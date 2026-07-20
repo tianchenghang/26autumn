@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pdd.3</title>
+    <style>
+      .page {
+        /* 历史代码, 为了优化长列表滚动性能, 开启独立合成层 */
+        transform: translateZ(0);
+      }
+      .night-mask {
+        position: fixed;
+        inset: 0;
+        background: rgb(0, 0, 0, 0.3);
+      }
+      #buy-btn {
+        position: relative;
+      }
+
+      /* .night-mask {
+        pointer-events: none;
+      } */
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <button id="buy-btn">立即购买</button>
+    </div>
+
+    <!-- 深色模式遮罩 -->
+    <div class="night-mask"></div>
+  </body>
+
+  <script>
+    document.getElementById("buy-btn").addEventListener("click", () => {
+      console.log("购买");
+    });
+  </script>
+</html>
+
+<!-- A: 为 #buy-btn 设置更高的层级 `#buy-btn { z-index: 999; }` -->
+<!-- B: 为 .night-mask 设置 `.night-mask { pointer-events: none; }`-->
+
+<!-- .night-mask 是定位元素, 层级比 .page 更高 -->
+<!-- .page 设置了 transform: translateZ(0), 会创建独立的层叠上下文 -->
+<!-- #buy-btn 是 .page 的子元素 -->
+
+<!-- pointer-events: none; 使得深色模式遮罩不响应鼠标事件, 点击事件会穿透到下层元素 -->
