@@ -2,7 +2,7 @@
 "use strict";
 
 // cSpell: words addlicense hangtiancheng
-/** Add Apache 2.0 license headers to files that are not git-ignored. */
+/** Add MIT license headers to files that are not git-ignored. */
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -11,7 +11,7 @@ import os from "node:os";
 import { fileURLToPath } from "node:url";
 
 /** @type {string} */
-const LICENSE_NAME = "mit";
+const LICENSE_NAME = "MIT";
 /** @type {string} */
 const COPYRIGHT_HOLDER = "hangtiancheng";
 /** @type {number} */
