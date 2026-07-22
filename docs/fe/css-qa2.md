@@ -752,15 +752,7 @@ Yoga 是 Facebook 开源的跨平台布局引擎, 用 C++ 编写, 实现了 Flex
 
 架构位置:
 
-```
-JavaScript (React Native 组件 + StyleSheet)
-        |
-        v
-Yoga 布局引擎 (C++, 计算 Flexbox 布局)
-        |
-        v
-原生渲染层 (iOS UIKit / Android View / Windows XAML)
-```
+![React Native Yoga 架构分层图](../assets/rn-yoga-architecture.png)
 
 Yoga 的局限性:
 

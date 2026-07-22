@@ -28,14 +28,14 @@ async function async1() {
 
 async function async2() {
   console.log("C");
-  throw new Error("D")
+  throw new Error("D");
 }
 
 console.log("E");
 
 async1().catch(() => {
   console.log("F");
-})
+});
 
 console.log("G");
 

@@ -1,0 +1,13 @@
+flowchart LR
+  subgraph Host[Host 宿主应用]
+    H1[加载 remoteEntry.js]
+    H2[运行时导入远程模块]
+  end
+  subgraph Remote[Remote 远程应用]
+    R1[暴露 remoteEntry.js]
+    R2[exposes 模块 chunk]
+  end
+  H1 --> R1
+  H2 --> R2
+  H2 --- S["shared 共享依赖<br/>版本协商 / singleton"]
+  R2 --- S

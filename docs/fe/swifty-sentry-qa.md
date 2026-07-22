@@ -60,16 +60,16 @@
 
 **核心模块职责：**
 
-| 模块 | 路径 | 职责 |
-|------|------|------|
-| SDK 生命周期 | `core/sdk-lifecycle.ts` | init/destroy/enablePlugin 入口 |
-| 事件总线 | `core/bus.ts` | 基于 Map<EventType, Set<Handler>> 的发布订阅 |
-| 猴子补丁调度 | `core/decorates.ts` | 统一安装/卸载浏览器 API 拦截 |
-| HTTP 拦截 | `core/decorate-http.ts` | XHR/Fetch 请求监控 |
-| 路由拦截 | `core/decorate-route.ts` | History/Hash 路由变化监听 |
-| 数据上报器 | `reporter/index.ts` | 批量队列、传输选择、离线缓存 |
-| 插件注册 | `core/plugin-registry.ts` | 插件 Set 管理与生命周期 |
-| 配置校验 | `core/options-schema.ts` | Zod schema 运行时校验 |
+| 模块         | 路径                      | 职责                                         |
+| ------------ | ------------------------- | -------------------------------------------- |
+| SDK 生命周期 | `core/sdk-lifecycle.ts`   | init/destroy/enablePlugin 入口               |
+| 事件总线     | `core/bus.ts`             | 基于 Map<EventType, Set<Handler>> 的发布订阅 |
+| 猴子补丁调度 | `core/decorates.ts`       | 统一安装/卸载浏览器 API 拦截                 |
+| HTTP 拦截    | `core/decorate-http.ts`   | XHR/Fetch 请求监控                           |
+| 路由拦截     | `core/decorate-route.ts`  | History/Hash 路由变化监听                    |
+| 数据上报器   | `reporter/index.ts`       | 批量队列、传输选择、离线缓存                 |
+| 插件注册     | `core/plugin-registry.ts` | 插件 Set 管理与生命周期                      |
+| 配置校验     | `core/options-schema.ts`  | Zod schema 运行时校验                        |
 
 **设计原则：**
 
@@ -93,9 +93,9 @@ export function init(options: InitOptions): void {
   sentry.setOptions(parsedOptions);
 
   // 2. 防护检查
-  if (sentry.options.disabled) return;      // 用户主动禁用
-  if (dsn === "") return;                    // DSN 为空拒绝初始化
-  if (isInitialized()) return;               // 防止重复初始化
+  if (sentry.options.disabled) return; // 用户主动禁用
+  if (dsn === "") return; // DSN 为空拒绝初始化
+  if (isInitialized()) return; // 防止重复初始化
 
   // 3. 启动事件订阅和猴子补丁
   cleanupSetup = setup();
@@ -170,7 +170,7 @@ HTTP 监控通过猴子补丁（Monkey Patching）实现，位于 `core/decorate
 ```typescript
 // 装饰 open：记录请求元信息
 const cleanupOpen = decorateProp(xhrProto, "open", (oldPropVal) => {
-  return function(this, method, url, async, ...rest) {
+  return function (this, method, url, async, ...rest) {
     this.__sentry__ = {
       ...getBaseData(),
       name: "XMLHttpRequest",
@@ -184,11 +184,11 @@ const cleanupOpen = decorateProp(xhrProto, "open", (oldPropVal) => {
 
 // 装饰 send：在 loadend 事件中收集响应数据
 const cleanupSend = decorateProp(xhrProto, "send", (oldPropVal) => {
-  return function(this, body) {
+  return function (this, body) {
     this.addEventListener("loadend", () => {
       this.__sentry__.statusCode = this.status;
       this.__sentry__.serverTiming = parseServerTiming(
-        this.getResponseHeader("server-timing")
+        this.getResponseHeader("server-timing"),
       );
       this.__sentry__.elapsedTime = Date.now() - this.__sentry__.timestamp;
       pub(EventType.Xhr, this.__sentry__);
@@ -227,13 +227,13 @@ const cleanup = decorateProp(globalThis, "fetch", (oldFetch) => {
 
 **两者的核心区别：**
 
-| 维度 | XHR | Fetch |
-|------|-----|-------|
-| 拦截位置 | `XMLHttpRequest.prototype.open/send` | `globalThis.fetch` |
-| 响应获取 | `loadend` 事件回调 | Promise `.then()` |
-| Body 处理 | 直接读取 `this.response` | 必须 `res.clone()` 后读取 |
-| 错误捕获 | loadend 中 status=0 | `.catch()` 中设置 statusCode=0 |
-| 存储方式 | 挂在实例 `this.__sentry__` | 闭包变量 `httpData` |
+| 维度      | XHR                                  | Fetch                          |
+| --------- | ------------------------------------ | ------------------------------ |
+| 拦截位置  | `XMLHttpRequest.prototype.open/send` | `globalThis.fetch`             |
+| 响应获取  | `loadend` 事件回调                   | Promise `.then()`              |
+| Body 处理 | 直接读取 `this.response`             | 必须 `res.clone()` 后读取      |
+| 错误捕获  | loadend 中 status=0                  | `.catch()` 中设置 statusCode=0 |
+| 存储方式  | 挂在实例 `this.__sentry__`           | 闭包变量 `httpData`            |
 
 **共同设计要点：**
 
@@ -250,21 +250,23 @@ const cleanup = decorateProp(globalThis, "fetch", (oldFetch) => {
 
 **错误类型覆盖：**
 
-| 类型 | 来源 | 实现方式 |
-|------|------|----------|
-| 运行时 JS 错误 | `window.onerror` | capture 阶段监听 `error` 事件 |
-| 资源加载错误 | img/script/link 加载失败 | capture 阶段判断 `target.src/href` |
-| Promise 未捕获异常 | `unhandledrejection` | 全局事件监听 |
-| console.error | 开发者主动输出 | 装饰 `console.error` 提取 Error 对象 |
-| React 组件错误 | ErrorBoundary | `componentDidCatch` 生命周期 |
-| Vue 组件错误 | errorHandler | `app.config.errorHandler` |
-| Preact 组件错误 | ErrorBoundary | 同 React 模式 |
+| 类型               | 来源                     | 实现方式                             |
+| ------------------ | ------------------------ | ------------------------------------ |
+| 运行时 JS 错误     | `window.onerror`         | capture 阶段监听 `error` 事件        |
+| 资源加载错误       | img/script/link 加载失败 | capture 阶段判断 `target.src/href`   |
+| Promise 未捕获异常 | `unhandledrejection`     | 全局事件监听                         |
+| console.error      | 开发者主动输出           | 装饰 `console.error` 提取 Error 对象 |
+| React 组件错误     | ErrorBoundary            | `componentDidCatch` 生命周期         |
+| Vue 组件错误       | errorHandler             | `app.config.errorHandler`            |
+| Preact 组件错误    | ErrorBoundary            | 同 React 模式                        |
 
 **去重机制（BoundedSet + base64v2 哈希）：**
 
 ```typescript
 // 生成错误唯一标识
-const errorId = base64v2(`${EventType.Error}-${message}-${filename}-${line}-${column}`);
+const errorId = base64v2(
+  `${EventType.Error}-${message}-${filename}-${line}-${column}`,
+);
 
 // BoundedSet 判重（容量 1000，LRU 淘汰）
 if (!sentry.codeErrors.has(errorId)) {
@@ -284,18 +286,25 @@ class BatchErrorManager {
   push(error) {
     this.cacheError.push(error);
     clearTimeout(this.timeoutID);
-    this.timeoutID = setTimeout(() => this.flush(), 2000);  // 2s 窗口
+    this.timeoutID = setTimeout(() => this.flush(), 2000); // 2s 窗口
   }
 
   flush() {
     // 按 type-name-message 分组
-    const groups = groupBy(this.cacheError, err => `${err.type}-${err.name}-${err.message}`);
+    const groups = groupBy(
+      this.cacheError,
+      (err) => `${err.type}-${err.name}-${err.message}`,
+    );
     for (const items of Object.values(groups)) {
       if (items.length >= 5) {
         // 5 次以上聚合为单条 BatchError
-        reporter.send({ ...items[0], batchError: true, batchErrorLength: items.length });
+        reporter.send({
+          ...items[0],
+          batchError: true,
+          batchErrorLength: items.length,
+        });
       } else {
-        items.forEach(item => reporter.send(item));
+        items.forEach((item) => reporter.send(item));
       }
     }
   }
@@ -402,11 +411,11 @@ private sendBatch(finalSendData: readonly IReportData[]): Promise<boolean> | boo
 
 **三种通道对比：**
 
-| 通道 | 大小限制 | 优势 | 劣势 | 适用场景 |
-|------|----------|------|------|----------|
-| `navigator.sendBeacon` | ~64KB | 页面卸载时仍可靠发送、不阻塞页面、浏览器调度 | 仅 POST、无法自定义 header、无法获取响应 | 常规批量上报 |
-| Image (1x1 gif) | ~2KB | 跨域无限制、兼容极老浏览器、不受 CSP connect-src 限制 | 仅 GET、URL 长度限制、无法发送复杂数据 | 兜底/跨域受限环境 |
-| `fetch POST` | 无硬限制 | 可自定义 header、可获取响应状态、支持 keepalive | 页面卸载时可能中断 | 大数据量/需要确认送达 |
+| 通道                   | 大小限制 | 优势                                                  | 劣势                                     | 适用场景              |
+| ---------------------- | -------- | ----------------------------------------------------- | ---------------------------------------- | --------------------- |
+| `navigator.sendBeacon` | ~64KB    | 页面卸载时仍可靠发送、不阻塞页面、浏览器调度          | 仅 POST、无法自定义 header、无法获取响应 | 常规批量上报          |
+| Image (1x1 gif)        | ~2KB     | 跨域无限制、兼容极老浏览器、不受 CSP connect-src 限制 | 仅 GET、URL 长度限制、无法发送复杂数据   | 兜底/跨域受限环境     |
+| `fetch POST`           | 无硬限制 | 可自定义 header、可获取响应状态、支持 keepalive       | 页面卸载时可能中断                       | 大数据量/需要确认送达 |
 
 **为什么需要多通道：**
 
@@ -434,8 +443,8 @@ private sendBatch(finalSendData: readonly IReportData[]): Promise<boolean> | boo
 window.addEventListener("offline", () => setOnline(false));
 window.addEventListener("online", () => {
   setOnline(true);
-  loadOfflineCache();  // 加载离线期间缓存的数据
-  flush();             // 立即尝试发送
+  loadOfflineCache(); // 加载离线期间缓存的数据
+  flush(); // 立即尝试发送
 });
 ```
 
@@ -460,8 +469,10 @@ function scheduleServerRecovery(retryTimer, callbacks) {
         loadOfflineCache();
         flush();
       }
-    } catch { /* 继续等待下一轮 */ }
-  }, retryIntervalMilliseconds);  // 默认 60s
+    } catch {
+      /* 继续等待下一轮 */
+    }
+  }, retryIntervalMilliseconds); // 默认 60s
   return timer;
 }
 ```
@@ -511,8 +522,14 @@ const sample = () => {
 
   // 水平方向 9 个点 + 垂直方向 9 个点 = 18 个采样点
   for (let i = 1; i <= 9; i++) {
-    const rowElem = document.elementFromPoint((innerWidth * i) / 10, innerHeight / 2);
-    const colElem = document.elementFromPoint(innerWidth / 2, (innerHeight * i) / 10);
+    const rowElem = document.elementFromPoint(
+      (innerWidth * i) / 10,
+      innerHeight / 2,
+    );
+    const colElem = document.elementFromPoint(
+      innerWidth / 2,
+      (innerHeight * i) / 10,
+    );
     if (!rowElem || isRoot(rowElem)) emptyPoints++;
     if (!colElem || isRoot(colElem)) emptyPoints++;
   }
@@ -535,9 +552,9 @@ const sample = () => {
 const isRoot = (elem: Element) => {
   const [idSelector, classSelector, elementSelector] = getCssSelectors(elem);
   return (
-    rootCssSelectors.includes(idSelector) ||    // 如 "#app", "#root"
+    rootCssSelectors.includes(idSelector) || // 如 "#app", "#root"
     rootCssSelectors.includes(classSelector) ||
-    rootCssSelectors.includes(elementSelector)  // 如 "html", "body"
+    rootCssSelectors.includes(elementSelector) // 如 "html", "body"
   );
 };
 ```
@@ -550,15 +567,15 @@ const isRoot = (elem: Element) => {
 if (hasSkeleton) {
   if (sampleCount === 1) {
     // 第一次采样：记录骨架屏的 CSS 选择器集合
-    selectors.forEach(s => initialSelectors.add(s));
-    return;  // 继续采样
+    selectors.forEach((s) => initialSelectors.add(s));
+    return; // 继续采样
   }
   // 后续采样：比较选择器是否变化
   if (sortedJoin(currentSelectors) === sortedJoin(initialSelectors)) {
-    report();  // 选择器未变化 → 骨架屏卡住 → 白屏
+    report(); // 选择器未变化 → 骨架屏卡住 → 白屏
     return;
   }
-  stopSample();  // 选择器变化了 → 正常渲染 → 非白屏
+  stopSample(); // 选择器变化了 → 正常渲染 → 非白屏
 }
 ```
 
@@ -582,7 +599,7 @@ FSP（First Screen Paint）实现在 `plugins/performance/first-screen-paint.ts`
 function observeFirstScreenPaint(callback: Callback): void {
   const excludedElementNames = new Set(["link", "script", "style"]);
   observer = new MutationObserver((mutationList) => {
-    checkDomChange(callback);  // 检测是否渲染完成
+    checkDomChange(callback); // 检测是否渲染完成
 
     const children: HTMLElement[] = [];
     for (const mutation of mutationList) {
@@ -592,7 +609,11 @@ function observeFirstScreenPaint(callback: Callback): void {
       // 3. 父节点在视口内
       // 4. 新增节点在视口内
       // 5. 排除 link/script/style 非可视元素
-      if (isHTMLElement(node) && !excluded.has(node.tagName) && isInViewport(node)) {
+      if (
+        isHTMLElement(node) &&
+        !excluded.has(node.tagName) &&
+        isInViewport(node)
+      ) {
         children.push(node);
       }
     }
@@ -602,7 +623,10 @@ function observeFirstScreenPaint(callback: Callback): void {
   });
 
   observer.observe(document, {
-    childList: true, subtree: true, characterData: true, attributes: true
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
   });
 }
 ```
@@ -615,25 +639,25 @@ function checkDomChange(callback: Callback): void {
   requestId = requestAnimationFrame(() => {
     if (document.readyState === "complete") {
       observer?.disconnect();
-      const fsp = Math.max(...entries.map(e => e.startTime));  // 取最晚的可视元素渲染时间
+      const fsp = Math.max(...entries.map((e) => e.startTime)); // 取最晚的可视元素渲染时间
       callback(fsp);
       return;
     }
-    checkDomChange(callback);  // 未完成则继续监听
+    checkDomChange(callback); // 未完成则继续监听
   });
 }
 ```
 
 **FSP vs LCP 对比：**
 
-| 维度 | FSP（自定义） | LCP（Web Vitals 标准） |
-|------|--------------|----------------------|
-| 定义 | 首屏所有可视 DOM 元素完成渲染的时间 | 视口内最大内容元素完成渲染的时间 |
-| 关注点 | 首屏整体完成度 | 单个最大元素 |
+| 维度     | FSP（自定义）                            | LCP（Web Vitals 标准）                            |
+| -------- | ---------------------------------------- | ------------------------------------------------- |
+| 定义     | 首屏所有可视 DOM 元素完成渲染的时间      | 视口内最大内容元素完成渲染的时间                  |
+| 关注点   | 首屏整体完成度                           | 单个最大元素                                      |
 | 实现方式 | MutationObserver 追踪所有视口内 DOM 变化 | PerformanceObserver 监听 largest-contentful-paint |
-| 排除元素 | link/script/style | 由浏览器自动判定 |
-| 终止条件 | `document.readyState === "complete"` | 用户交互或页面完全加载 |
-| 适用场景 | SPA 首屏、SSR 页面 | 通用页面 |
+| 排除元素 | link/script/style                        | 由浏览器自动判定                                  |
+| 终止条件 | `document.readyState === "complete"`     | 用户交互或页面完全加载                            |
+| 适用场景 | SPA 首屏、SSR 页面                       | 通用页面                                          |
 
 **设计意图：**
 
@@ -649,17 +673,18 @@ PerformancePlugin 是 SDK 最重的插件，采集以下指标类别：
 
 **1. Core Web Vitals（via web-vitals 库）：**
 
-| 指标 | 含义 | 采集方式 |
-|------|------|----------|
-| LCP | 最大内容绘制 | `onLCP()` |
-| FCP | 首次内容绘制 | `onFCP()` |
-| CLS | 累积布局偏移 | `onCLS()` |
-| INP | 交互到下一次绘制 | `onINP()` |
-| TTFB | 首字节时间 | `onTTFB()` |
+| 指标 | 含义             | 采集方式   |
+| ---- | ---------------- | ---------- |
+| LCP  | 最大内容绘制     | `onLCP()`  |
+| FCP  | 首次内容绘制     | `onFCP()`  |
+| CLS  | 累积布局偏移     | `onCLS()`  |
+| INP  | 交互到下一次绘制 | `onINP()`  |
+| TTFB | 首字节时间       | `onTTFB()` |
 
 **2. Navigation Timing（Performance API）：**
 
 从 `performance.getEntriesByType("navigation")` 提取：
+
 - DNS 查询耗时（domainLookupEnd - domainLookupStart）
 - TCP 连接耗时（connectEnd - connectStart）
 - TLS 握手耗时
@@ -707,7 +732,7 @@ PerformancePlugin 是 SDK 最重的插件，采集以下指标类别：
 
 ```typescript
 class MinHeap<T extends { timestamp: number }> {
-  capacity = 30;  // MAX_BREADCRUMBS
+  capacity = 30; // MAX_BREADCRUMBS
   private heap: T[] = [];
 
   push(item: T): boolean {
@@ -722,7 +747,7 @@ class MinHeap<T extends { timestamp: number }> {
       this.heapifyDown(0);
       return true;
     }
-    return false;  // 比最旧的还旧，丢弃
+    return false; // 比最旧的还旧，丢弃
   }
 
   dump(): T[] {
@@ -733,13 +758,13 @@ class MinHeap<T extends { timestamp: number }> {
 
 **与数组方案的对比：**
 
-| 操作 | 数组方案 | 最小堆方案 |
-|------|----------|-----------|
-| 插入（未满） | O(1) push | O(log n) heapifyUp |
+| 操作                     | 数组方案                              | 最小堆方案                      |
+| ------------------------ | ------------------------------------- | ------------------------------- |
+| 插入（未满）             | O(1) push                             | O(log n) heapifyUp              |
 | 插入（已满，需淘汰最旧） | O(n) shift + O(1) push 或 O(n) splice | O(log n) 替换堆顶 + heapifyDown |
-| 查找最旧元素 | O(1) [0]（有序数组）或 O(n) | O(1) heap[0] |
-| 导出有序结果 | O(1)（已排序）或 O(n log n) | O(n log n) sort |
-| 空间 | O(n) | O(n) |
+| 查找最旧元素             | O(1) [0]（有序数组）或 O(n)           | O(1) heap[0]                    |
+| 导出有序结果             | O(1)（已排序）或 O(n log n)           | O(n log n) sort                 |
+| 空间                     | O(n)                                  | O(n)                            |
 
 **选择最小堆的原因：**
 
@@ -766,13 +791,13 @@ class MinHeap<T extends { timestamp: number }> {
 // recorder.ts 核心逻辑
 class RollingRecorder {
   private events: RRWebEvent[] = [];
-  private durationMs: number;  // 默认 3000ms
+  private durationMs: number; // 默认 3000ms
 
   onEvent(event: RRWebEvent) {
     this.events.push(event);
     // 过滤：只保留最近 durationMs 内的事件
     const cutoff = event.timestamp - this.durationMs;
-    this.events = this.events.filter(e => e.timestamp >= cutoff);
+    this.events = this.events.filter((e) => e.timestamp >= cutoff);
   }
 
   getSnapshot(): string {
@@ -835,7 +860,7 @@ function registerPlugin(plugin: SentryPlugin): void {
 }
 
 function destroyPlugins(): void {
-  plugins.forEach(p => p.destroy?.());
+  plugins.forEach((p) => p.destroy?.());
   plugins.clear();
 }
 ```
@@ -854,7 +879,10 @@ export function enablePlugin(plugin: SentryPlugin): SentryPlugin {
 
 ```typescript
 import { init, enablePlugin } from "@swifty.js/sentry";
-import { PerformancePlugin, ScreenRecordPlugin } from "@swifty.js/sentry/plugins";
+import {
+  PerformancePlugin,
+  ScreenRecordPlugin,
+} from "@swifty.js/sentry/plugins";
 
 init({ dsn: "https://..." });
 enablePlugin(new PerformancePlugin());
@@ -871,11 +899,11 @@ enablePlugin(new ScreenRecordPlugin());
 
 **三个内置插件的职责：**
 
-| 插件 | 功能 | 核心技术 |
-|------|------|----------|
-| PerformancePlugin | Web Vitals + Navigation/Resource Timing + Long Task + FSP | PerformanceObserver, MutationObserver |
-| ScreenRecordPlugin | 错误前 3 秒操作回放 | rrweb, pako gzip |
-| ExposurePlugin | 元素曝光时长追踪 | IntersectionObserver |
+| 插件               | 功能                                                      | 核心技术                              |
+| ------------------ | --------------------------------------------------------- | ------------------------------------- |
+| PerformancePlugin  | Web Vitals + Navigation/Resource Timing + Long Task + FSP | PerformanceObserver, MutationObserver |
+| ScreenRecordPlugin | 错误前 3 秒操作回放                                       | rrweb, pako gzip                      |
+| ExposurePlugin     | 元素曝光时长追踪                                          | IntersectionObserver                  |
 
 ---
 
@@ -918,10 +946,10 @@ const vuePlugin = {
         name: "VueErrorHandler",
         message: err.message,
         stack: err.stack,
-        extra: info,  // 如 "mounted hook"
+        extra: info, // 如 "mounted hook"
       });
     };
-  }
+  },
 };
 
 // 使用：app.use(vuePlugin)
@@ -976,8 +1004,8 @@ function shouldQueuePayload(payload: TReportPayload): boolean {
 ```typescript
 // 配置：excludeApis: ["/api/health", /^https:\/\/analytics/]
 function isExcludedApi(api: string): boolean {
-  return sentry.options.excludeApis.some(pattern =>
-    typeof pattern === "string" ? api.includes(pattern) : pattern.test(api)
+  return sentry.options.excludeApis.some((pattern) =>
+    typeof pattern === "string" ? api.includes(pattern) : pattern.test(api),
   );
 }
 ```
@@ -987,8 +1015,10 @@ function isExcludedApi(api: string): boolean {
 ```typescript
 // 配置：ignoreErrors: ["ResizeObserver loop", /Script error/]
 function isIgnoredError(message: string): boolean {
-  return sentry.options.ignoreErrors.some(pattern =>
-    typeof pattern === "string" ? message.includes(pattern) : pattern.test(message)
+  return sentry.options.ignoreErrors.some((pattern) =>
+    typeof pattern === "string"
+      ? message.includes(pattern)
+      : pattern.test(message),
   );
 }
 ```
@@ -998,9 +1028,9 @@ function isIgnoredError(message: string): boolean {
 ```typescript
 init({
   onBeforeReportData: (data) => {
-    if (data.url.includes("/admin")) return null;  // 返回 null 拒绝上报
-    return data;  // 可修改后返回
-  }
+    if (data.url.includes("/admin")) return null; // 返回 null 拒绝上报
+    return data; // 可修改后返回
+  },
 });
 ```
 
@@ -1081,12 +1111,12 @@ static reset(): void {
 
 **属性约定：**
 
-| 属性 | 含义 | 示例 |
-|------|------|------|
-| `s-swifty-ev` | 事件 ID | `s-swifty-ev="btn_submit"` |
-| `s-swifty-msg` | 事件描述 | `s-swifty-msg="提交订单"` |
+| 属性            | 含义          | 示例                       |
+| --------------- | ------------- | -------------------------- |
+| `s-swifty-ev`   | 事件 ID       | `s-swifty-ev="btn_submit"` |
+| `s-swifty-msg`  | 事件描述      | `s-swifty-msg="提交订单"`  |
 | `s-swifty-view` | 所属视图/页面 | `s-swifty-view="checkout"` |
-| `s-swifty-*` | 自定义参数 | `s-swifty-price="99.9"` |
+| `s-swifty-*`    | 自定义参数    | `s-swifty-price="99.9"`    |
 
 **实现逻辑（utils/click-data.ts）：**
 
@@ -1106,13 +1136,13 @@ function getClickData(event: MouseEvent): IClickData | null {
         view: params.view,
         x: event.clientX,
         y: event.clientY,
-        path: dom2str(el).slice(0, 128),  // CSS 路径，截断 128 字符
+        path: dom2str(el).slice(0, 128), // CSS 路径，截断 128 字符
         timestamp: Date.now(),
         ...params.custom,
       };
     }
   }
-  return null;  // 无标记元素，不追踪
+  return null; // 无标记元素，不追踪
 }
 ```
 
@@ -1146,11 +1176,11 @@ if (clickThrottleDelay > 0) {
 
 **三层身份标识：**
 
-| 标识 | 来源 | 持久化 | 用途 |
-|------|------|--------|------|
-| `anonymousId` | FingerprintJS visitorId | localStorage | 匿名用户跨会话追踪 |
-| `visitorId` | 后端设置（`setVisitorId()`） | 内存 | 业务侧访客标识 |
-| `userId` | 业务设置（`setUserId()`） | 内存 | 登录用户标识 |
+| 标识          | 来源                         | 持久化       | 用途               |
+| ------------- | ---------------------------- | ------------ | ------------------ |
+| `anonymousId` | FingerprintJS visitorId      | localStorage | 匿名用户跨会话追踪 |
+| `visitorId`   | 后端设置（`setVisitorId()`） | 内存         | 业务侧访客标识     |
+| `userId`      | 业务设置（`setUserId()`）    | 内存         | 登录用户标识       |
 
 **设备指纹生成（CRC32 Canvas）：**
 
@@ -1193,9 +1223,9 @@ import { UAParser } from "ua-parser-js";
 
 const parser = new UAParser(navigator.userAgent);
 const deviceInfo = {
-  browser: parser.getBrowser(),      // { name: "Chrome", version: "120.0" }
-  os: parser.getOS(),                // { name: "macOS", version: "14.0" }
-  device: parser.getDevice(),        // { type: "mobile", model: "iPhone" }
+  browser: parser.getBrowser(), // { name: "Chrome", version: "120.0" }
+  os: parser.getOS(), // { name: "macOS", version: "14.0" }
+  device: parser.getDevice(), // { type: "mobile", model: "iPhone" }
   language: navigator.language,
   screen: `${screen.width}x${screen.height}`,
 };
@@ -1255,14 +1285,14 @@ const deviceInfo = {
 
 **依赖管理：**
 
-| 依赖 | 用途 | 体积考量 |
-|------|------|----------|
-| web-vitals | Core Web Vitals | ~2KB |
-| @rrweb/record | 屏幕录制 | 较大，插件按需加载 |
-| pako | gzip 压缩 | ~45KB，仅录屏插件用 |
-| ua-parser-js | UA 解析 | ~20KB |
-| @fingerprintjs/fingerprintjs | 设备指纹 | ~50KB，默认禁用 |
-| zod | 运行时校验 | ~13KB |
+| 依赖                         | 用途            | 体积考量            |
+| ---------------------------- | --------------- | ------------------- |
+| web-vitals                   | Core Web Vitals | ~2KB                |
+| @rrweb/record                | 屏幕录制        | 较大，插件按需加载  |
+| pako                         | gzip 压缩       | ~45KB，仅录屏插件用 |
+| ua-parser-js                 | UA 解析         | ~20KB               |
+| @fingerprintjs/fingerprintjs | 设备指纹        | ~50KB，默认禁用     |
+| zod                          | 运行时校验      | ~13KB               |
 
 **Monorepo 结构：**
 
@@ -1285,11 +1315,11 @@ class BoundedSet<T> {
 
   add(value: T): void {
     if (this.map.has(value)) {
-      this.map.delete(value);  // 先删再插，更新插入顺序
+      this.map.delete(value); // 先删再插，更新插入顺序
     }
     this.map.set(value, true);
     if (this.map.size > this.capacity) {
-      const oldest = this.map.keys().next().value;  // Map 迭代序 = 插入序
+      const oldest = this.map.keys().next().value; // Map 迭代序 = 插入序
       if (oldest !== undefined) this.map.delete(oldest);
     }
   }
@@ -1331,7 +1361,7 @@ class CallbackQueue {
     this.isFlushing = true;
 
     if (typeof requestIdleCallback !== "function") {
-      Promise.resolve().then(() => this.flushFuncList());  // 降级：微任务
+      Promise.resolve().then(() => this.flushFuncList()); // 降级：微任务
       return;
     }
     requestIdleCallback(() => this.flushFuncList());
@@ -1341,7 +1371,7 @@ class CallbackQueue {
     const oldFuncList = this.cbList;
     this.cbList = [];
     this.isFlushing = false;
-    oldFuncList.forEach(func => func());
+    oldFuncList.forEach((func) => func());
   }
 }
 ```
@@ -1436,6 +1466,7 @@ enableHashChange: true, // 是否监听 hashchange
 **路由变化的下游处理（handle-route.ts）：**
 
 路由变化事件触发后：
+
 1. 发送上一页的 `PageDwell`（停留时长）
 2. 发送新页面的 `PageView`
 3. 记录面包屑
@@ -1458,8 +1489,8 @@ function initPageView(): void {
 
   // 路由变化时发送新 PV + 上一页停留时长
   sub(EventType.RouteChange, ({ from, to }) => {
-    sendPageDwell(from);   // 上一页停留
-    sendPageView(to);      // 新页面 PV
+    sendPageDwell(from); // 上一页停留
+    sendPageView(to); // 新页面 PV
   });
 }
 ```
@@ -1484,7 +1515,7 @@ function sendPageDwell(url: string): void {
     dwellTime,
   });
 
-  pageEnterTime = Date.now();  // 重置计时
+  pageEnterTime = Date.now(); // 重置计时
 }
 ```
 
@@ -1499,10 +1530,10 @@ window.addEventListener("beforeunload", () => {
 
 **数据模型：**
 
-| 事件类型 | 触发时机 | 关键字段 |
-|----------|----------|----------|
-| PageView | 页面加载、路由切换 | url, referrer, timestamp |
-| PageDwell | 路由切换、页面关闭 | url, dwellTime(ms) |
+| 事件类型  | 触发时机           | 关键字段                 |
+| --------- | ------------------ | ------------------------ |
+| PageView  | 页面加载、路由切换 | url, referrer, timestamp |
+| PageDwell | 路由切换、页面关闭 | url, dwellTime(ms)       |
 
 **设计要点：**
 

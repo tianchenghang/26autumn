@@ -27,7 +27,7 @@ function wrap(fn, delay) {
     timer = setTimeout(() => {
       fn(...args);
     }, delay);
-  }
+  };
 }
 
 // 可以 debounce

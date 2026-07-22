@@ -55,16 +55,16 @@
 
 swifty-chatbot 是一个基于 pnpm workspace 的全栈 LLM 聊天应用, 采用前后端分离架构:
 
-| 层级 | 技术选型 |
-|------|---------|
-| 前端 | React 19 + TypeScript 5.9 + Vite 8 |
+| 层级     | 技术选型                                                  |
+| -------- | --------------------------------------------------------- |
+| 前端     | React 19 + TypeScript 5.9 + Vite 8                        |
 | 状态管理 | Jotai (客户端状态) + TanStack React Query v5 (服务端状态) |
-| UI | Radix UI + Tailwind CSS 4 + shadcn/ui 模式 |
-| 后端 | Koa 3 + @koa/router |
-| LLM | LangChain + Ollama (本地部署, 默认 qwen3) |
-| 数据库 | MySQL (Knex 查询构建器) |
-| 缓存 | Redis (ioredis) + LRU 降级 |
-| RAG | LangChain MemoryVectorStore + OllamaEmbeddings |
+| UI       | Radix UI + Tailwind CSS 4 + shadcn/ui 模式                |
+| 后端     | Koa 3 + @koa/router                                       |
+| LLM      | LangChain + Ollama (本地部署, 默认 qwen3)                 |
+| 数据库   | MySQL (Knex 查询构建器)                                   |
+| 缓存     | Redis (ioredis) + LRU 降级                                |
+| RAG      | LangChain MemoryVectorStore + OllamaEmbeddings            |
 
 项目结构为 monorepo, 包含 `client/` 和 `server/` 两个 package。后端采用 Router -> Controller -> Service -> DAO -> DB 的经典分层架构。AI 能力通过工厂模式封装, 支持普通对话和 RAG 增强两种模型类型。
 
@@ -90,6 +90,7 @@ swifty-chatbot 是一个基于 pnpm workspace 的全栈 LLM 聊天应用, 采用
 **生产环境**: 前端构建为静态资源, 由 Nginx 或类似反向代理统一分发: 静态资源直接返回, `/api/` 请求转发到 Koa 服务。
 
 **通信协议**:
+
 - 普通请求: JSON over HTTP (POST/GET)
 - 流式响应: Server-Sent Events (SSE), Content-Type 为 `text/event-stream`
 - 认证: Bearer Token (Authorization header) 或 query param `?token=`
@@ -118,12 +119,12 @@ swifty-chatbot 是一个基于 pnpm workspace 的全栈 LLM 聊天应用, 采用
 
 两者解决的是不同维度的问题:
 
-| 维度 | Jotai | TanStack React Query |
-|------|-------|---------------------|
+| 维度     | Jotai                           | TanStack React Query           |
+| -------- | ------------------------------- | ------------------------------ |
 | 数据类型 | 客户端状态 (token, theme, lang) | 服务端状态 (sessions, history) |
-| 同步需求 | 无需同步, 本地即真相 | 需要缓存失效、重新获取 |
-| 持久化 | localStorage | 内存缓存 + 后端 |
-| 更新频率 | 低 (用户主动切换) | 中 (路由切换时获取) |
+| 同步需求 | 无需同步, 本地即真相            | 需要缓存失效、重新获取         |
+| 持久化   | localStorage                    | 内存缓存 + 后端                |
+| 更新频率 | 低 (用户主动切换)               | 中 (路由切换时获取)            |
 
 如果只用 Jotai, 需要手动实现缓存失效、loading/error 状态管理、请求去重等逻辑。如果只用 React Query, 纯客户端状态 (如主题) 没有合适的缓存键和失效策略。两者互补, 各取所长。
 
@@ -284,16 +285,16 @@ Router (@koa/router)
         -> MySQL / Redis
 ```
 
-| 层级 | 目录 | 职责 |
-|------|------|------|
-| Router | `src/router/` | URL 到 Controller 的映射, 中间件挂载 |
+| 层级       | 目录              | 职责                                     |
+| ---------- | ----------------- | ---------------------------------------- |
+| Router     | `src/router/`     | URL 到 Controller 的映射, 中间件挂载     |
 | Controller | `src/controller/` | Zod 参数校验, 调用 Service, 格式化响应体 |
-| Service | `src/service/` | 业务逻辑编排, 协调 DAO 和 AI Agent |
-| DAO | `src/dao/` | 纯数据访问, 封装 Knex 查询 |
-| Model | `src/model/` | TypeScript 类型定义 |
-| Middleware | `src/middleware/` | JWT 鉴权等横切关注点 |
-| AI | `src/ai/` | Agent 系统 (独立于业务分层) |
-| RAG | `src/rag/` | 检索增强生成管线 |
+| Service    | `src/service/`    | 业务逻辑编排, 协调 DAO 和 AI Agent       |
+| DAO        | `src/dao/`        | 纯数据访问, 封装 Knex 查询               |
+| Model      | `src/model/`      | TypeScript 类型定义                      |
+| Middleware | `src/middleware/` | JWT 鉴权等横切关注点                     |
+| AI         | `src/ai/`         | Agent 系统 (独立于业务分层)              |
+| RAG        | `src/rag/`        | 检索增强生成管线                         |
 
 **响应格式统一**: 所有接口返回 `{code: number, message: string, ...data}` 结构, 通过 `success()` 和 `codeOf()` 工具函数生成。
 
@@ -313,8 +314,8 @@ export async function createStreamSessionAndSendMessageStream(ctx: Context) {
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
-    "Connection": "keep-alive",
-    "X-Accel-Buffering": "no",  // 禁止 Nginx 缓冲
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no", // 禁止 Nginx 缓冲
   });
   res.flushHeaders();
 
@@ -323,7 +324,11 @@ export async function createStreamSessionAndSendMessageStream(ctx: Context) {
 
   // 4. 流式生成, 逐 token 写入
   await sessionService.sendMessageStream2session(
-    username, question, model_type, sessionId, res
+    username,
+    question,
+    model_type,
+    sessionId,
+    res,
   );
 
   // 5. 结束连接
@@ -440,7 +445,7 @@ if (agent) {
 ```
 用户上传文件 (.md/.txt/.json)
   -> multer 接收, CRC32 命名去重, 存入 uploads/{username}/
-  
+
 用户发送消息 (model_type = rag)
   -> DocumentLoader.loadFromDirectory() 读取用户目录下所有文件
   -> RecursiveCharacterTextSplitter 分块 (chunkSize=1000, overlap=200)
@@ -531,14 +536,14 @@ SSE 使用 Fetch API (非 EventSource), 因此可以直接设置 Authorization h
 
 **答:**
 
-| 弱点 | 风险 | 改进方向 |
-|------|------|---------|
-| MD5 哈希密码 | 彩虹表攻击, 无盐值 | 改用 bcrypt/argon2 + 随机盐 |
-| JWT 有效期 1 年 | token 泄露后长期有效 | 缩短有效期 + refresh token 机制 |
-| JWT secret 默认值 | 未配置时使用应用名作为密钥 | 启动时强制要求配置, 否则拒绝启动 |
-| 无速率限制 | 暴力破解、资源耗尽 | 引入 rate limiter (如 koa-ratelimit) |
-| CORS 全开 | 跨域攻击面 | 配置白名单域名 |
-| body 限制 100MB | 大 payload DoS | 按接口设置合理限制 |
+| 弱点              | 风险                       | 改进方向                             |
+| ----------------- | -------------------------- | ------------------------------------ |
+| MD5 哈希密码      | 彩虹表攻击, 无盐值         | 改用 bcrypt/argon2 + 随机盐          |
+| JWT 有效期 1 年   | token 泄露后长期有效       | 缩短有效期 + refresh token 机制      |
+| JWT secret 默认值 | 未配置时使用应用名作为密钥 | 启动时强制要求配置, 否则拒绝启动     |
+| 无速率限制        | 暴力破解、资源耗尽         | 引入 rate limiter (如 koa-ratelimit) |
+| CORS 全开         | 跨域攻击面                 | 配置白名单域名                       |
+| body 限制 100MB   | 大 payload DoS             | 按接口设置合理限制                   |
 
 ---
 
@@ -551,23 +556,27 @@ SSE 使用 Fetch API (非 EventSource), 因此可以直接设置 Authorization h
 三张核心表, 服务启动时通过 Knex 自动建表 (hasTable 检查):
 
 **users 表**:
+
 - `id` BIGINT 主键
 - `name`, `email` (索引), `username` (唯一约束), `password`
 - `created_at`, `updated_at`, `deleted_at` (软删除)
 
 **sessions 表**:
+
 - `id` VARCHAR 主键 (UUID)
 - `username` (索引, 关联用户)
 - `title` (会话标题)
 - `created_at`, `updated_at`, `deleted_at` (软删除)
 
 **messages 表**:
+
 - `id` INT 自增主键
 - `session_id` (索引, 关联会话)
 - `username`, `content` (TEXT), `is_user` (BOOLEAN)
 - `created_at`
 
 **设计要点**:
+
 - sessions 使用 UUID 作为主键, 便于前端在创建会话时乐观生成 ID
 - messages 使用自增 INT, 保证插入顺序和查询性能
 - 软删除 (deleted_at) 而非物理删除, 支持数据恢复和审计
@@ -586,6 +595,7 @@ CacheInterface
 ```
 
 **降级策略**: 服务启动时尝试连接 Redis, 连接失败则自动切换到进程内 LRU 缓存:
+
 - 最大条目数: 10,000
 - 最大内存: 256MB
 - TTL: 10 分钟
@@ -600,10 +610,10 @@ CacheInterface
 
 **答:**
 
-| 端 | 构建工具 | 输出 |
-|----|---------|------|
+| 端   | 构建工具                                          | 输出                   |
+| ---- | ------------------------------------------------- | ---------------------- |
 | 前端 | Vite 8 (@vitejs/plugin-react + @tailwindcss/vite) | 静态资源 (HTML/JS/CSS) |
-| 后端 | Rollup (TypeScript plugin) | 单个 ESM bundle |
+| 后端 | Rollup (TypeScript plugin)                        | 单个 ESM bundle        |
 
 **服务端选择 Rollup 的原因**:
 
@@ -632,6 +642,7 @@ CacheInterface
 - **server**: `tsx watch src/index.ts` (文件监听自动重启, 端口 8088)
 
 **代码规范**:
+
 - 前端: ESLint + Prettier
 - 后端: Biome (更快的 lint + format 一体化工具)
 
@@ -643,15 +654,15 @@ CacheInterface
 
 **答:**
 
-| 模式 | 应用位置 | 解决的问题 |
-|------|---------|-----------|
-| 工厂模式 | AiModelFactory | 解耦模型创建与使用, 新增模型类型只需 registerModel |
-| 单例模式 | AiAgentManager, AiModelFactory | 全局唯一的 Agent 管理器和模型注册表 |
-| 策略模式 | AiModel 接口 (OllamaModel / OllamaRagModel) | 同一 Agent 可切换不同推理策略 |
-| 观察者/回调 | StreamCallback | 解耦 token 生成与 SSE 写入 |
-| 中间件模式 | Koa auth middleware | 横切关注点 (鉴权) 与业务逻辑分离 |
-| 分层架构 | Router->Controller->Service->DAO | 关注点分离, 各层可独立测试和替换 |
-| 适配器模式 | Cache 抽象层 (Redis/LRU) | 统一接口, 底层实现可替换 |
+| 模式        | 应用位置                                    | 解决的问题                                         |
+| ----------- | ------------------------------------------- | -------------------------------------------------- |
+| 工厂模式    | AiModelFactory                              | 解耦模型创建与使用, 新增模型类型只需 registerModel |
+| 单例模式    | AiAgentManager, AiModelFactory              | 全局唯一的 Agent 管理器和模型注册表                |
+| 策略模式    | AiModel 接口 (OllamaModel / OllamaRagModel) | 同一 Agent 可切换不同推理策略                      |
+| 观察者/回调 | StreamCallback                              | 解耦 token 生成与 SSE 写入                         |
+| 中间件模式  | Koa auth middleware                         | 横切关注点 (鉴权) 与业务逻辑分离                   |
+| 分层架构    | Router->Controller->Service->DAO            | 关注点分离, 各层可独立测试和替换                   |
+| 适配器模式  | Cache 抽象层 (Redis/LRU)                    | 统一接口, 底层实现可替换                           |
 
 **扩展新模型示例**:
 
@@ -668,18 +679,20 @@ factory.registerModel("openai", (config) => new OpenAIModel(config));
 
 当前架构的水平扩展瓶颈及解决方案:
 
-| 瓶颈 | 原因 | 解决方案 |
-|------|------|---------|
+| 瓶颈           | 原因                   | 解决方案                                     |
+| -------------- | ---------------------- | -------------------------------------------- |
 | Agent 内存状态 | 对话历史存在进程内存中 | 迁移到 Redis/共享存储, 或使用 sticky session |
-| RAG 向量索引 | 每次请求重建, 无共享 | 引入独立向量数据库服务 (Milvus/Qdrant) |
-| 文件存储 | 本地磁盘 uploads/ | 迁移到对象存储 (S3/OSS) |
-| SSE 长连接 | 连接绑定到特定进程 | 使用 Redis Pub/Sub 或消息队列广播 |
+| RAG 向量索引   | 每次请求重建, 无共享   | 引入独立向量数据库服务 (Milvus/Qdrant)       |
+| 文件存储       | 本地磁盘 uploads/      | 迁移到对象存储 (S3/OSS)                      |
+| SSE 长连接     | 连接绑定到特定进程     | 使用 Redis Pub/Sub 或消息队列广播            |
 
 **最小改造路径 (Sticky Session)**:
+
 1. 负载均衡器按 username 做一致性哈希, 同一用户的请求始终路由到同一实例
 2. 无需改造 Agent 内存模型, 但牺牲了故障转移能力
 
 **完整改造路径 (无状态服务)**:
+
 1. Agent 对话历史存入 Redis (List 结构)
 2. 每次请求从 Redis 加载上下文, 响应后写回
 3. 服务完全无状态, 可任意扩缩容
@@ -700,6 +713,7 @@ factory.registerModel("openai", (config) => new OpenAIModel(config));
 - **组件目录**: `components/ui/` 包含 button, card, input, select, textarea, dropdown-menu, skeleton, sonner (toast) 等
 
 **优势**:
+
 1. 组件源码在项目中, 可任意定制, 不受库版本约束
 2. Radix 保证 WAI-ARIA 可访问性
 3. Tailwind 原子化样式避免 CSS 命名冲突

@@ -1,0 +1,5 @@
+flowchart TD
+  A["Node.js 主进程<br/>事件循环 / IPC 任务调度"] --> W1["子进程 1<br/>N-API 加载 crypto.so"]
+  A --> W2["子进程 2<br/>N-API 加载 crypto.so"]
+  A --> W3["子进程 3<br/>N-API 加载 crypto.so"]
+  A --> W4["子进程 4<br/>N-API 加载 crypto.so"]

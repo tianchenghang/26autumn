@@ -1568,7 +1568,7 @@ A: Tree-shaking 指打包器在构建期移除未被使用的导出代码（dead
 - 模块含顶层副作用且 package.json 未声明 "sideEffects": false（或数组白名单，注意 CSS 引入要保留 `*.css`）。
 - 代码被 Babel/TS 转译成 CJS（如 tsconfig module: commonjs），静态结构丢失；应保留 ESM 输出交给打包器。
 - 重导出整包（export \* from 'lib'）配合动态属性访问、类的静态方法挂载、装饰器等让分析器无法确认"未使用"。
-- /\*#**PURE**\*/ 注释缺失时，函数调用形式的导出初始化（如 styled() 返回值）被视为有副作用而保留；组件库构建时需要工具自动注入 PURE 标记。
+- `/*#__PURE__*/` 注释缺失时，函数调用形式的导出初始化（如 styled() 返回值）被视为有副作用而保留；组件库构建时需要工具自动注入 PURE 标记。
 - lodash 这类 CJS 库整包引入；应换 lodash-es 或 babel-plugin-import 之类的按需转换。
 
 验证手段：构建产物用 source-map-explorer/rsdoctor 分析；对疑似未删除的模块检查其 sideEffects 声明与转译产物格式。

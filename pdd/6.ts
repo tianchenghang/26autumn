@@ -1,5 +1,4 @@
-type OrderStatus = "pending" | "success" | "failure"
-
+type OrderStatus = "pending" | "success" | "failure";
 
 declare function fetchStatus(orderId: string): Promise<OrderStatus>;
 
@@ -9,25 +8,31 @@ declare function fetchStatus(orderId: string): Promise<OrderStatus>;
 // 某次 fetchStatus 异常 (reject) 视为无结果的探测, 继续轮询
 // 超时使用「软截止」: 如果超时 timeout ms, 并且状态是 "pending", 则 `reject(new Error("timeout"))
 
-function pollOrderStatus(orderId: string, { interval, timeout }: {
-  interval: number,
-  timeout: number
-}) { 
-  return new Promise((resolve, reject) => { 
-    let settled = false
+function pollOrderStatus(
+  orderId: string,
+  {
+    interval,
+    timeout,
+  }: {
+    interval: number;
+    timeout: number;
+  },
+) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
     const startTime = Date.now();
 
     let timer: ReturnType<typeof setTimeout> | null = null;
-    const settle = (cb: (value?: unknown) => void) => { 
-      if (!settled) { 
+    const settle = (cb: (value?: unknown) => void) => {
+      if (!settled) {
         return;
       }
       settled = true;
-      if (timer) { 
+      if (timer) {
         clearTimeout(timer);
       }
-      cb()
-    }
+      cb();
+    };
 
     const poll = async () => {
       try {
@@ -35,11 +40,11 @@ function pollOrderStatus(orderId: string, { interval, timeout }: {
           return;
         }
         const status = await fetchStatus(orderId);
-        if (status !== 'pending') {
+        if (status !== "pending") {
           settle(() => resolve(status));
           return;
         }
-      } catch (err) { 
+      } catch (err) {
         if (settled) {
           return;
         }
@@ -47,14 +52,14 @@ function pollOrderStatus(orderId: string, { interval, timeout }: {
 
       // status === "pending" || err !== undefined
       const elapsed = Date.now() - startTime;
-      if (elapsed >= timeout) { 
+      if (elapsed >= timeout) {
         settle(() => reject(new Error("timeout")));
-        return
+        return;
       }
 
       timer = setTimeout(poll, interval);
-    }
+    };
 
     poll();
-  })
+  });
 }

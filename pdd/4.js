@@ -22,11 +22,12 @@
 
 /** @deprecated */
 function deepClone_(obj, seen = new Set()) {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== "object") {
     return obj;
   }
 
-  if (seen.has(obj)) { // 循环引用
+  if (seen.has(obj)) {
+    // 循环引用
     return obj; // 指向原对象
   }
 
@@ -37,18 +38,18 @@ function deepClone_(obj, seen = new Set()) {
   }
 
   if (obj instanceof RegExp) {
-    return new RegExp(obj)
+    return new RegExp(obj);
   }
 
   const clone = Array.isArray(obj) ? [] : {};
 
-  for (const key in obj) { // 遍历所有可枚举属性
+  for (const key in obj) {
+    // 遍历所有可枚举属性
     clone[key] = deepClone_(obj[key], seen);
   }
 
   return clone;
 }
-
 
 /**
  *
@@ -82,9 +83,9 @@ function deepClone(obj, seen = new WeakMap()) {
     return clone;
   }
 
-  clone = Array.isArray(obj) ? [] : {}
+  clone = Array.isArray(obj) ? [] : {};
   seen.set(obj, clone);
-  
+
   for (const key in obj) {
     // 过滤原型链属性
     if (obj.hasOwnProperty(key)) {

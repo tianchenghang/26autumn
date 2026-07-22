@@ -111,6 +111,7 @@ func compose(middlewares []Middleware, final Middleware) func(ctx *Context) {
 A: 延迟响应是 Koa.js 的核心设计：中间件不直接操作 `http.ResponseWriter`，而是设置 `ctx.Status`、`ctx.Body`、`ctx.headers`，最终由 `respond()` 统一写出。
 
 **设计优势**：
+
 - 下游中间件在 `next()` 返回后可以检查/修改上游设置的响应（如统一包装、压缩、添加 header）
 - 避免"header 已发送"的不可逆问题
 - 错误处理中间件可以覆盖之前设置的 Body
@@ -163,6 +164,7 @@ type node struct {
 ```
 
 **支持的路由模式**：
+
 - 静态段：`/users/list`
 - 参数段：`/users/:id`（匹配单段）
 - 通配段：`/static/*filepath`（匹配剩余所有段）
@@ -170,6 +172,7 @@ type node struct {
 **插入**（`insert`）：递归按 parts 逐层插入，到达末尾时设置 `n.pattern`。
 
 **搜索**（`search`）：
+
 1. 优先精确匹配（`child.part == part`）
 2. 其次通配匹配（`child.isWild`）
 3. 遇到 `*` 前缀的节点立即返回（贪婪匹配剩余路径）
@@ -295,6 +298,7 @@ type Context struct {
 ```
 
 **Koa 风格特征**：
+
 - `State`：等价于 Koa 的 `ctx.state`，用于中间件间传递数据（如认证中间件写入 `ctx.State["user"]`，下游 handler 读取）
 - `Body` 为 `interface{}`：等价于 Koa 的 `ctx.body`，支持任意类型，由 respond() 根据类型分发序列化
 - `Throw(status, msg)`：等价于 Koa 的 `ctx.throw()`，设置状态码并生成错误 Body
@@ -405,6 +409,7 @@ return func(ctx *Context, next func()) {
 ```
 
 关键设计：
+
 1. **先检查文件存在性**：不存在时走正常的 404 延迟响应流程，不 hijack 连接
 2. **刷新延迟 header**：上游中间件（如 CORS）通过 `ctx.Set()` 设置的 header 必须在 FileServer 写入前刷到 ResponseWriter
 3. **设置 flushed = true**：阻止 `respond()` 再次写入
@@ -422,6 +427,7 @@ type statusRecorder struct {
 FileServer 内部直接调用 `WriteHeader()`，绕过了 Context 的延迟响应。statusRecorder 拦截 `WriteHeader` 和 `Write` 调用，将实际状态码同步回 `ctx.Status`，使 Logger 等后续中间件能记录正确的状态码。
 
 **staticFileExists**（`group.go:141-160`）：
+
 - 打开文件后立即关闭（避免 fd 泄漏）
 - 目录仅在包含 `index.html` 时视为存在（匹配 koa-static 行为）
 - 不暴露目录列表（安全考量）
@@ -592,6 +598,7 @@ A: **帧格式**（RFC 6455 Section 5.2）：
 **readFrame 实现**（`websocket.go:364-429`）：
 
 安全校验：
+
 1. **RSV1-3 必须为 0**：未协商扩展（如 permessage-deflate），非零则拒绝
 2. **opcode 合法性**：仅允许 0(continuation)、1(text)、2(binary)、8(close)、9(ping)、10(pong)
 3. **控制帧约束**：必须 FIN=1（不可分片）、payload <= 125 字节
@@ -632,6 +639,7 @@ func (ws *WSConn) readMessage() (opcode int, payload []byte, err error) {
 ```
 
 关键规则（RFC 6455 Section 5.4）：
+
 - 分片消息中间可以插入控制帧（ping/pong/close），控制帧立即返回
 - continuation 帧必须跟在数据帧之后
 - 分片中途不能出现新的数据帧
@@ -710,6 +718,7 @@ app.server = &http.Server{Handler: app}
 ```
 
 如果在 Listen() 中构造 server，存在竞态：
+
 1. goroutine A 调用 `Listen()`，正在执行 `app.server = &http.Server{...}`
 2. goroutine B 调用 `Shutdown()`，此时 `app.server` 仍为 nil，直接返回 nil（静默 no-op）
 3. 服务实际未关闭
@@ -742,15 +751,15 @@ app.Shutdown(ctx)
 
 A:
 
-| 维度 | swifty_http | Gin | Echo |
-|------|-------------|-----|------|
-| 中间件模型 | 洋葱模型 (Koa 风格) | 洋葱模型 (类 Koa) | 洋葱模型 |
-| 响应方式 | 延迟响应 | 即时写入 | 即时写入 |
-| 路由 | 按段 Trie | Radix Tree (httprouter) | Radix Tree |
-| 依赖 | 零依赖 | 少量依赖 | 少量依赖 |
-| WebSocket | 内置 (RFC 6455) | 需第三方 (gorilla) | 需第三方 |
-| SSE | 内置 | 需手动实现 | 需手动实现 |
-| 性能 | 中等 | 高 (sync.Pool 复用 Context) | 高 |
+| 维度       | swifty_http         | Gin                         | Echo       |
+| ---------- | ------------------- | --------------------------- | ---------- |
+| 中间件模型 | 洋葱模型 (Koa 风格) | 洋葱模型 (类 Koa)           | 洋葱模型   |
+| 响应方式   | 延迟响应            | 即时写入                    | 即时写入   |
+| 路由       | 按段 Trie           | Radix Tree (httprouter)     | Radix Tree |
+| 依赖       | 零依赖              | 少量依赖                    | 少量依赖   |
+| WebSocket  | 内置 (RFC 6455)     | 需第三方 (gorilla)          | 需第三方   |
+| SSE        | 内置                | 需手动实现                  | 需手动实现 |
+| 性能       | 中等                | 高 (sync.Pool 复用 Context) | 高         |
 
 **设计哲学差异**：
 
@@ -761,6 +770,7 @@ A:
 3. **Context 复用**：Gin 使用 `sync.Pool` 复用 Context 对象减少 GC 压力。swifty_http 每请求新建 Context，实现简单但在极高 QPS 下 GC 压力更大。
 
 **适用场景**：
+
 - swifty_http：学习框架原理、中小型项目、需要 SSE/WS 且不想引入额外依赖
 - Gin：生产环境高并发 API 服务
 - Echo：需要丰富中间件生态的项目
@@ -772,12 +782,14 @@ A:
 **Q: 零依赖带来了哪些优势和限制？WebSocket 实现相比 gorilla/websocket 缺少什么？**
 
 A: **优势**：
+
 - 无供应链风险（无第三方 CVE 影响）
 - 编译产物小，无版本冲突
 - 代码完全可控，便于调试和定制
 - 学习价值：完整展示 HTTP 框架 internals
 
 **限制与缺失**（对比 gorilla/websocket）：
+
 1. **无 permessage-deflate 压缩**：RSV1 非零直接拒绝，不支持消息压缩
 2. **无写超时自动管理**：需要用户手动调用 SetWriteDeadline
 3. **无并发写缓冲**：gorilla 有 `NextWriter` 支持流式写入大消息，swifty_http 的 WriteMessage 是一次性写入
@@ -786,6 +798,7 @@ A: **优势**：
 6. **无 TLS/代理支持**：依赖底层 net.Conn，不处理 X-Forwarded-For 等
 
 **SSE 的限制**：
+
 - 无自动重连 ID 管理（需用户手动调用 ID()）
 - 无连接池/广播机制（需用户自行实现 pub/sub）
 
