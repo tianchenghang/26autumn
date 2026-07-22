@@ -40,15 +40,15 @@
 
 ### 1. Kitex 是什么? 在 TikTok Performance 团队中如何与 Thrift 配合使用?
 
-Kitex 是字节跳动 CloudWeGo 开源的高性能 Go RPC 框架, 基于 netpoll 网络库构建, 支持多协议 (Thrift、KitexProtobuf、gRPC)。在 TikTok Performance 团队中, 后端服务使用 Go + Kitex 构建, 服务间通过 Thrift IDL 定义接口契约。具体流程: 先在 .thrift 文件中定义 service 和 struct, 然后用 kitex 命令行工具生成 Go server/client 桩代码。Kitex 内部用 thrift 编解码做序列化, 相比 JSON 体积小 60% 以上。同时通过 CodeGen 工具将同一份 Thrift IDL 生成 TypeScript 类型定义和 npm 包, 供 BFF 层 (Nest.js) 直接消费, 实现了后端到前端的类型安全传递, 消除了手写 DTO 的维护成本。Kitex 的连接池复用、多路复用 (mux) 模式让单机 QPS 稳定在 5w+ 级别。
+Kitex 是字节跳动 CloudWeGo 开源的高性能 Go RPC 框架, 基于 netpoll 网络库构建, 支持多协议 (Thrift、KitexProtobuf、gRPC)。在 TikTok Performance 团队中, 后端服务使用 Go + Kitex 构建, 服务间通过 Thrift IDL 定义接口契约。具体流程: 先在 .thrift 文件中定义 service 和 struct, 然后用 kitex 命令行工具生成 Go server/client 桩代码。Kitex 内部用 thrift 编解码做序列化, 相比 JSON 体积小 30%~50%。同时通过 CodeGen 工具将同一份 Thrift IDL 生成 TypeScript 类型定义和 npm 包, 供 BFF 层 (Nest.js) 直接消费, 实现了后端到前端的类型安全传递, 消除了手写 DTO 的维护成本。Kitex 的连接池复用、多路复用 (mux) 模式让单机 QPS 稳定在 5w+ 级别。
 
 ### 2. Kafka 转发数据到 Redis/MySQL/ClickHouse 的整体数据链路如何设计? 为什么选这三种存储各承担什么职责?
 
-整体链路: TikTok 客户端和服务端埋点数据先写入 Kafka topic, 由 Go consumer group 消费。Consumer 内部做数据清洗、字段校验后, 按数据类型路由到三个存储系统。Redis 承担实时热度数据, 用 Sorted Set 维护最近 24 小时的指标排行榜, TTL 设为 1 天, 用于实时 Dashboard 展示, 查询延迟 P99 < 2ms。MySQL 存储结构化配置数据和用户权限, 作为权威数据源, 数据量小但要求强一致。ClickHouse 作为 OLAP 引擎承接海量时序日志 (日均 10 亿+ 事件), 利用 MergeTree 引擎的列式存储和稀疏索引做秒级聚合查询, 压缩比约 8:1。三者配合形成"实时查 Redis、历史分析查 ClickHouse、配置走 MySQL"的分层架构, 消费侧用批量写入 (ClickHouse batch insert 500 行/批) 和 pipeline (Redis pipeline 200 条/批) 提升吞吐。
+整体链路: TikTok 客户端和服务端埋点数据先写入 Kafka topic, 由 Go consumer group 消费。Consumer 内部做数据清洗、字段校验后, 按数据类型路由到三个存储系统。Redis 承担实时热度数据, 用 Sorted Set 维护最近 24 小时的指标排行榜, TTL 设为 1 天, 用于实时 Dashboard 展示, 查询延迟 P99 < 2ms。MySQL 存储结构化配置数据和用户权限, 作为权威数据源, 数据量小但要求强一致。ClickHouse 作为 OLAP 引擎承接海量时序数据 (日均约 2 亿条事件), 利用 MergeTree 引擎的列式存储和稀疏索引做秒级聚合查询, 压缩比约 8:1。三者配合形成"实时查 Redis、历史分析查 ClickHouse、配置走 MySQL"的分层架构, 消费侧用批量写入 (ClickHouse batch insert 500 行/批) 和 pipeline (Redis pipeline 200 条/批) 提升吞吐。
 
 ### 3. 多层缓存设计具体是哪些层? 各级命中率如何?
 
-四层缓存架构: 第一层是浏览器内存缓存, 前端用 SWR 的 cache provider 缓存已请求数据, 命中率约 30%, 零网络开销。第二层是 BFF (Nest.js) 本地 LRU 缓存, 用 lru-cache 库, max 500 条, TTL 30s, 命中率约 25%, 减少下游 RPC 调用。第三层是 Redis 集群缓存, 存储聚合后的热点指标数据, TTL 5min, 命中率约 70%。第四层是 ClickHouse 的 query result cache, 对固定时间窗口查询结果缓存, 命中率约 40%。请求穿透时逐层 fallback。缓存一致性通过 Kafka 消费成功后异步删除 Redis key (invalidate) 保证最终一致, BFF 层用 stale-while-revalidate 模式容忍短暂不一致。整体将 P99 延迟从 800ms 降到 50ms 以内。
+四层缓存架构: 第一层是浏览器内存缓存, 前端用 SWR 的 cache provider 缓存已请求数据, 零网络开销。第二层是 BFF (Nest.js) 本地 LRU 缓存, 用 lru-cache 库, max 500 条, TTL 30s, 热门面板上命中率约 60%, 减少下游 RPC 调用。第三层是 Redis 集群缓存, 存储聚合后的热点指标数据, TTL 5min, 全局命中率约 45%。第四层是 ClickHouse 的物化视图预聚合, 将原始查询的 P99 延迟从 2 秒降到 200ms。请求穿透时逐层 fallback。缓存一致性通过 Kafka 消费成功后异步删除 Redis key (invalidate) 保证最终一致, BFF 层用 stale-while-revalidate 模式容忍短暂不一致。整体将前端面板查询的 P99 延迟控制在 300ms 以内。
 
 ### 4. Thrift 生成 npm 包给 BFF 消费, 这解决了什么问题? 跨团队协作收益如何?
 
@@ -56,7 +56,7 @@ Kitex 是字节跳动 CloudWeGo 开源的高性能 Go RPC 框架, 基于 netpoll
 
 ### 5. 你参与的 CloudWeGo Kitex 开源项目贡献了什么?
 
-主要贡献了两部分: 一是优化了 Kitex client 侧的连接池回收逻辑。原实现中 idle connection 在极端流量下会出现 O(n) 遍历, 改为基于双向链表 + 时间轮的分层回收策略, 将连接回收从 O(n) 降到 O(1), 在高并发场景 (10w+ QPS) 下减少了约 15% 的 goroutine 调度开销。二是补充了 Thrift generic call 的 benchmark 测试和文档。generic call 允许不生成桩代码直接发起 RPC 调用, 适合网关代理场景, 我编写了基准测试覆盖 codec 性能, PR 被合入 main 分支。此外还修复了 connection pool 在 context cancel 时未正确归还连接的 bug, 该问题会导致池耗尽。
+主要贡献了两部分: 一是修复了 connection pool 在 context cancel 时未正确归还连接的 bug, 该问题在高并发下会导致连接池耗尽; 同时优化了空闲连接被复用前的健康检查逻辑 (idle connection 缺少 liveness probe)。二是补充了 Thrift generic call 的 benchmark 测试和文档。generic call 允许不生成桩代码直接发起 RPC 调用, 适合网关代理场景, 我编写了基准测试覆盖 codec 性能, PR 被合入 main 分支。
 
 ### 6. 虚拟滚动列表的具体实现原理是什么? 在什么场景下使用?
 
@@ -66,7 +66,7 @@ Kitex 是字节跳动 CloudWeGo 开源的高性能 Go RPC 框架, 基于 netpoll
 
 ### 7. React 类组件迁移到函数组件的具体步骤和难点是什么?
 
-步骤分四阶段: 第一阶段盘点, 用 AST 脚本扫描所有 extends React.Component 的类, 标记有 shouldComponentUpdate、getDerivedStateFromProps 等生命周期的复杂组件。第二阶段逐组件迁移: 将 state 拆为多个 useState, componentDidMount/componentDidUpdate 合并为 useEffect, 用 useCallback 包裹传给子组件的回调。第三阶段处理难点: 对于 getSnapshotBeforeProps 迁移到 useLayoutEffect; 对于 ref 操作 DOM 从 createRef 转为 useRef + useEffect; 对于 render props 模式转为自定义 hook。第四阶段回归测试, 用 React Testing Library 对每个组件写单元测试, 覆盖状态变化路径。难点在于: 类组件中 this.setState 的批量更新行为和 hooks 的 batch 行为不同, 导致某些连续 setState 的组件在迁移后出现中间状态被吞掉的问题, 需要用 flushSync 显式同步更新。整个迁移涉及 120+ 个组件, 历时 6 周。
+步骤分四阶段: 第一阶段盘点, 用 AST 脚本扫描所有 extends React.Component 的类, 标记有 shouldComponentUpdate、getDerivedStateFromProps 等生命周期的复杂组件。第二阶段逐组件迁移: 将 state 拆为多个 useState, componentDidMount/componentDidUpdate 合并为 useEffect, 用 useCallback 包裹传给子组件的回调。第三阶段处理难点: 对于 getSnapshotBeforeUpdate 迁移到 useLayoutEffect; 对于 ref 操作 DOM 从 createRef 转为 useRef + useEffect; 对于 render props 模式转为自定义 hook。第四阶段回归测试, 用 React Testing Library 对每个组件写单元测试, 覆盖状态变化路径。难点在于: 类组件中 this.setState 的批量更新行为和 hooks 的 batch 行为不同, 导致某些连续 setState 的组件在迁移后出现中间状态被吞掉的问题, 需要用 flushSync 显式同步更新。整个迁移涉及 80+ 个组件, 历时约 2 个月。
 
 ### 8. 什么是"未捕获的闭包"问题? 你的项目里具体是什么场景?
 
@@ -78,33 +78,33 @@ Kitex 是字节跳动 CloudWeGo 开源的高性能 Go RPC 框架, 基于 netpoll
 
 ### 10. TCP 连接池的实现要考虑哪些问题? 你实现的池化策略是什么?
 
-TCP 连接池需要考虑: 连接复用与生命周期管理、空闲超时回收、连接健康检查、并发安全、背压控制。我的实现策略: 池结构用 Go channel 做有界队列 (capacity=50), 创建连接时先尝试从 channel 取, 取不到再 new。连接封装为 PooledConn struct, 内含 net.Conn 和 lastUsedAt 时间戳。健康检查: 归还连接前调用 SetReadDeadline(1ms) + Read(1byte) 探测连接是否存活, 死亡连接直接 Close 不入池。空闲回收: 后台 goroutine 每 30s 扫描, 超过 idleTimeout (5min) 的连接 Close 并从池中移除。并发安全: channel 天然协程安全, 避免 mutex 竞争。背压: channel 满时新连接请求阻塞等待, 加 context.WithTimeout 防止永久阻塞, 超时返回 ErrPoolExhausted。实际效果: 数据库连接池将 TCP 握手 (三次握手 + TCP_NODELAY) 开销从每次请求 5ms 摊薄到接近 0, 吞吐量提升约 40%。
+TCP 连接池需要考虑: 连接复用与生命周期管理、空闲超时回收、连接健康检查、并发安全、背压控制。我的实现策略 (Node.js/TypeScript): 池结构维护 idle 数组和 active 集合, 最大连接数 20, 最小空闲 4。请求到来时优先从 idle 取连接, 取不到且未达上限再新建。连接封装为 PooledConn, 内含 net.Socket 和 lastUsedAt 时间戳。健康检查: 后台定时器每 10s 对空闲连接发送轻量 ping 帧探测存活, 死亡连接直接 destroy 不入池。空闲回收: 超过 idleTimeout (30s) 的连接关闭并从池中移除。背压: 达到 maxOpen 时新请求进入等待队列, 配合 acquire 超时 (3s) 快速失败, 避免请求无限堆积。协议适配: 针对 NoSQL 存储引擎的自定义 TCP 协议实现了帧解析器区分请求边界, 处理握手、鉴权等逻辑。实际效果: 将 TCP 三次握手开销从每次请求约 5ms 摊薄到接近 0, 吞吐量提升约 40%。
 
 ### 11. 进程池调用 C++ .so 动态链接库的具体方式是什么? 为什么不用 N-API?
 
-具体方式: Node.js 通过 child_process.fork 创建 worker 进程池, 每个 worker 进程内通过 ffi-napi 加载 C++ .so 文件并调用导出函数。C++ 侧用 extern "C" 暴露 ABI 稳定的 C 接口, ffi-napi 在 JS 侧声明函数签名 (参数类型、返回类型) 即可调用。进程池大小设为 CPU 核心数, 用 cluster 模块 round-robin 分发任务, worker 崩溃由 cluster 自动重启。为什么不用 N-API: N-API 适合编写 Node addon 做同步绑定调用, 但我们的 C++ 库是独立编译的第三方数值计算引擎 (约 50w 行代码), 没有 N-API wrapper, 重新包装工作量巨大。且 N-API addon 运行在 Node 主进程内, C++ crash 会直接拖垮 Node 进程, 而进程池隔离下 worker 崩溃不影响主服务。此外 C++ 计算密集任务会阻塞 V8 event loop, 进程池 + worker 进程的方式天然将计算卸载到独立进程, 主进程 event loop 不被阻塞。代价是 IPC (JSON 序列化) 开销约 1ms/次, 相比计算耗时 (50ms+) 可接受。
+具体方式: Node.js 通过 child_process.fork 创建 worker 进程池 (大小与 CPU 核心数一致, 默认 4 个), 每个 worker 进程内通过轻量的 N-API 绑定层加载 C++ .so (加解密、表文件解析库) 并调用导出函数。C++ 侧用 extern "C" 暴露 ABI 稳定的 C 接口。主进程按最少挂起任务数分发任务, worker 崩溃后由主进程监听 exit 事件自动重启补充。为什么不在主进程内直接 N-API 调用: 一是加解密和表文件解析是 CPU 密集任务, 在主进程内同步调用会阻塞 V8 event loop, 高负载下严重影响并发能力, 进程池天然将计算卸载到独立进程; 二是 .so 内部 segfault 会直接拖垮所在进程, 进程池隔离下 worker 崩溃不影响主服务。代价是 IPC 序列化开销约 1ms/次, 相比计算耗时 (加密 1MB 约 5ms, 解析大表文件几十 ms) 可接受, 且可以通过批量合并小任务进一步摊薄。
 
 ### 12. valgrind 排查 Node + C++ .so 内存泄漏的具体流程是什么? 发现了哪些泄漏点?
 
-流程: 首先编写 C++ 侧的单元测试, 模拟 Node 调用路径 (init -> compute -> cleanup), 用 valgrind --leak-check=full --show-leak-kinds=all ./test_binary 运行。valgrind 的 Memcheck 工具追踪每次 malloc/new 和 free/delete 的配对, 结束时报告 definitely lost (确认泄漏)、indirectly lost、possibly lost。同时用 heaptrack 做动态内存分配可视化, 定位增长趋势。发现的泄漏点有三处: (1) C++ 侧一个全局缓存 map<string, vector<double>> 在 update 时只 insert 不 erase, 持续膨胀, 修复为 LRU 策略限制容量。 (2) Node 与 C++ 交互时, ffi-napi 分配的 Buffer 对象在回调函数中创建但未被 GC 回收, 因为回调引用形成了闭包持有, 改为用 Buffer.alloc + manual slice 替代 Buffer.from 避免引用泄漏。 (3) C++ .so 内一个线程局部变量 (thread_local) 在 worker 退出时未析构, 修复为注册 pthread_key_create 的 destructor callback。修复后 Memcheck 报告 definitely lost 从 12MB 降到 0, 运行 24 小时后 RSS 稳定不再增长。
+流程: 问题现象是 Node 进程 RSS 从启动时的 200MB 在 24 小时内涨到 800MB 以上, 但 heapdump 对比显示 JS 堆稳定, 判断泄漏在 C++ 层。首先编写 C++ 侧的单元测试, 模拟 Node 调用路径 (init -> parse -> cleanup), 用 valgrind --leak-check=full --show-leak-kinds=all ./test_binary 运行。valgrind 的 Memcheck 工具追踪每次 malloc/new 和 free/delete 的配对, 结束时报告 definitely lost (确认泄漏)、indirectly lost、possibly lost; 同时用 --tool=massif 跟踪堆分配趋势, 发现 C++ 层上下文对象的分配次数明显多于释放次数。定位到的泄漏点: 表文件解析函数在解密失败 (文件损坏、密钥错误) 时走了 early return 路径, 跳过了临时 buffer 的 free, 该分支在特定损坏表文件下会被频繁命中。修复方案是将裸指针改为 RAII 智能指针 (std::unique_ptr 配自定义 deleter), 保证任何返回路径都自动释放。辅助手段: 用 Node.js 官方的 valgrind suppressions 文件过滤 V8 的已知误报, 用 process.memoryUsage() 做进程级内存监控和告警。修复后 Memcheck 的 definitely lost 归零, 运行 24 小时后 RSS 增长不超过 20MB。
 
 ### 13. 对象池、v8 隐藏类在 Node 中如何优化 GC? 优化后 GC 停顿降低了多少?
 
-对象池: 对高频创建的临时对象 (如表示数据行的 Row 对象), 维护一个预分配数组, 需要时从池中取、用完后重置字段归还, 避免 new 触发 GC。实现为 ObjectPool 类, 内部 Array 预分配 1000 个实例, getInstance/returnInstance 用 index 指针管理。V8 隐藏类 (Hidden Class / Map) 优化: V8 对结构相同的对象分配相同的隐藏类, 使属性访问走固定偏移而非 hash 查找。为保持隐藏类稳定, 确保所有对象在构造函数中以相同顺序赋值属性, 避免运行时动态 add/delete 属性 (会触发 hidden class transition, 退化为字典模式)。具体做法: Row 类构造函数预声明所有字段并赋默认值, 复用对象时只赋值不改变 shape。效果: Scavenge (minor GC) 频率从每 200ms 一次降到每 800ms 一次, 单次停顿从 8ms 降到 3ms。Old-space GC (major) 的 mark-sweep 因堆中存活对象减少, 扫描耗时降低约 50%。通过 --prof 和 v8-profiler 验证了分配速率 (allocation rate) 从 120MB/min 降到 30MB/min。
+对象池: 对高频创建的临时对象 (如表示数据行的 Row 对象), 维护一个预分配数组, 需要时从池中取、用完后重置字段归还, 避免 new 触发 GC。实现为 ObjectPool 类, 内部 Array 预分配 1000 个实例, getInstance/returnInstance 用 index 指针管理。V8 隐藏类 (Hidden Class / Map) 优化: V8 对结构相同的对象分配相同的隐藏类, 使属性访问走固定偏移而非 hash 查找。为保持隐藏类稳定, 确保所有对象在构造函数中以相同顺序赋值属性, 避免运行时动态 add/delete 属性 (会触发 hidden class transition, 退化为字典模式)。具体做法: Row 类构造函数预声明所有字段并赋默认值, 复用对象时只赋值不改变 shape。效果: 加解密和解析高频场景下, GC 暂停时间从平均 15ms 降低到 5ms, 吞吐量提升约 20%。通过 --prof 和 v8-profiler 验证了对象分配速率显著下降。
 
 ## 字节跳动 (Data-架构部门)
 
 ### 14. JSError 大模型自动修复的整体架构是什么? LLM 是如何获取上下文进行修复的?
 
-架构分四层: 采集层、上下文组装层、LLM 推理层、审核发布层。采集层从 Sentry 风格的错误监控平台获取线上 JSError, 包含 stack trace、用户操作路径、浏览器环境信息。上下文组装层: 根据 stack trace 中的文件名和行号, 从 Git 仓库提取对应源码文件 (前后 50 行), 同时检索最近 3 次该文件的 git log diff, 再拉取该错误的聚合堆 (相同 stack 归为一组, 取出现频次最高的)。组装后的 prompt 包含: 错误信息、堆栈、源码上下文、git diff、修复建议模板。LLM 推理层: 调用大模型 API (temperature=0.1 减少随机性), 输出 JSON 格式的 patch (文件路径 + unified diff)。审核发布层: patch 自动在沙箱分支 apply, 跑单元测试和类型检查, 通过后提交 CR 到 GitLab, 人工 review 后合入。准确率: 对 Top 50 高频错误, 自动 patch 通过单测的比率约 62%, 经人工 review 后合入率约 45%。衡量收益以"错误 MTTR (平均修复时间)"为指标, 从人工的 4.2 天降到 0.8 天。
+架构分四层: 采集层、上下文组装层、LLM 推理层、审核发布层。采集层从 Sentry 风格的错误监控平台获取线上 JSError, 包含 stack trace、用户操作路径、浏览器环境信息。上下文组装层: 根据 stack trace 中的文件名和行号, 从 Git 仓库提取对应源码文件 (前后 50 行), 同时检索最近 3 次该文件的 git log diff, 再拉取该错误的聚合堆 (相同 stack 归为一组, 取出现频次最高的)。组装后的 prompt 包含: 错误信息、堆栈、源码上下文、git diff、修复建议模板。LLM 推理层: 调用大模型 API (temperature=0.1 减少随机性), 输出 JSON 格式的 patch (文件路径 + unified diff)。审核发布层: patch 自动在沙箱分支 apply, 跑单元测试和类型检查, 通过后提交 CR 到代码平台, 人工 review 后合入。准确率: 对高频错误, 自动 patch 通过验证 (编译 + 单测) 的比率约 65%, 经人工 review 后合入率约 47%。衡量收益以"错误 MTTR (平均修复时间)"为指标, 从人工的 4.2 天降到 0.8 天。
 
 ### 15. 自动修复的准确率是多少? 如何衡量收益?
 
-评测方式: 从监控平台取 200 个历史已修复的 JSError, 用系统重新生成 patch, 与人工修复的 commit diff 做比对。准确率定义分三层: (1) 编译通过 (apply diff 后 tsc + build 成功) -- 78%。 (2) 单元测试通过 (修复后跑该模块所有单测) -- 62%。 (3) 语义等价 (与人工修复 diff 的 AST 差异 < 5 个节点, 用 ast-diff 工具比对) -- 45%。分析失败原因: 40% 是因为上下文不足 (跨文件依赖未注入), 30% 是修复方向错误 (如本应修改调用方却修改了被调方), 30% 是格式/lint 问题 (可自动 fix)。衡量业务收益: (1) MTTR 从 4.2 天降到 0.8 天。 (2) 每周节省 on-call 人力约 6 小时。 (3) 长尾错误覆盖率提升 -- 人工只修 P0/P1 错误, 自动修复可覆盖 P2/P3 级别的低频报错。
+评测方式: 从监控平台取 200 个历史已修复的 JSError, 用系统重新生成 patch, 与人工修复的 commit diff 做比对。准确率定义分三层: (1) 编译通过 (apply diff 后 tsc + build 成功) -- 78%。 (2) 验证通过 (修复后跑该模块所有单测) -- 65%。 (3) 语义等价 (与人工修复 diff 的 AST 差异 < 5 个节点, 用 ast-diff 工具比对) -- 47%。分析失败原因: 40% 是因为上下文不足 (跨文件依赖未注入), 30% 是修复方向错误 (如本应修改调用方却修改了被调方), 30% 是格式/lint 问题 (可自动 fix)。衡量业务收益: (1) MTTR 从 4.2 天降到 0.8 天。 (2) 每周节省 on-call 人力约 6 小时。 (3) 长尾错误覆盖率提升 -- 人工只修 P0/P1 错误, 自动修复可覆盖 P2/P3 级别的低频报错。
 
 ### 16. SWR 前端性能优化具体做了什么?
 
-SWR (stale-while-revalidate) 是一种缓存优先的数据请求策略。项目中三个关键优化: (1) 首屏请求: 用 SWR 的 useSWR hook, 首次渲染直接返回 localStorage 中的 cached data (stale), 同时后台发起 revalidate 请求, 用户无感知获取最新数据, 首屏 TTI 从 2.1s 降到 0.8s。 (2) 预取 (prefetch): 路由切换前, 在 onMouseEnter 事件中调用 mutate(key, fetcher, { revalidate: false }) 预加载下一页数据, 切换后 SWR 直接命中缓存。 (3) 分页列表的 optimistic update: 删除行时, 先乐观更新本地缓存 (从数组中移除), 再异步发请求, 失败时 rollback。SWR 内部用 Map 做全局 cache, 相同 key 的请求自动去重 (deduplication), 避免多组件同 key 重复请求。此外, 利用 SWR 的 refreshInterval 对监控面板数据做定时轮询, 配合 focusThrottleInterval 防止 Tab 切回时的重复请求风暴。
+SWR (stale-while-revalidate) 是一种缓存优先的数据请求策略。项目中三个关键优化: (1) 首屏请求: 用 SWR 的 useSWR hook, 首次渲染直接返回 localStorage 中的 cached data (stale), 同时后台发起 revalidate 请求, 用户无感知获取最新数据, 首屏加载时间从 3.2s 降到 1.4s。 (2) 预取 (prefetch): 路由切换前, 在 onMouseEnter 事件中调用 mutate(key, fetcher, { revalidate: false }) 预加载下一页数据, 切换后 SWR 直接命中缓存。 (3) 分页列表的 optimistic update: 删除行时, 先乐观更新本地缓存 (从数组中移除), 再异步发请求, 失败时 rollback。SWR 内部用 Map 做全局 cache, 相同 key 的请求自动去重 (deduplication), 避免多组件同 key 重复请求。此外, 利用 SWR 的 refreshInterval 对监控面板数据做定时轮询, 配合 focusThrottleInterval 防止 Tab 切回时的重复请求风暴。
 
 ### 17. A2UI 是什么框架? 接入过程有什么难点?
 

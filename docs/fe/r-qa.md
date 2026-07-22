@@ -207,7 +207,7 @@ Webpack 模块联邦 vs Vite 模块联邦的核心差异:
 
 远程模块加载失败处理: 给 remote 加载加 error boundary，加载失败时展示 fallback UI。可以配合 retry 机制 (加载失败后重试一次或切换到备用 remote URL)。
 
-我在阿里巴巴的具体贡献是给 @module-federation/vite 提 PR，处理 Vite 环境下 ESM 模块联邦的一些 edge case，比如 CSS 资源的加载路径问题和 dev 模式下的 HMR 兼容性。
+我在阿里巴巴的具体贡献是给 @module-federation/vite 提 PR，核心是修复 dev 模式下远程模块 HMR 失效的问题，并优化了 shared 依赖的预构建逻辑（合并 optimizeDeps 调用），以及补充 runtime plugin 机制。
 
 ### 1.9 Agent 开发
 
@@ -403,46 +403,45 @@ TCP 连接池设计要点:
 
 Node.js 调用 C++ .so 动态链接库有几种方式:
 
-1. N-API (Node-API): 编写 C++ addon，需要 .so 的源码或编写包装层。性能最好 (直接函数调用，零序列化开销)，但 .so 崩溃会导致 Node.js 崩溃。需要 C++ 编译环境。
-2. FFI (ffi-napi): 在 JavaScript 中声明 C 函数签名，运行时动态加载 .so 并调用。不需要 .so 源码，不需要编译 C++ addon，但有 FFI 调用开销 (参数 marshalling / unmarshalling)。
-3. child_process: 启动 C++ 子进程，通过 IPC 通信。稳定性最好 (进程隔离)，但有 IPC 序列化开销和架构复杂度。
+1. N-API (Node-API) 主进程内调用: 编写 C++ addon 绑定层，性能最好 (直接函数调用，零序列化开销)，但 CPU 密集计算会阻塞事件循环，且 .so 崩溃会导致 Node.js 主进程崩溃。
+2. FFI (ffi-napi): 在 JavaScript 中声明 C 函数签名，运行时动态加载 .so 并调用。不需要编译 C++ addon，但有 FFI 调用开销 (参数 marshalling / unmarshalling)，且稳定性和类型安全较差。
+3. child_process 进程池 + 子进程内 N-API: 子进程通过 N-API 绑定层加载 .so，主进程通过 IPC 分发任务。有 IPC 序列化开销，但兼顾了调用性能、崩溃隔离和事件循环不阻塞。
 
-我们选择 ffi-napi 的原因:
+我们选择方案 3 的原因:
 
-1. .so 是第三方预编译的二进制库，没有源码，无法编写 N-API addon
-2. 加解密和表文件解析的调用频率高，child_process 的 IPC 序列化开销不可接受
-3. ffi-napi 开发效率高，纯 JavaScript 对接，不需要维护 C++ 编译工具链
+1. 加解密和表文件解析是 CPU 密集任务，调用频率高、单次耗时可观 (加密 1MB 约 5ms，解析大表文件几十 ms)，放在主进程内会阻塞事件循环
+2. .so 崩溃只影响单个子进程，主进程监听 exit 事件自动重启补充，服务不中断
+3. 子进程内仍然是 N-API 直接函数调用，避免了 FFI 的调用开销和运行时类型风险; IPC 开销约 1ms/次，相比计算耗时可接受
 
-ffi-napi 的使用细节:
+使用细节:
 
 ```typescript
-import ffi from "ffi-napi";
-import ref from "ref-napi";
+// crypto-worker.js (子进程): 通过 N-API 绑定层加载 .so
+const addon = require("bindings")("crypto_binding");
 
-const libcrypto = ffi.Library("./libcrypto.so", {
-  encrypt: ["int", ["pointer", "int", "pointer", "int", "pointer"]],
-  decrypt: ["int", ["pointer", "int", "pointer", "int", "pointer"]],
-  parse_table: ["int", ["string", "pointer", "int"]],
+process.on("message", (msg) => {
+  try {
+    let result;
+    if (msg.action === "encrypt") {
+      result = addon.encrypt(Buffer.from(msg.data), msg.keyId);
+    } else if (msg.action === "parseTable") {
+      result = addon.parseTable(msg.filePath);
+    }
+    process.send({ taskId: msg.taskId, result });
+  } catch (error) {
+    process.send({ taskId: msg.taskId, error: error.message });
+  }
 });
-
-// Node.js Buffer 作为 C 指针传递
-const inputBuf = Buffer.from(plaintext);
-const outputBuf = Buffer.alloc(outputSize);
-const ret = libcrypto.encrypt(
-  inputBuf,
-  inputBuf.length,
-  outputBuf,
-  outputBuf.length,
-  keyBuf,
-);
 ```
+
+C++ 绑定层用 extern "C" 暴露 ABI 稳定的接口，N-API 侧将 Node.js Buffer 映射为 C 指针传入，避免额外拷贝。
 
 踩过的坑:
 
-1. 内存泄漏: ffi-napi 通过 ref-napi 分配的 Buffer 不会被 V8 GC 自动回收 (因为引用关系对 GC 不可见)，需要手动管理。我们维护了对象池复用 Buffer，避免频繁分配。
-2. 类型对齐: C 结构体的内存布局需要考虑对齐 (alignment)，ref-struct-napi 可以处理，但嵌套结构体容易出错。
-3. 回调函数: .so 中有异步接口需要传入 C 函数指针作为回调。ffi-napi 支持通过 ffi.Callback 创建，但回调函数在 C 侧被调用时如果抛出异常会导致进程崩溃，必须在回调内部做完整的错误处理。
-4. valgrind 排查: Node.js 进程加载 .so 后，用 valgrind --tool=massif 分析堆内存使用，用 valgrind --leak-check=full 检测 .so 层的 malloc/free 不匹配。
+1. 内存泄漏: 绑定层在异常路径 (解密失败 early return) 下漏掉了 free，导致 C++ 堆持续增长。用 valgrind --leak-check=full 定位后，改用 RAII 智能指针修复。
+2. 类型对齐: C 结构体的内存布局需要考虑对齐 (alignment)，嵌套结构体在绑定层容易出错，统一改为扁平的入参出参。
+3. 大 Buffer 的 IPC 开销: 高频小任务批量合并后再发给子进程，减少 IPC 次数; 结果 Buffer 复用降低分配开销。
+4. valgrind 排查: 对子进程单独运行 valgrind，用 --tool=massif 分析堆内存增长趋势，用 --leak-check=full 检测 .so 层的 malloc/free 不匹配，并用 Node.js 官方 suppressions 文件过滤 V8 误报。
 
 ### 2.7 字节 Data-架构 - JSError LLM 自动修复
 
@@ -522,9 +521,9 @@ Schema 的定义和解析:
 我的具体贡献:
 
 - 给 @module-federation/vite 提交了多个 PR，主要涉及:
-  1. Vite dev server 模式下远程模块的 HMR (Hot Module Replacement) 兼容性修复
-  2. CSS 资源在 ESM 模块联邦场景下的加载路径处理
-  3. shared 依赖的版本协商在 Vite 环境下的边界情况修复
+  1. Vite dev server 模式下远程模块的 HMR (Hot Module Replacement) 失效修复
+  2. shared 依赖预构建逻辑优化: 将多个 shared 依赖合并为一次 optimizeDeps 调用，预构建时间从约 12 秒降到 3 秒
+  3. runtime plugin 机制: 允许运行时动态修改远程模块的加载行为 (鉴权 header、切换 CDN 源等)，对齐 Webpack 版 Module Federation 的 runtime plugin API
 
 Webpack 和 Vite 模块联邦的核心差异:
 

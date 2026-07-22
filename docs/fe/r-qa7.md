@@ -1,5 +1,27 @@
 # 杭天铖 - 前端面试题 (A)
 
+## 目录
+
+- [一、项目深挖题](#一项目深挖题)
+  - [1. Sentry SDK — JSError 还原故障现场](#1-sentry-sdk--jserror-还原故障现场)
+  - [2. Sentry SDK — rrweb 屏幕录制原理与性能代价](#2-sentry-sdk--rrweb-屏幕录制原理与性能代价)
+  - [3. Sentry SDK — 白屏检测关键点采样](#3-sentry-sdk--白屏检测关键点采样)
+  - [4. Sentry SDK — 3级降级上报策略](#4-sentry-sdk--3级降级上报策略)
+  - [5. CLI Coding Agent — ReAct 范式实现](#5-cli-coding-agent--react-范式实现)
+  - [6. CLI Coding Agent — 上下文压缩与会话持久化](#6-cli-coding-agent--上下文压缩与会话持久化)
+  - [7. 腾讯 — valgrind 排查 Node + C++ .so 内存泄漏](#7-腾讯--valgrind-排查-node--c-so-内存泄漏)
+  - [8. 字节 Data 架构 — JSError LLM 自动修复](#8-字节-data-架构--jserror-llm-自动修复)
+  - [9. 阿里妈妈 — 模块联邦接入与开源贡献](#9-阿里妈妈--模块联邦接入与开源贡献)
+- [二、技术原理题](#二技术原理题)
+  - [10. React Fiber 架构深度解析](#10-react-fiber-架构深度解析)
+  - [11. Vue3 响应式原理深度解析](#11-vue3-响应式原理深度解析)
+  - [12. V8 隐藏类与 GC 机制](#12-v8-隐藏类与-gc-机制)
+  - [13. 模块联邦原理](#13-模块联邦原理)
+- [三、场景设计题](#三场景设计题)
+  - [14. 设计一个大规模前端灰度发布系统](#14-设计一个大规模前端灰度发布系统)
+  - [15. 设计一个高性能实时数据大屏](#15-设计一个高性能实时数据大屏)
+  - [16. 设计一个 Agent 开发平台的前端架构](#16-设计一个-agent-开发平台的前端架构)
+
 ---
 
 ## 一、项目深挖题
@@ -296,30 +318,7 @@ ReAct 的 Thought → Action → Observation 循环编排：
 
 我的 CLI Coding Agent（@swifty/swifty）基于 ReAct 范式，Agent Loop 的核心流程如下：
 
-```
-┌─────────────────────────────────────────────┐
-│                  Agent Loop                  │
-│                                              │
-│  1. 构建 messages（System Prompt +           │
-│     历史消息 + 压缩后的上下文）               │
-│                                              │
-│  2. 调用 LLM（流式输出 SSE）                 │
-│     ↓                                        │
-│  3. 解析 LLM 响应：                          │
-│     - 纯文本 → 直接展示给用户，结束循环       │
-│     - tool_use block → 进入 Action 执行       │
-│     ↓                                        │
-│  4. Action 执行：                            │
-│     - 权限检查（5 层权限系统）                 │
-│     - 路由到具体工具并执行                     │
-│     - 捕获执行结果（stdout/stderr/返回值）     │
-│     ↓                                        │
-│  5. Observation 回注：                       │
-│     - 将工具执行结果作为 tool_result 消息      │
-│       追加到 messages 数组                     │
-│     - 回到步骤 2，继续下一轮循环               │
-└─────────────────────────────────────────────┘
-```
+![Agent Loop 核心流程](../assets/agent-loop.png)
 
 每一轮循环中，LLM 先输出 Thought（以文本形式表达推理过程），然后输出 Action（工具调用请求），Agent 执行工具后将 Observation（执行结果）回注到上下文中，LLM 在下一轮读取 Observation 继续推理。
 
@@ -500,7 +499,7 @@ LLM 记忆提取与整理：
 
 2. 环境变量控制：设置 `--v8-pool-size=0` 减少 V8 的线程池，`--max-old-space-size=256` 限制堆大小，减少 V8 的内存分配量从而降低噪声。
 
-3. 进程隔离：将 C++ .so 的调用放到独立的 worker 进程中（通过 Node.js `worker_threads`），对 worker 进程单独跑 valgrind，这样 V8 的干扰更小。
+3. 进程隔离：将 C++ .so 的调用放到独立的子进程中（child_process 进程池），对子进程单独跑 valgrind，这样 V8 的干扰更小。
 
 调用方式与泄漏定位：
 
@@ -568,35 +567,16 @@ GC 分代与对象晋升：
 
 完整修复流程：
 
-```
+![JSError LLM 自动修复流水线](../assets/jserror-autofix-pipeline.png)
+
 1. 线上 JSError 报警触发
-   ↓
-2. Sentry 服务端聚合错误，按指纹分组，生成错误报告
-   （包含：错误消息、压缩堆栈、source map 还原后的原始堆栈、
-    出错代码上下文、错误发生频率、影响用户数）
-   ↓
+2. Sentry 服务端聚合错误，按指纹分组，生成错误报告（包含：错误消息、压缩堆栈、source map 还原后的原始堆栈、出错代码上下文、错误发生频率、影响用户数）
 3. 错误报告进入 LLM 修复流水线（异步队列）
-   ↓
-4. 构建 Prompt 上下文：
-   - 还原后的堆栈信息
-   - 出错文件的前后 50 行源码
-   - 关联的 Git blame 信息（最近修改该文件的人和时间）
-   - 历史相似错误的修复案例（从知识库中检索）
-   - 相关的 TypeScript 类型定义
-   ↓
+4. 构建 Prompt 上下文：还原后的堆栈信息、出错文件的前后 50 行源码、关联的 Git blame 信息（最近修改该文件的人和时间）、历史相似错误的修复案例（从知识库中检索）、相关的 TypeScript 类型定义
 5. LLM 生成修复 patch（统一的 diff 格式）
-   ↓
-6. 自动验证：
-   - 语法检查（TypeScript 编译通过）
-   - 单测运行（相关模块的单元测试）
-   - diff 审查规则（不允许删除安全相关代码、不允许修改公共 API 签名）
-   ↓
-7. 验证通过 → 自动创建 CR（Code Review）
-   - 分配 reviewer（优先选择 Git blame 中的最近修改者）
-   - 附带修复说明和影响分析
-   ↓
+6. 自动验证：语法检查（TypeScript 编译通过）、单测运行（相关模块的单元测试）、diff 审查规则（不允许删除安全相关代码、不允许修改公共 API 签名）
+7. 验证通过后自动创建 CR（Code Review），分配 reviewer（优先选择 Git blame 中的最近修改者），附带修复说明和影响分析
 8. 人工 Review 通过后合并上线
-```
 
 Prompt 上下文包含的信息：
 
@@ -645,9 +625,9 @@ at renderWithHooks (node_modules/react-dom/...)
 
 实际落地数据：
 
-- 修复成功率：约 35-40%（LLM 生成的 patch 通过所有验证的比例）
-- CR 通过率：通过验证的 patch 中，约 60% 最终被人工 Review 通过
-- 整体有效率：约 20-25% 的 JSError 被自动修复并上线
+- 修复成功率：约 65%（LLM 生成的 patch 通过所有验证的比例）
+- CR 通过率：通过验证的 patch 中，约 47% 最终被人工 Review 通过
+- 整体有效率：约 30% 的 JSError 被自动修复并上线
 - 主要修复类型：
   - Null/Undefined 访问（添加可选链 `?.`、空值兜底 `?? []`）—— 占比约 45%
   - 类型错误（添加类型守卫、类型断言）—— 占比约 25%
@@ -1250,22 +1230,16 @@ Vite 模块联邦为什么不能复用 Webpack 的实现：
 
 采用服务端下发策略 + 客户端执行判断的混合模式：
 
-```
-┌──────────────────────────────────────────────────────┐
-│                  灰度配置中心                          │
-│  ┌────────────────────────────────────────────────┐  │
-│  │ 灰度规则：                                      │  │
-│  │ - 按用户 ID 取模（userId % 100 < 10 → 10% 灰度）│  │
-│  │ - 按地域（region === "cn-east" → 灰度）          │  │
-│  │ - 按用户标签（userTag.includes("beta") → 灰度）  │  │
-│  │ - 按流量比例（random 0-100 < 5 → 5% 灰度）      │  │
-│  └────────────────────────────────────────────────┘  │
-│                        ↓                              │
-│  灰度 API: GET /api/feature-flags?userId=xxx          │
-│  返回: { features: { newDashboard: { enabled: true,   │
-│          variant: "B", version: "2.1.0" } } }         │
-└──────────────────────────────────────────────────────┘
-```
+![灰度发布链路](../assets/gray-release.png)
+
+灰度配置中心支持的规则类型：
+
+- 按用户 ID 取模（userId % 100 < 10 即 10% 灰度）
+- 按地域（region === "cn-east" 灰度）
+- 按用户标签（userTag.includes("beta") 灰度）
+- 按流量比例（random 0-100 < 5 即 5% 灰度）
+
+灰度 API 形如 `GET /api/feature-flags?userId=xxx`，返回 `{ features: { newDashboard: { enabled: true, variant: "B", version: "2.1.0" } } }`。
 
 - 服务端负责灰度规则的存储和计算（避免客户端暴露灰度逻辑）
 - 客户端通过 SDK 在初始化时请求灰度 API，获取当前用户的灰度状态
@@ -1563,38 +1537,24 @@ class PerformanceMonitor {
 
 整体前端架构：
 
-```
 路由结构：
-/                          → 首页/仪表盘（Agent 列表、运行统计）
-/agents/:id/config         → Agent 配置编辑器
-/agents/:id/debug          → Agent 调试面板（运行日志流 + 工具调用链）
-/agents/:id/sessions       → 历史会话列表
-/agents/:id/sessions/:sid  → 会话回放
-/settings                  → 全局设置（模型 API Key、权限配置）
+
+```
+/                          -> 首页/仪表盘（Agent 列表、运行统计）
+/agents/:id/config         -> Agent 配置编辑器
+/agents/:id/debug          -> Agent 调试面板（运行日志流 + 工具调用链）
+/agents/:id/sessions       -> 历史会话列表
+/agents/:id/sessions/:sid  -> 会话回放
+/settings                  -> 全局设置（模型 API Key、权限配置）
+```
 
 状态管理分层：
-┌─────────────────────────────────────────┐
-│ Server State (React Query / SWR)         │
-│ - Agent 配置数据（CRUD）                  │
-│ - 历史会话列表                            │
-│ - 运行统计数据                            │
-├─────────────────────────────────────────┤
-│ Realtime State (Zustand)                 │
-│ - SSE 日志流数据                          │
-│ - 工具调用链实时状态                       │
-│ - Agent/Subagent 并发状态                 │
-├─────────────────────────────────────────┤
-│ UI State (Zustand / useReducer)          │
-│ - 编辑器光标位置、折叠状态                  │
-│ - 面板布局、主题设置                       │
-└─────────────────────────────────────────┘
 
-数据流：
-用户操作 → UI State 更新 → 触发 API 调用 / SSE 连接
-                              ↓
-服务端响应 → Server State 更新 → 组件 re-render
-SSE 事件 → Realtime State 更新 → 组件 re-render
-```
+- Server State（React Query / SWR）：Agent 配置数据（CRUD）、历史会话列表、运行统计数据
+- Realtime State（Zustand）：SSE 日志流数据、工具调用链实时状态、Agent/Subagent 并发状态
+- UI State（Zustand / useReducer）：编辑器光标位置、折叠状态、面板布局、主题设置
+
+数据流：用户操作先更新 UI State，并触发 API 调用或建立 SSE 连接；服务端响应更新 Server State，SSE 事件更新 Realtime State，两者都会驱动组件 re-render。
 
 SSE 长连接可靠性设计：
 
@@ -1772,27 +1732,9 @@ class ReplayPlayer {
 
 UI 布局：
 
-```
-┌──────────────────────────────────────────────────────┐
-│  Agent Team: "代码重构任务"                            │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐       │
-│  │ Lead Agent │ │ Coder      │ │ Reviewer   │       │
-│  │ ● Running  │ │ ● Running  │ │ ○ Waiting  │       │
-│  │ 思考中...  │ │ 编辑文件   │ │            │       │
-│  └────────────┘ └────────────┘ └────────────┘       │
-│                                                       │
-│  ┌────────────┐ ┌────────────┐                       │
-│  │ Tester     │ │ Researcher │                       │
-│  │ ● Running  │ │ ✓ Done     │                       │
-│  │ 运行测试   │ │ 3 files    │                       │
-│  └────────────┘ └────────────┘                       │
-│                                                       │
-│  ─── 消息流 ──────────────────────────────────────     │
-│  [Lead → Coder] "请重构 auth 模块的 login 函数"        │
-│  [Researcher → Lead] "找到 3 个相关文件"               │
-│  [Lead → Tester] "重构完成后运行 auth.test.ts"         │
-└──────────────────────────────────────────────────────┘
-```
+- 顶部为 Team 标题区（如 Agent Team "代码重构任务"）
+- 中部以卡片网格展示每个 teammate（Lead Agent、Coder、Reviewer、Tester、Researcher 等），每张卡片显示运行状态（Running / Waiting / Done）和当前动作摘要（思考中、编辑文件、运行测试、已完成 3 个文件等）
+- 底部为消息流区域，按时间顺序展示 Agent 之间的通信记录，例如 [Lead -> Coder] "请重构 auth 模块的 login 函数"、[Researcher -> Lead] "找到 3 个相关文件"、[Lead -> Tester] "重构完成后运行 auth.test.ts"
 
 技术实现：
 
