@@ -9,7 +9,10 @@
       "Bash(ls -la /Users/hangtiancheng/github/swifty-chatbot/)",
       "Read(//Users/hangtiancheng/github/swifty-chatbot/**)",
       "Bash(ls /Users/hangtiancheng/github/swifty-sentry/sentry/src/core/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/reporter/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/utils/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/types/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/constants/)",
-      "Read(//Users/hangtiancheng/github/swifty-sentry/sentry/src/core/**)"
+      "Read(//Users/hangtiancheng/github/swifty-sentry/sentry/src/core/**)",
+      "Bash(find /Users/hangtiancheng/github/swifty-sentry/sentry -type f | head -200)",
+      "Bash(ls -la /Users/hangtiancheng/github/swifty-sentry/sentry/)",
+      "Read(//Users/hangtiancheng/github/swifty-sentry/sentry/**)"
     ]
   }
 }
