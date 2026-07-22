@@ -1,6 +1,6 @@
 # CSS 面试 Q/A 大全
 
-本文档收录 38 道 CSS 高频面试题, 覆盖选择器、布局、工程化、渲染原理、性能优化、响应式、动画与跨端等方向, 解答兼顾原理深度与工程实践, 适合中高级前端面试准备。
+本文档收录 41 道 CSS 高频面试题, 覆盖选择器、布局、工程化、渲染原理、性能优化、响应式、动画与跨端等方向, 解答兼顾原理深度与工程实践, 适合中高级前端面试准备。
 
 ## 目录
 
@@ -50,6 +50,10 @@
   - [36. React Native 中的 CSS 和 Web 中的 CSS 有什么不同? Yoga 引擎是什么?](#36-react-native-中的-css-和-web-中的-css-有什么不同-yoga-引擎是什么)
   - [37. React/Vue 中有哪些 CSS 方案? 如何选择?](#37-reactvue-中有哪些-css-方案-如何选择)
   - [38. Vue 的 scoped CSS 是如何实现样式隔离的?](#38-vue-的-scoped-css-是如何实现样式隔离的)
+- [现代 CSS 新特性进阶](#现代-css-新特性进阶)
+  - [39. CSS 原生嵌套 (CSS Nesting) 与预处理器嵌套有什么区别?](#39-css-原生嵌套-css-nesting-与预处理器嵌套有什么区别)
+  - [40. @property 是什么? CSS Houdini 了解多少?](#40-property-是什么-css-houdini-了解多少)
+  - [41. View Transitions 与滚动驱动动画是什么?](#41-view-transitions-与滚动驱动动画是什么)
 
 ---
 
@@ -1445,6 +1449,112 @@ Vue 单文件组件 `<style scoped>` 的隔离是编译期转换, 分两步:
 - 混用: scoped 与全局 `<style>` 块可以并存; 同一个 SFC 还可以用 `<style module>` 走 CSS Modules
 - 与 CSS Modules 的对比: scoped 是属性选择器后缀 (权重 +1, 仍是全局类名, 理论上存在跨组件类名+属性巧合冲突的极小概率), CSS Modules 是直接改写类名为唯一 hash, 隔离更彻底; scoped 写法零心智负担, Modules 需要 `styles.xxx` 引用
 - 动态样式: Vue 支持 `v-bind()` 在 CSS 中绑定组件状态, 编译为 CSS 自定义属性, 实现"scoped + 动态"的组合
+
+---
+
+## 现代 CSS 新特性进阶
+
+### 39. CSS 原生嵌套 (CSS Nesting) 与预处理器嵌套有什么区别?
+
+A:
+
+CSS 原生嵌套 (CSS Nesting Module) 已在 2023 年被主流浏览器全部支持, 允许不经编译直接在浏览器里写嵌套规则:
+
+```css
+.card {
+  padding: 16px;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  @media (min-width: 768px) {
+    padding: 24px; /* 媒体查询也可以嵌套在规则内部 */
+  }
+}
+```
+
+与 SCSS 嵌套的关键区别:
+
+- 运行时机: 原生嵌套由浏览器解析, 零构建; SCSS 嵌套在编译期展开为平铺选择器
+- `&` 语义: 原生嵌套中嵌套选择器隐式等价于 `:is(父选择器) 子选择器`, 因此特异性按 `:is()` 规则取父选择器列表中最高者, 与 SCSS 纯文本拼接的展开结果可能不同 (如父选择器是 `.a, #b` 时, 原生嵌套里两个分支的特异性都按 `#b` 计算)
+- 字符串拼接: SCSS 支持 `&-title` 拼接类名 (BEM 常用), 原生嵌套不支持——`&` 是选择器引用不是字符串, 这是迁移时最大的不兼容点
+- 早期语法要求嵌套规则以符号开头 (`& div`), 现行规范已放开, 可直接写元素选择器嵌套
+
+工程建议: 新项目可用原生嵌套逐步替代 SCSS 的嵌套需求; 涉及 BEM 拼接、循环与 mixin 的场景仍需预处理器或 PostCSS 插件降级 (postcss-nesting)。
+
+### 40. @property 是什么? CSS Houdini 了解多少?
+
+A:
+
+@property 是 CSS Houdini "Properties & Values API" 的声明式语法, 用于给 CSS 自定义属性注册类型、初始值与继承行为:
+
+```css
+@property --progress {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+.bar {
+  background: linear-gradient(to right, #1677ff var(--progress), #eee 0);
+  transition: --progress 0.3s ease;
+}
+.bar.done {
+  --progress: 100%;
+}
+```
+
+解决的核心问题: 未注册的自定义属性对浏览器只是无类型的 token 串, 无法插值, 因此不能参与 transition/animation; 注册类型后浏览器知道"这是一个百分比", 就能对它做平滑过渡。典型应用: 渐变动画 (渐变本身不可过渡, 但驱动渐变的变量可以)、圆环进度条、数字滚动 (配合 counter)。
+
+CSS Houdini 是一组开放浏览器渲染引擎底层能力的 API 集合:
+
+- Properties & Values API: 即 @property (JS 侧对应 CSS.registerProperty), 落地最好
+- Paint API (CSS.paintWorklet): 用 JS 在 Worklet 中自定义绘制背景/边框, 如 `background: paint(my-ripple)`, Chromium 系支持
+- Typed OM: `el.attributeStyleMap.set('width', CSS.px(100))`, 用类型化对象替代字符串读写样式, 减少解析开销
+- Layout API / Animation Worklet: 自定义布局算法与脱离主线程的动画, 仍处于实验阶段
+
+面试口径: Houdini 的价值是"把过去只能靠 JS 模拟或等浏览器实现的能力, 下放为可编程的渲染管线钩子"; 目前生产可用的主要是 @property 与 Typed OM, Paint API 需要按浏览器支持渐进增强。
+
+### 41. View Transitions 与滚动驱动动画是什么?
+
+A:
+
+View Transitions API (视图过渡):
+
+- 解决的问题: DOM 状态切换 (列表排序、页面路由跳转) 是瞬间完成的, 过去做"元素从旧位置平滑飞到新位置"需要 FLIP 手法手工测量。View Transitions 让浏览器自动截图旧状态、更新 DOM、再在新旧快照之间做过渡
+- 同文档用法: `document.startViewTransition(() => updateDOM())`; 浏览器生成 `::view-transition-old()` 与 `::view-transition-new()` 伪元素树, 默认做交叉淡入, 可用 CSS 完全自定义
+- 共享元素过渡: 给新旧两个元素设置相同的 `view-transition-name`, 浏览器自动补间其位置与尺寸, 实现"缩略图放大为详情图"的原生转场
+- 跨文档 (MPA) 过渡: CSS 声明 `@view-transition { navigation: auto; }` 即可让传统多页应用获得 SPA 般的转场; SPA 路由框架 (React Router、Vue Router、Next.js) 已内置集成
+- 注意: 过渡期间页面不可交互 (快照是位图); 需要 `@media (prefers-reduced-motion: reduce)` 降级
+
+滚动驱动动画 (Scroll-driven Animations):
+
+- 让 CSS animation 的进度由滚动位置而非时间驱动, 替代 scroll 事件监听 + JS 计算的方案, 且动画运行在合成器线程不阻塞主线程
+- `animation-timeline: scroll()`: 进度绑定滚动容器的滚动进度, 典型应用是阅读进度条:
+
+```css
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.progress {
+  transform-origin: 0 50%;
+  animation: grow auto linear;
+  animation-timeline: scroll(root);
+}
+```
+
+- `animation-timeline: view()`: 进度绑定元素自身在视口中的可见进度, 配合 `animation-range: entry 0% cover 40%` 控制起止区间, 实现元素入场淡入、视差效果, 可替代一部分 IntersectionObserver 用例
+- 兼容性: Chromium 已支持, Safari/Firefox 逐步跟进中, 需 `@supports (animation-timeline: scroll())` 检测并以无动画作为降级
 
 ---
 

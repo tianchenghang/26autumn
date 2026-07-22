@@ -1475,7 +1475,7 @@ CRP（Critical Rendering Path）优化清单：
 
 CORS 两类请求：
 
-- 简单请求（GET/HEAD/POST + 限定头部 + `Content-Type: text/plain / form-urlencoded / x-www-form-urlencoded`）：直接发出，响应带 `Access-Control-Allow-Origin` 匹配则放行；
+- 简单请求（GET/HEAD/POST + 限定头部 + `Content-Type` 仅限 `text/plain` / `multipart/form-data` / `application/x-www-form-urlencoded` 三种）：直接发出，响应带 `Access-Control-Allow-Origin` 匹配则放行；
 - 非简单请求（PUT/DELETE、自定义头、`application/json`）：先发 OPTIONS 预检——询问 `Access-Control-Request-Method/Headers`，服务端应答 `Allow-Origin/Allow-Methods/Allow-Headers/Max-Age`（预检结果可缓存 `Max-Age` 秒）；预检通过才发真实请求。
 
 凭证（Cookie）跨域：`fetch(url, {credentials: 'include'})` / XHR `withCredentials = true` 时：
@@ -1721,7 +1721,7 @@ PUT vs PATCH vs POST：PUT 整体替换（幂等）；PATCH 部分更新（RFC 5
 fetch 的坑（高频）：
 
 - HTTP 错误状态不 reject：404/500 照常 resolve，要检查 `response.ok` 或 `status`——只有网络故障/CORS/DNS 失败才 reject；
-- 默认不带 Cookie：需 `credentials: 'include'`（同域是 'same-origin'，与 XHR 默认带同域 Cookie 不同）；
+- 凭证策略：fetch 默认 `credentials: 'same-origin'`（同源请求带 Cookie，跨源不带），跨源要带 Cookie 需显式 `credentials: 'include'`；早期规范默认值是 `omit`，"fetch 默认完全不带 Cookie"是过时说法；
 - 无原生超时：用 `AbortController` + setTimeout 自实现；
 - 无上传进度（`ReadableStream` 只有下载进度；上传进度要用 XHR 或 `duplex: 'half'` 流式 body）；
 - 响应体只能读一次（`bodyUsed`，`clone()` 备份）。
