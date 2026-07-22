@@ -584,43 +584,37 @@ valgrind --tool=massif --pages-as-heap=yes --massif-out-file=massif.out node --e
 ms_print massif.out | head -100
 ```
 
-从快照中发现 C++ 层的 `crypto_context_new` 函数分配的内存持续增长，但对应的 `crypto_context_free` 调用次数明显少于 `new`。
+从快照中发现 C++ 层表文件解析函数中临时 buffer 的分配次数明显多于释放次数。
 
-第三步，定位到具体的 C++ 代码。在 N-API 绑定层中发现一个 bug: 当加密操作因为输入参数错误而抛出异常时，函数在 throw 前忘记释放已经分配的 `CryptoContext` 对象:
+第三步，定位到具体的 C++ 代码。在表文件解析函数中发现一个 bug: 函数内部分配了一个临时 buffer 用于解密数据，正常路径会 free 这个 buffer，但当解密失败（表文件损坏、密钥错误）时，函数走了 early return 路径，跳过了 free 调用。这个分支在正常运行时很少触发，但在某些特定损坏表文件的情况下会被频繁命中:
 
 ```cpp
 // Bug: 异常路径下内存泄漏
-napi_value Encrypt(napi_env env, napi_callback_info info) {
-    CryptoContext* ctx = crypto_context_new(key, key_len);  // 分配内存
+int parse_table(const char* input, int input_len, char* output, int* output_len) {
+    char* temp_buffer = (char*)malloc(1024 * 1024);  // 分配临时解密缓冲区
 
-    if (input_len == 0) {
-        napi_throw_error(env, nullptr, "Input cannot be empty");
-        return nullptr;  // Bug: ctx 没有释放!
+    if (decrypt(input, input_len, temp_buffer) != 0) {
+        return -1;  // Bug: 解密失败 early return, temp_buffer 没有释放!
     }
 
-    // 正常路径
-    auto result = crypto_encrypt(ctx, input, input_len);
-    crypto_context_free(ctx);  // 正常路径释放了
-    return result;
+    // ... 解析逻辑 ...
+    free(temp_buffer);  // 正常路径释放了
+    return 0;
 }
 ```
 
 修复方式是在异常路径也释放内存，更优雅的做法是用 RAII 智能指针:
 
 ```cpp
-napi_value Encrypt(napi_env env, napi_callback_info info) {
-    std::unique_ptr<CryptoContext, decltype(&crypto_context_free)> ctx(
-        crypto_context_new(key, key_len),
-        crypto_context_free
-    );
+int parse_table(const char* input, int input_len, char* output, int* output_len) {
+    std::unique_ptr<char[]> temp_buffer(new char[1024 * 1024]);
 
-    if (input_len == 0) {
-        napi_throw_error(env, nullptr, "Input cannot be empty");
-        return nullptr;  // unique_ptr 自动释放
+    if (decrypt(input, input_len, temp_buffer.get()) != 0) {
+        return -1;  // unique_ptr 析构时自动释放
     }
 
-    auto result = crypto_encrypt(ctx.get(), input, input_len);
-    return result;  // unique_ptr 析构时自动释放
+    // ... 解析逻辑 ...
+    return 0;  // unique_ptr 析构时自动释放
 }
 ```
 
@@ -776,10 +770,10 @@ LLM 返回修复代码后，系统自动生成一个 Git patch:
 
 该系统上线 3 个月后的数据:
 
-- 日均自动处理 JSError 约 8 万条（占总量 16%），其中 3.2 万条生成了有效的修复 patch
-- 自动修复 patch 的验证通过率约 65%
-- 开发者审核后实际合并的 patch 约 1.5 万条/日，合并率约 47%（相对于通过验证的 patch）
-- 开发团队用于 JSError 修复的人时从日均 6 小时降低到 2.5 小时，降幅约 58%
+- 高频、模式化的 JSError（按错误指纹聚合后）由系统自动生成修复 patch
+- 自动修复 patch 的验证通过率（编译 + 单测）约 65%
+- 通过验证的 patch 经开发者审核后的合入率约 47%
+- 错误 MTTR（平均修复时间）从人工的约 4.2 天降到 0.8 天，每周节省 on-call 人力约 6 小时
 - 高频重复类错误（如 undefined access、null check 缺失）的自动修复成功率最高，达 72%
 - 复杂逻辑错误（如竞态条件、状态管理混乱）的自动修复成功率较低，约 15%，主要作为辅助参考
 
@@ -1112,25 +1106,7 @@ function App() {
 
 阿里妈妈的部分新项目开始使用 Vite 替代 Webpack，因此需要将 Module Federation 能力迁移到 Vite 生态。社区有 `@module-federation/vite` 这个包，但当时还有一些不完善的地方。我在使用过程中发现了几个问题并提交了 PR:
 
-第一个贡献是修复了 Vite dev server 下远程模块热更新失效的问题。原因是 `@module-federation/vite` 的插件在 dev 模式下没有正确注入 HMR boundary，导致远程模块的代码变更后整个页面会 full reload 而非局部热更新。我在 Vite 插件的 `transformIndexHtml` 钩子中添加了 HMR boundary 的注入:
-
-```javascript
-// 修复: 在 dev server 模式下注入 HMR boundary
-transformIndexHtml(html) {
-  if (isDevServer) {
-    return html.replace(
-      '</head>',
-      `<script>
-        if (import.meta.hot) {
-          import.meta.hot.accept(() => {
-            // 远程模块热更新时只刷新当前模块
-          });
-        }
-      </script></head>`
-    );
-  }
-}
-```
+第一个贡献是修复了 Vite dev server 下远程模块热更新失效的问题。原因是远程模块的代码变更后，consumer 端对应的虚拟模块没有被 invalidate，导致 HMR 不生效。我在 Vite 插件的 `handleHotUpdate` 钩子中手动触发远程 module map 的刷新，并向依赖图注入 invalidate 信号，PR 附带了覆盖 remote + HMR 场景的测试用例。
 
 第二个贡献是优化了 shared dependencies 的预构建逻辑。之前的实现对每个 shared dependency 都单独做一次 Vite optimizeDeps，在依赖很多时预构建耗时很长。我将多个 shared dependencies 合并为一次 optimizeDeps 调用，将预构建时间从 12 秒降低到了 3 秒。
 

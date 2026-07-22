@@ -1,0 +1,7 @@
+flowchart LR
+  A[entry 入口] --> B["模块解析<br/>enhanced-resolve"]
+  B --> C["Loader 链转译<br/>ts / css / asset"]
+  C --> D["AST 分析依赖<br/>递归构建 Module Graph"]
+  D --> E["Seal 阶段<br/>Chunk Graph 生成"]
+  E --> F["Plugin 介入优化<br/>Tree Shaking / SplitChunks / 压缩"]
+  F --> G["emit 产物<br/>bundle + sourcemap"]

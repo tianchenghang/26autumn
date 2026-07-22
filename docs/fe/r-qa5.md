@@ -60,7 +60,7 @@ Kitex 是字节跳动 CloudWeGo 开源的高性能 Go RPC 框架, 基于 netpoll
 
 ### 6. 虚拟滚动列表的具体实现原理是什么? 在什么场景下使用?
 
-场景: 性能指标日志列表, 单页最多渲染 5w 行, 直接渲染导致 FPS 掉到个位数。实现原理: 只渲染可视区域内的 DOM 节点。核心参数: containerHeight (可视区高度), itemHeight (每行固定 48px), scrollTop。可视区间 startIndex = floor(scrollTop / itemHeight), endIndex = startIndex + ceil(containerHeight / itemHeight) + buffer (上下各缓冲 5 行)。外层容器设置 padding-top 和 padding-bottom 模拟真实滚动高度。用 transform: translateY 代替 margin 避免 reflow。数据用 useMemo 切片, scroll 事件用 requestAnimationFrame 节流。对于动态行高, 维护一个行高缓存 Map, 首次渲染后通过 ResizeObserver 更新实际高度, 查询用二分查找定位行索引。优化后 5w 行列表滚动帧率稳定 60fps, DOM 节点始终控制在 50 个以内。
+场景: 性能指标日志列表, 单页最多渲染 10 万行, 直接渲染导致 FPS 掉到个位数。实现原理: 只渲染可视区域内的 DOM 节点。核心参数: containerHeight (可视区高度), itemHeight (每行固定 48px), scrollTop。可视区间 startIndex = floor(scrollTop / itemHeight), endIndex = startIndex + ceil(containerHeight / itemHeight) + buffer (上下各缓冲 5 行)。外层容器设置 padding-top 和 padding-bottom 模拟真实滚动高度。用 transform: translateY 代替 margin 避免 reflow。数据用 useMemo 切片, scroll 事件用 requestAnimationFrame 节流。对于动态行高, 维护一个行高缓存 Map, 首次渲染后通过 ResizeObserver 更新实际高度, 查询用二分查找定位行索引。优化后 10 万行列表滚动帧率稳定接近 60fps, DOM 节点始终控制在 50 个以内。
 
 ## 腾讯 (IEG)
 
@@ -118,7 +118,7 @@ Server&Schema-Driven UI 的核心理念: 页面结构、组件配置、数据绑
 
 ### 19. 模块联邦是什么? 在你的项目中解决了什么问题?
 
-Module Federation 是 Webpack 5 引入的运行时模块共享方案, 允许多个独立构建的应用在运行时动态加载彼此的模块, 就像它们是同一应用的一部分。在阿里妈妈项目中, 广告投放平台由 5 个独立微前端应用组成 (出价、人群、创意、报表、审核), 之前用 qiankun 做沙箱隔离, 但每个应用打包时都要重复打包 lodash、moment、antd 等公共依赖, 总包体积 12MB。引入模块联邦后: 将公共组件库 (@alimama/shared-ui) 和工具库暴露为 federated module, 各子应用作为 consumer 运行时加载, 实现了 (1) 公共依赖只加载一份 (shared scope 配置 singleton: true), 包体积从 12MB 降到 5MB。 (2) 子应用独立部署, shared 模块更新后子应用自动获取最新版, 无需重新构建。 (3) 组件热更新 -- shared-ui 发布新版本后, 子应用刷新即生效, 不需要逐个发布。
+Module Federation 是 Webpack 5 引入的运行时模块共享方案, 允许多个独立构建的应用在运行时动态加载彼此的模块, 就像它们是同一应用的一部分。在阿里妈妈项目中, 广告投放平台由 5 个独立微前端应用组成 (投放管理、效果分析、人群管理、创意中心、财务结算), 之前用 qiankun 做沙箱隔离, 但每个应用打包时都要重复打包 lodash、moment、antd 等公共依赖, 总包体积 12MB。引入模块联邦后: 将公共组件库 (@alimama/shared-ui) 和工具库暴露为 federated module, 各子应用作为 consumer 运行时加载, 实现了 (1) 公共依赖只加载一份 (shared scope 配置 singleton: true), 包体积从 12MB 降到 5MB。 (2) 子应用独立部署, shared 模块更新后子应用自动获取最新版, 无需重新构建。 (3) 组件热更新 -- shared-ui 发布新版本后, 子应用刷新即生效, 不需要逐个发布。
 
 ### 20. @module-federation/vite 相比 webpack 的模块联邦有什么差异? 你贡献了什么?
 
@@ -132,7 +132,7 @@ Webpack 接入: 在 webpack.config.js 的 plugins 中配置 new ModuleFederation
 
 ### 36. React Fiber 架构了解多少? 时间切片、优先级调度是如何工作的?
 
-React Fiber 是 React 16 引入的协调引擎, 将传统的递归式 reconciliation 改为链表遍历的可中断工作单元模型。每个 React 元素对应一个 Fiber node (JS 对象), 包含 type、stateNode、child、sibling、return (父节点) 指针, 构成一棵链表树。时间切片 (Time Slicing): Coordinator 阶段 (render phase) 被拆分为多个工作单元, 每个单元处理一个 Fiber node。Scheduler 用 MessageChannel (或 requestIdleCallback) 模拟时间片, 每个时间片约 5ms (一帧 16.6ms 留给渲染)。当前时间片用完, 协调器保存当前 Fiber 指针 (workInProgress), yield 控制权给浏览器, 下一个时间片继续。优先级调度: 用 Lane 模型 (32 位 bitmask), 从 SyncLane (最高, 阻塞优先) 到 IdleLane (最低) 划分优先级。用户交互触发的更新 (click) 标记为 InputContinuousLane, setTimeout 回调标记为 DefaultLane。高优先级更新可以"打断"当前正在进行的低优先级渲染 (interrupt), 先完成高优先级任务, 之后恢复低优先级。Concurrent Mode 下, 多个不同优先级的更新可以 batch 和 reorder, 实现 transition 等延迟渲染能力。
+React Fiber 是 React 16 引入的协调引擎, 将传统的递归式 reconciliation 改为链表遍历的可中断工作单元模型。每个 React 元素对应一个 Fiber node (JS 对象), 包含 type、stateNode、child、sibling、return (父节点) 指针, 构成一棵链表树。时间切片 (Time Slicing): Coordinator 阶段 (render phase) 被拆分为多个工作单元, 每个单元处理一个 Fiber node。Scheduler 用 MessageChannel (降级为 setTimeout) 模拟时间片, 每个时间片约 5ms (一帧 16.6ms 留给渲染)。当前时间片用完, 协调器保存当前 Fiber 指针 (workInProgress), yield 控制权给浏览器, 下一个时间片继续。优先级调度: 用 Lane 模型 (32 位 bitmask), 从 SyncLane (最高, 阻塞优先) 到 IdleLane (最低) 划分优先级。用户交互触发的更新 (click) 标记为 InputContinuousLane, setTimeout 回调标记为 DefaultLane。高优先级更新可以"打断"当前正在进行的低优先级渲染 (interrupt), 先完成高优先级任务, 之后恢复低优先级。Concurrent Mode 下, 多个不同优先级的更新可以 batch 和 reorder, 实现 transition 等延迟渲染能力。
 
 ### 37. Vue3 响应式原理和 Vue2 的区别是什么? Proxy 的优势是什么?
 

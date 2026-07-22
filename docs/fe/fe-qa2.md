@@ -49,7 +49,7 @@
 
 ### 第二部分：面试 Q/A
 
-一、JavaScript 核心（Q1–Q14）
+[一、JavaScript 核心（Q1–Q14）](#一javascript-核心)
 
 1. 详细介绍 TypeScript 转为 JS 的每一个过程（必考）
 2. 事件循环：宏任务、微任务与渲染帧的精确时序
@@ -66,7 +66,7 @@
 13. 尾调用优化、bigint、Record/Tuple 提案等新特性
 14. 正则引擎与灾难性回溯
 
-二、DOM（Q15–Q20）
+[二、DOM（Q15–Q20）](#二dom)
 
 15. DOM 事件流：捕获、冒泡、委托与 passive 监听器
 16. 渲染流水线：重排、重绘与合成
@@ -75,7 +75,7 @@
 19. Shadow DOM 与样式隔离
 20. 大型列表渲染优化（虚拟滚动 / 时间切片）
 
-三、BOM（Q21–Q25）
+[三、BOM（Q21–Q25）](#三bom)
 
 21. History API 与前端路由实现（hash vs history）
 22. 浏览器存储全家族对比（Cookie / Storage / IndexedDB / Cache API）
@@ -83,7 +83,7 @@
 24. requestAnimationFrame 与 requestIdleCallback
 25. location / navigator / screen 的高频考点
 
-四、浏览器原理（Q26–Q33）
+[四、浏览器原理（Q26–Q33）](#四浏览器原理)
 
 26. 从输入 URL 到页面展示的完整过程（深度版）
 27. Chrome 多进程架构与站点隔离
@@ -94,7 +94,7 @@
 32. Web Worker / Service Worker / PWA 离线方案
 33. Web 性能指标（LCP / INP / CLS）与优化手段
 
-五、网络（Q34–Q42）
+[五、网络（Q34–Q42）](#五网络)
 
 34. TCP 三次握手与四次挥手的每一个"为什么"
 35. TLS 握手全过程（1.2 vs 1.3）
@@ -105,6 +105,8 @@
 40. HTTP 状态码与方法语义深挖
 41. 队头阻塞在每一层的表现与解法
 42. fetch 与 XHR 的细节：超时、取消、进度、流式
+
+[附录：学习路径建议](#附录学习路径建议)
 
 ---
 

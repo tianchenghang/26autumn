@@ -1072,11 +1072,10 @@ Step 5: Human Review。将验证通过的修复方案提交给人工审核，审
 
 常见修复类型：
 
-- 空值检查缺失（35%）：添加 `if (obj?.prop)` 或默认值
-- 异步竞态（25%）：添加 cleanup 函数或 AbortController
-- 类型错误（20%）：修正类型转换或添加类型守卫
-- 依赖缺失（15%）：添加 useEffect 依赖项
-- 其他（5%）：边界条件、兼容性等
+- 空值/未定义访问（45%）：添加可选链 `?.`、空值兜底 `?? []` 或默认值
+- 类型错误（25%）：添加类型守卫、修正类型转换
+- API 返回值变更（15%）：适配新的数据结构
+- 边界条件缺失（15%）：添加数组长度检查、条件判断、useEffect 依赖项等
 
 ---
 
@@ -1170,13 +1169,13 @@ function ToggleFavorite({ algorithmId, isFavorite }: Props) {
 
 ```typescript
 function AlgorithmFeed() {
-  const { data, size, setSize, isLoadingMore } = useSWRInfinite(
+  const { data, size, setSize, isValidating } = useSWRInfinite(
     (index) => `/api/algorithms?page=${index}&limit=20`,
     fetcher
   );
 
   const algorithms = data ? [].concat(...data.map(page => page.items)) : [];
-  const isLoadingMore = isLoadingMore || (size > 0 && data && typeof data[size - 1] === 'undefined');
+  const isLoadingMore = isValidating || (size > 0 && data && typeof data[size - 1] === 'undefined');
   const isReachingEnd = data && data[data.length - 1]?.items.length < 20;
 
   return (
@@ -2274,7 +2273,7 @@ Webpack 为什么慢：
 
 生产环境对比：
 
-Vite 生产环境使用 Rollup 打包（也支持 Webpack），两者差异不大。主要差异在开发体验。
+Vite 生产环境使用 Rollup 打包，两者差异不大。主要差异在开发体验。
 
 选择建议：
 
