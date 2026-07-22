@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/hangtiancheng/github/swifty.go/swifty_cli -type f | head -200)",
+      "Bash(ls -la /Users/hangtiancheng/github/swifty.go/swifty_cli/)",
+      "Read(//Users/hangtiancheng/github/swifty.go/swifty_cli/**)"
+    ]
+  }
+}

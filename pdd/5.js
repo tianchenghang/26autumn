@@ -29,19 +29,26 @@ const list = [
   { id: 6, pid: 3, name: "员工 F" },
 ];
 
-/** @deprecated */
-function arrayToTree_(list) {
+function arrayToTree(list) {
   const isRoot = (pid) => pid === 0 || pid === null;
-  const build = (id) => {
-    return list
-      .filter((item) => item.pid === id)
-      .map((item) => ({
-        ...item,
-        children: build(item.id),
-      }));
-  };
+  const nodeMap = new Map();
+  const roots = [];
+  for (const item of list) {
+    const node = { ...item, children: [] };
+    nodeMap.set(node.id, node);
+    if (isRoot(node)) {
+      roots.push(node);
+    }
+  }
 
-  return list
-    .filter((item) => isRoot(item))
-    .map((item) => ({ ...item, children: build(item.id) }));
+  for (const item of list) {
+    const node = nodeMap.get(item.id);
+    if (!isRoot(node)) {
+      const parent = nodeMap.get(node.pid);
+      if (parent) {
+        parent.children.push(node);
+      }
+    }
+  }
+  return roots;
 }
