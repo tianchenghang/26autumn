@@ -3,7 +3,13 @@
     "allow": [
       "Bash(find /Users/hangtiancheng/github/swifty.go/swifty_cli -type f | head -200)",
       "Bash(ls -la /Users/hangtiancheng/github/swifty.go/swifty_cli/)",
-      "Read(//Users/hangtiancheng/github/swifty.go/swifty_cli/**)"
+      "Read(//Users/hangtiancheng/github/swifty.go/swifty_cli/**)",
+      "Bash(find /Users/hangtiancheng/github/swifty-chatbot -type f | head -200)",
+      "Bash(cd /Users/hangtiancheng/github/swifty-sentry/sentry && ls -la && echo \"---GIT---\" && git log --oneline -20 2>/dev/null && echo \"---BRANCH---\" && git branch -a 2>/dev/null)",
+      "Bash(ls -la /Users/hangtiancheng/github/swifty-chatbot/)",
+      "Read(//Users/hangtiancheng/github/swifty-chatbot/**)",
+      "Bash(ls /Users/hangtiancheng/github/swifty-sentry/sentry/src/core/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/reporter/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/utils/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/types/ /Users/hangtiancheng/github/swifty-sentry/sentry/src/constants/)",
+      "Read(//Users/hangtiancheng/github/swifty-sentry/sentry/src/core/**)"
     ]
   }
 }
