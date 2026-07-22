@@ -1,35 +1,71 @@
 /* ============================================================
-   Sakura Terminal — docsify 主题 (自包含，无需 vue.css)
-   极浅粉纸感底色 / 全等宽字体 / 紧凑布局 / 弹簧曲线动效
+   Sakura Terminal — Self-contained Docsify Theme
+   ------------------------------------------------------------
+   A terminal-inspired documentation theme with a soft sakura
+   palette, monospace typography, compact layout, and spring-
+   based motion. Requires no external vue.css dependency.
+
+   Architecture:
+     1. Design tokens (CSS custom properties + theme variants)
+     2. Docsify layout primitives (structural reset)
+     3. Custom cursor system
+     4. Themed component styles (visual layer)
+     5. Prism.js syntax highlighting tokens
+     6. Responsive & accessibility overrides
+   ============================================================ */
+
+/* ============================================================
+   1. DESIGN TOKENS
+   Centralized custom properties for colors, shadows, fonts,
+   and easing curves. Theme variants override these tokens via
+   the [data-theme] attribute on <html> or <body>.
    ============================================================ */
 
 :root {
+  /* Background hierarchy: page -> soft region -> surface card */
   --c-bg: #fff6f8;
   --c-bg-soft: #ffedf1;
   --c-surface: #fffdfe;
   --c-surface-2: #fff0f4;
+
+  /* Text hierarchy: primary -> secondary -> tertiary/muted */
   --c-text: #52343e;
   --c-text-2: #7d5a66;
   --c-text-3: #ab8a96;
+
+  /* Accent scale: strong (CTA) -> base -> soft -> faint (bg tint) */
   --c-accent: #e05c85;
   --c-accent-strong: #c94470;
   --c-accent-soft: #f3b6c8;
   --c-accent-faint: #ffeef3;
+
+  /* Border/separator lines */
   --c-line: #f5d4dd;
   --c-line-strong: #eab7c6;
+
+  /* Elevation shadows (soft = resting, lift = hovered/raised) */
   --shadow-soft: 0 6px 20px -12px rgba(201, 68, 112, 0.28);
   --shadow-lift: 0 14px 34px -16px rgba(201, 68, 112, 0.38);
+
+  /* Code block palette (dark terminal surface) */
   --c-code-bg: #33232c;
   --c-code-edge: rgba(255, 255, 255, 0.07);
   --c-code-text: #f4dfe8;
+
+  /* Typography: monospace-first stack with CJK fallback */
   --font-mono:
     "JetBrains Mono", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo,
     Consolas, monospace;
+
+  /* Motion curves: decelerate-out and spring-overshoot */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Docsify internal reference (used by progress bar plugin) */
   --theme-color: var(--c-accent);
 }
 
+/* --- Theme variant: Peach (warm orange accent) --- */
 [data-theme="peach"] {
   --c-bg: #fff8f3;
   --c-bg-soft: #ffeddf;
@@ -49,6 +85,7 @@
   --c-code-bg: #352820;
 }
 
+/* --- Theme variant: Plum (cool purple accent) --- */
 [data-theme="plum"] {
   --c-bg: #f9f6fc;
   --c-bg-soft: #f0e9f8;
@@ -69,18 +106,24 @@
 }
 
 /* ============================================================
-   Docsify 布局基础
+   2. DOCSIFY LAYOUT PRIMITIVES
+   Structural reset and positioning required by the docsify
+   rendering engine. These rules establish the fixed sidebar +
+   scrollable content shell before themed styles are applied.
    ============================================================ */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   overflow-x: hidden;
 }
 
+/* Reading-progress bar (fixed to viewport top, width animated by JS) */
 .progress {
   height: 2px;
   left: 0;
@@ -94,6 +137,7 @@ body {
   z-index: 999999;
 }
 
+/* Fixed left sidebar container (260px rail) */
 .sidebar {
   overflow-y: auto;
   position: fixed;
@@ -106,6 +150,7 @@ body {
   z-index: 20;
 }
 
+/* Sidebar site title */
 .sidebar > h1 {
   margin: 0;
   font-size: 1rem;
@@ -115,6 +160,8 @@ body {
   color: inherit;
   text-decoration: none;
 }
+
+/* Navigation tree structure */
 .sidebar .sidebar-nav {
   line-height: 1.8em;
   padding-bottom: 40px;
@@ -142,6 +189,7 @@ body {
   padding-left: 12px;
 }
 
+/* Mobile sidebar toggle button (fixed bottom-left) */
 .sidebar-toggle {
   background-color: transparent;
   border: 0;
@@ -166,6 +214,7 @@ body {
   height: 2px;
 }
 
+/* Main content area (offset by sidebar width) */
 .content {
   padding-top: 40px;
   position: absolute;
@@ -176,6 +225,7 @@ body {
   transition: left 0.25s ease;
 }
 
+/* Markdown rendering viewport */
 .markdown-section {
   margin: 0 auto;
   max-width: 80%;
@@ -199,8 +249,13 @@ body {
 }
 
 /* ============================================================
-   自定义光标
+   3. CUSTOM CURSOR SYSTEM
+   Replaces the native cursor with a dot + trailing ring.
+   Interactive states (hover, click) are toggled via JS class
+   manipulation. A radial "bubble" element is spawned on click.
    ============================================================ */
+
+/* Suppress native cursor globally */
 body {
   cursor: none;
 }
@@ -213,6 +268,7 @@ textarea,
   cursor: none;
 }
 
+/* Primary cursor dot (follows pointer instantly) */
 .cursor-dot {
   position: fixed;
   top: 0;
@@ -229,6 +285,7 @@ textarea,
   mix-blend-mode: multiply;
 }
 
+/* Secondary cursor ring (lerps toward pointer for trailing effect) */
 .cursor-ring {
   position: fixed;
   top: 0;
@@ -246,6 +303,7 @@ textarea,
     opacity 0.3s;
 }
 
+/* Ring expands when hovering interactive elements */
 .cursor-ring.hovering {
   width: 48px;
   height: 48px;
@@ -253,12 +311,14 @@ textarea,
   background: rgba(224, 92, 133, 0.06);
 }
 
+/* Ring contracts on mousedown for tactile feedback */
 .cursor-ring.clicking {
   width: 24px;
   height: 24px;
   border-color: var(--c-accent-strong);
 }
 
+/* Click ripple bubble (spawned and removed by JS) */
 .click-bubble {
   position: fixed;
   width: 12px;
@@ -283,8 +343,15 @@ textarea,
 }
 
 /* ============================================================
-   主题样式
+   4. THEMED COMPONENT STYLES
+   Visual layer applied on top of the layout primitives.
+   Covers: global typography, ambient background, progress bar,
+   sidebar, search, navigation tree, markdown content, code
+   blocks, tables, pagination, and image zoom.
    ============================================================ */
+
+/* --- Global typography & interaction feedback --- */
+
 html {
   scroll-behavior: smooth;
 }
@@ -299,6 +366,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Enforce monospace across all form controls and code elements */
 body,
 button,
 input,
@@ -321,6 +389,7 @@ samp {
   border-radius: 4px;
 }
 
+/* Minimal custom scrollbar (WebKit/Blink) */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -336,7 +405,8 @@ samp {
   background: var(--c-accent);
 }
 
-/* 环境光 */
+/* --- Ambient background: soft gradient orbs + noise texture --- */
+
 .ambient {
   position: fixed;
   inset: 0;
@@ -377,6 +447,7 @@ samp {
   background: radial-gradient(circle, #ffdbe7, transparent 62%);
   animation: drift-c 24s var(--ease-out) infinite alternate;
 }
+/* SVG fractal-noise grain overlay for paper texture */
 .ambient::after {
   content: "";
   position: absolute;
@@ -384,6 +455,7 @@ samp {
   opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
 @keyframes drift-a {
   to {
     transform: translate(-6vw, 5vh) scale(1.08);
@@ -400,7 +472,8 @@ samp {
   }
 }
 
-/* 进度条 */
+/* --- Reading progress bar (gradient fill + glow) --- */
+
 .progress {
   background: linear-gradient(
     90deg,
@@ -410,7 +483,8 @@ samp {
   box-shadow: 0 0 10px rgba(224, 92, 133, 0.55);
 }
 
-/* 侧边栏 */
+/* --- Sidebar: frosted-glass panel with staggered nav animation --- */
+
 .sidebar {
   background: color-mix(in srgb, var(--c-surface) 82%, transparent);
   backdrop-filter: blur(14px);
@@ -419,6 +493,7 @@ samp {
   padding: 16px 10px 48px;
 }
 
+/* Site title with decorative blossom glyph */
 .sidebar > h1 {
   margin: 0 0 8px;
   padding: 4px 8px 10px;
@@ -446,7 +521,8 @@ samp {
   transform: rotate(180deg) scale(1.15);
 }
 
-/* 搜索 */
+/* --- Search panel (docsify search plugin) --- */
+
 .search {
   margin-bottom: 10px;
   padding: 0 4px;
@@ -507,7 +583,8 @@ samp {
   font-weight: 700;
 }
 
-/* 导航树 */
+/* --- Navigation tree: staggered entrance + active indicator --- */
+
 .sidebar-nav > ul > li {
   animation: item-in 0.5s var(--ease-out) both;
 }
@@ -518,6 +595,7 @@ samp {
   animation-delay: 0.12s;
 }
 
+/* Top-level category labels (rendered as "// label" prefix) */
 .sidebar-nav > ul > li > a {
   display: block;
   margin: 12px 0 4px 4px;
@@ -536,6 +614,7 @@ samp {
   margin: 0;
 }
 
+/* Navigation links with hover slide and active accent bar */
 .sidebar-nav a {
   position: relative;
   display: block;
@@ -560,6 +639,7 @@ samp {
   font-weight: 600;
   background: linear-gradient(90deg, var(--c-accent-faint), transparent 88%);
 }
+/* Vertical accent bar on the active nav item */
 .sidebar-nav li.active > a::before {
   content: "";
   position: absolute;
@@ -572,6 +652,8 @@ samp {
   transform: translateY(-50%);
   animation: bar-in 0.35s var(--ease-spring) both;
 }
+
+/* Sub-sidebar (auto-generated TOC for current page) */
 .sidebar .app-sub-sidebar li::before {
   content: "";
 }
@@ -581,6 +663,7 @@ samp {
   color: var(--c-text-3);
 }
 
+/* Sidebar toggle: frosted pill with accent-colored bars */
 .sidebar-toggle {
   background: color-mix(in srgb, var(--c-surface) 85%, transparent);
   backdrop-filter: blur(10px);
@@ -610,12 +693,14 @@ samp {
   }
 }
 
-/* 正文 */
+/* --- Markdown content area --- */
+
 .markdown-section {
   max-width: 860px;
   padding: 20px 28px 56px;
 }
 
+/* Page transition: fade + rise + de-blur on route change */
 .page-reveal {
   animation: page-in 0.5s var(--ease-out) both;
 }
@@ -632,6 +717,7 @@ samp {
   }
 }
 
+/* Paragraphs and inline emphasis */
 .markdown-section p {
   margin: 8px 0;
   line-height: 1.8;
@@ -644,7 +730,8 @@ samp {
   color: var(--c-text-2);
 }
 
-/* 标题 — 始终可见 */
+/* --- Headings: hierarchical sizing with decorative accents --- */
+
 .markdown-section h1,
 .markdown-section h2,
 .markdown-section h3,
@@ -655,6 +742,8 @@ samp {
   font-weight: 700;
   line-height: 1.4;
 }
+
+/* H1: page title with animated underline bar */
 .markdown-section h1 {
   position: relative;
   margin: 4px 0 16px;
@@ -681,6 +770,7 @@ samp {
   }
 }
 
+/* H2: section header with left accent border */
 .markdown-section h2 {
   margin: 24px 0 10px;
   padding-left: 10px;
@@ -691,6 +781,8 @@ samp {
 .markdown-section h2:hover {
   border-left-color: var(--c-accent);
 }
+
+/* H3: sub-section with guillemet prefix */
 .markdown-section h3 {
   margin: 18px 0 6px;
   font-size: 15px;
@@ -700,13 +792,15 @@ samp {
   color: var(--c-accent);
   opacity: 0.7;
 }
+
+/* H4: minor heading in secondary text color */
 .markdown-section h4 {
   margin: 14px 0 4px;
   font-size: 13.5px;
   color: var(--c-text-2);
 }
 
-/* 标题内链接 — 继承颜色，始终可见 */
+/* Heading anchor links: inherit heading style, no decoration */
 .markdown-section h1 a,
 .markdown-section h2 a,
 .markdown-section h3 a,
@@ -719,7 +813,8 @@ samp {
   font-weight: inherit;
 }
 
-/* 锚点 — .anchor 包裹整个标题文字，必须始终可见 */
+/* Docsify .anchor wrapper: keeps heading text visible and adds
+   a "#" suffix on hover for permalink discovery */
 .markdown-section .anchor {
   display: inline;
   color: inherit;
@@ -745,7 +840,8 @@ samp {
   opacity: 0.6;
 }
 
-/* 正文链接 */
+/* --- Body links: animated underline via background-size --- */
+
 .markdown-section p a,
 .markdown-section li a,
 .markdown-section blockquote a,
@@ -766,7 +862,8 @@ samp {
   background-size: 100% 1px;
 }
 
-/* 列表 */
+/* --- Lists --- */
+
 .markdown-section ul,
 .markdown-section ol {
   margin: 6px 0;
@@ -781,7 +878,8 @@ samp {
   font-weight: 700;
 }
 
-/* 引用 */
+/* --- Blockquotes --- */
+
 .markdown-section blockquote {
   margin: 12px 0;
   padding: 8px 14px;
@@ -798,7 +896,8 @@ samp {
   margin: 3px 0;
 }
 
-/* 提示块 */
+/* --- Docsify callout blocks (tip / warn) --- */
+
 .markdown-section p.tip {
   margin: 12px 0;
   padding: 8px 14px;
@@ -816,7 +915,8 @@ samp {
   color: #8a6116;
 }
 
-/* 行内代码 */
+/* --- Inline code --- */
+
 .markdown-section :not(pre) > code {
   margin: 0 2px;
   padding: 1px 5px;
@@ -828,7 +928,8 @@ samp {
   white-space: nowrap;
 }
 
-/* 代码块 */
+/* --- Fenced code blocks: dark terminal card with language badge --- */
+
 .markdown-section pre {
   position: relative;
   margin: 14px 0;
@@ -849,6 +950,7 @@ samp {
     inset 0 0 0 1px var(--c-code-edge),
     0 16px 36px -20px rgba(84, 38, 58, 0.7);
 }
+/* Language label badge (top-right, fades on hover) */
 .markdown-section pre::after {
   content: attr(data-lang);
   position: absolute;
@@ -875,7 +977,8 @@ samp {
   white-space: pre;
 }
 
-/* 复制按钮 — 优雅粉色系 */
+/* --- Copy-code button (docsify-copy-code plugin) --- */
+
 .docsify-copy-code-button {
   position: absolute;
   top: 6px;
@@ -916,7 +1019,13 @@ samp {
   color: #fff;
 }
 
-/* Prism 语法 */
+/* ============================================================
+   5. PRISM.JS SYNTAX HIGHLIGHTING TOKENS
+   Sakura-tinted dark theme mapped onto Prism token classes.
+   Covers: comments, punctuation, keywords, literals, strings,
+   functions, classes, tags, operators, and diff markers.
+   ============================================================ */
+
 .token.comment,
 .token.prolog,
 .token.doctype,
@@ -983,7 +1092,12 @@ samp {
   background: transparent;
 }
 
-/* 表格 */
+/* ============================================================
+   6. TABLES, MEDIA, MISC CONTENT
+   ============================================================ */
+
+/* --- Tables: rounded card with hover row highlight --- */
+
 .markdown-section table {
   display: table;
   width: 100%;
@@ -1016,7 +1130,8 @@ samp {
   background: var(--c-accent-faint);
 }
 
-/* 分隔线 */
+/* --- Horizontal rule: gradient fade from center --- */
+
 .markdown-section hr {
   margin: 24px 0;
   border: none;
@@ -1031,7 +1146,8 @@ samp {
   );
 }
 
-/* 图片 */
+/* --- Images: bordered card with hover lift --- */
+
 .markdown-section img {
   max-width: 100%;
   border: 1px solid var(--c-line);
@@ -1046,6 +1162,7 @@ samp {
   box-shadow: var(--shadow-lift);
 }
 
+/* medium-zoom plugin overlay (image lightbox) */
 .medium-zoom-overlay {
   background: color-mix(in srgb, var(--c-bg) 88%, transparent) !important;
   backdrop-filter: blur(8px);
@@ -1055,7 +1172,8 @@ samp {
   box-shadow: var(--shadow-lift) !important;
 }
 
-/* kbd */
+/* --- Keyboard shortcut indicator --- */
+
 .markdown-section kbd {
   padding: 1px 6px;
   border: 1px solid var(--c-line-strong);
@@ -1066,7 +1184,8 @@ samp {
   font-size: 0.82em;
 }
 
-/* 分页 */
+/* --- Pagination (docsify-pagination plugin) --- */
+
 .docsify-pagination-container {
   display: flex;
   gap: 10px;
@@ -1103,7 +1222,12 @@ samp {
   text-align: right;
 }
 
-/* 响应式 */
+/* ============================================================
+   7. RESPONSIVE & ACCESSIBILITY OVERRIDES
+   ============================================================ */
+
+/* Mobile: collapse sidebar off-canvas, full-width content,
+   disable custom cursor (touch devices have no pointer) */
 @media (max-width: 768px) {
   .sidebar {
     left: -260px;
@@ -1142,6 +1266,8 @@ samp {
   }
 }
 
+/* Respect OS-level reduced-motion preference: kill all
+   animations/transitions and restore native cursor */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

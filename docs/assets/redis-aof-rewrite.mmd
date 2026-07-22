@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant M as 主进程 (redis-server)
+  participant C as bgrewriteaof 子进程
+  participant F as 新 AOF 文件
+
+  M->>C: fork (写时复制, 共享内存页)
+  Note over M: 继续处理客户端写命令
+  M->>M: 写命令追加到 AOF 缓冲区
+  M->>M: 写命令同时追加到 AOF 重写缓冲区
+  C->>F: 遍历内存数据库, 以 rdb 格式写入全量数据 (混合持久化)
+  C-->>M: IPC 通知: 重写完成
+  M->>F: 将 AOF 重写缓冲区中的增量写命令以 AOF 日志格式追加
+  M->>M: 原子 rename, 新 AOF 文件替换旧 AOF 文件

@@ -1,0 +1,10 @@
+flowchart TB
+    Start[读取记录版本, 取该版本的 trx_id] --> C1{trx_id == creator_trx_id?}
+    C1 -->|是| Visible1[可见: 本事务修改的]
+    C1 -->|否| C2{trx_id < min_trx_id?}
+    C2 -->|是| Visible2[可见: 创建 read view 前已提交]
+    C2 -->|否| C3{trx_id >= max_trx_id?}
+    C3 -->|是| Invisible1[不可见: read view 创建后才启动的事务<br/>沿 roll_pointer 找上一版本]
+    C3 -->|否| C4{trx_id 在 m_ids 活跃事务列表中?}
+    C4 -->|是| Invisible2[不可见: 已启动未提交<br/>沿 roll_pointer 找上一版本]
+    C4 -->|否| Visible3[可见: 已提交]

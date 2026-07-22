@@ -1,0 +1,39 @@
+sequenceDiagram
+    participant App as Application
+    participant Group as Group
+    participant Cache as Local Cache
+    participant SF as SingleFlight
+    participant Picker as ClientPicker
+    participant Peer as Remote Peer (gRPC)
+    participant Getter as Getter (DB)
+
+    App->>Group: Get(ctx, key)
+    Group->>Cache: Get(key)
+    alt local hit
+        Cache-->>Group: value
+        Group-->>App: ByteView
+    else local miss
+        Group->>SF: Do(key, loadFn)
+        Note over SF: deduplicate concurrent loads
+        SF->>Cache: double-check Get(key)
+        alt cache hit after dedup
+            Cache-->>SF: value
+        else still miss
+            SF->>Picker: PickPeer(key)
+            alt owns by self
+                SF->>Getter: Get(ctx, key)
+                Getter-->>SF: data
+            else owns by remote peer
+                SF->>Peer: gRPC Get(group, key)
+                alt peer success
+                    Peer-->>SF: data
+                else peer failure
+                    SF->>Getter: Get(ctx, key) [fallback]
+                    Getter-->>SF: data
+                end
+            end
+            SF->>Cache: Set(key, value, TTL)
+        end
+        SF-->>Group: value
+        Group-->>App: ByteView
+    end

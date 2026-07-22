@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant C as 客户端
+    participant M as 主库 (Master)
+    participant IO as 从库 I/O 线程
+    participant RL as 中继日志 (relay log)
+    participant SQL as 从库 SQL 线程
+
+    C->>M: 写请求 (事务提交)
+    M->>M: 两阶段提交, 写 binlog
+    IO->>M: 建立长连接, 请求 binlog (binlog dump 线程)
+    M-->>IO: 推送 binlog 事件
+    IO->>RL: 写入 relay log
+    SQL->>RL: 读取 relay log
+    SQL->>SQL: 回放 SQL / row 事件, 更新从库数据
+
+    Note over M,SQL: 异步复制: 主库不等从库 ACK<br/>半同步复制: 至少 1 个从库写入 relay log 并 ACK 后才向客户端返回

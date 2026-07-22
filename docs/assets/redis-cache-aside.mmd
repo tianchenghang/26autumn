@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant A as 请求 A (写)
+  participant B as 请求 B (读)
+  participant C as 缓存
+  participant D as 数据库
+
+  A->>C: 删除缓存
+  B->>C: 缓存未命中
+  B->>D: 读到旧值 20
+  B->>C: 把旧值 20 写入缓存 (快)
+  A->>D: 更新数据库为 21 (慢)
+  Note over C,D: 缓存 20, 数据库 21, 长期不一致
