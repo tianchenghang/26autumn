@@ -248,8 +248,8 @@ CSS 原子化 (以 Tailwind CSS 为代表):
 - 支持 JIT (Just-In-Time) 模式, 按需生成, 支持任意值如 .w-[327px]
 
 ```html
-<div class="flex items-center gap-4 p-6 bg-white rounded-lg shadow-md">
-  <img class="w-12 h-12 rounded-full" src="avatar.jpg" />
+<div class="flex items-center gap-4 rounded-lg bg-white p-6 shadow-md">
+  <img class="h-12 w-12 rounded-full" src="avatar.jpg" />
   <div class="text-sm text-gray-600">内容</div>
 </div>
 ```

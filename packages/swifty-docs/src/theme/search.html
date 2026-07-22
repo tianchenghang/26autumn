@@ -1,0 +1,54 @@
+<div class="{{=modalClass}}" id="docs-search-modal" @click="onModalClick()">
+  <div class="modal-box max-w-xl p-0" @click.stop="noop()">
+    <!-- Search input -->
+    <div class="border-base-300 border-b px-4 py-3">
+      <label class="input input-sm w-full">
+        <span
+          class="h-3.5 w-3.5 text-current opacity-50 [&>svg]:h-full [&>svg]:w-full"
+        >
+          {{!icons.search}}
+        </span>
+        <input
+          type="text"
+          class="grow text-sm"
+          placeholder="Search documentation..."
+          @input="onSearchInput()"
+          id="docs-search-input"
+        />
+        <kbd class="kbd kbd-xs">esc</kbd>
+      </label>
+    </div>
+
+    <!-- Results -->
+    <div class="max-h-80 overflow-y-auto">
+      {{if results.length > 0}}
+      <ul class="menu menu-sm p-1.5">
+        {{forOf results as result}}
+        <li>
+          <a
+            class="rounded-field flex-col items-start gap-0.5 p-2"
+            data-href="{{=result.link}}"
+            @click="goToResult()"
+          >
+            <p class="text-xs font-medium">{{!result.highlightedTitle}}</p>
+            {{if result.excerpt}}
+            <p class="text-base-content/60 line-clamp-2 text-xs">
+              {{!result.highlightedExcerpt}}
+            </p>
+            {{/if}}
+          </a>
+        </li>
+        {{/forOf}}
+      </ul>
+      {{else}} {{if hasSearched}}
+      <div class="flex flex-col items-center justify-center py-8 text-center">
+        <p class="text-base-content/40 text-xs">No results found</p>
+      </div>
+      {{else}}
+      <div class="flex flex-col items-center justify-center py-8 text-center">
+        <p class="text-base-content/30 text-xs">Type to search...</p>
+      </div>
+      {{/if}} {{/if}}
+    </div>
+  </div>
+</div>

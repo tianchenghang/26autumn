@@ -1,0 +1,60 @@
+<!-- Counter Component (create version) -->
+<div class="{{=styles['counter-store']}}">
+  <div class="{{=styles['counter-store__label']}}">create</div>
+  <div class="{{=styles['counter-store__display']}}">
+    <div class="{{=styles['counter-store__value']}}">{{=count}}</div>
+    <div class="{{=styles['counter-store__display-label']}}">current count</div>
+  </div>
+
+  <div class="{{=styles['counter-store__step-row']}}">
+    <label class="{{=styles['counter-store__step-label']}}">Step</label>
+    <input
+      type="number"
+      value="{{=step}}"
+      @change="stepChange()"
+      min="1"
+      max="100"
+      class="{{=styles['counter-store__step-input']}}"
+    />
+  </div>
+
+  <div class="{{=styles['counter-store__actions']}}">
+    <button
+      @click="decrement()"
+      class="{{=styles['counter-store__button']}} {{=styles['counter-store__button--primary']}}"
+    >
+      - {{=step}}
+    </button>
+    <button
+      @click="reset()"
+      class="{{=styles['counter-store__button']}} {{=styles['counter-store__button--secondary']}}"
+    >
+      Reset
+    </button>
+    <button
+      @click="increment()"
+      class="{{=styles['counter-store__button']}} {{=styles['counter-store__button--primary']}}"
+    >
+      + {{=step}}
+    </button>
+  </div>
+
+  <div class="{{=styles['counter-store__history-header']}}">
+    <span class="{{=styles['counter-store__history-label']}}">History</span>
+    <button
+      @click="clearHistory()"
+      class="{{=styles['counter-store__history-clear']}}"
+    >
+      Clear
+    </button>
+  </div>
+  {{if history.length > 0}}
+  <ul class="{{=styles['counter-store__history-list']}}">
+    {{forOf history as record}}
+    <li class="{{=styles['counter-store__history-item']}}">{{=record}}</li>
+    {{/forOf}}
+  </ul>
+  {{else}}
+  <p class="{{=styles['counter-store__history-empty']}}">No history</p>
+  {{/if}}
+</div>

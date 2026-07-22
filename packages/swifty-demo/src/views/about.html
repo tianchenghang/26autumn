@@ -1,0 +1,59 @@
+<!-- About View Template -->
+<div class="{{=styles['about-page']}}">
+  <div class="{{=styles['about-page__container']}}">
+    <h1 class="{{=styles['about-page__title']}}">{{=title}}</h1>
+
+    <div class="{{=styles['about-page__card']}}">
+      <h3 class="{{=styles['about-page__card-title']}}">Shared Store State</h3>
+      <div class="{{=styles['about-page__store-grid']}}">
+        <div
+          class="{{=styles['about-page__store-item']}} {{=styles['about-page__store-item--emerald']}}"
+        >
+          <div class="{{=styles['about-page__store-value']}}">{{=count}}</div>
+          <div class="{{=styles['about-page__store-label']}}">count</div>
+        </div>
+        <div
+          class="{{=styles['about-page__store-item']}} {{=styles['about-page__store-item--sky']}}"
+        >
+          <div class="{{=styles['about-page__store-value']}}">{{=step}}</div>
+          <div class="{{=styles['about-page__store-label']}}">step</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="{{=styles['about-page__card']}}">
+      <p class="{{=styles['about-page__content']}}">{{=content}}</p>
+    </div>
+
+    <div class="{{=styles['about-page__card']}}">
+      <h3 class="{{=styles['about-page__card-title']}}">Version Information</h3>
+      <p class="{{=styles['about-page__info-row']}}">
+        Author:
+        <span class="{{=styles['about-page__info-value']}}">{{=author}}</span>
+      </p>
+      <p class="{{=styles['about-page__info-row']}}">
+        Version:
+        <span class="{{=styles['about-page__info-value']}}">{{=version}}</span>
+      </p>
+    </div>
+
+    <div class="{{=styles['about-page__card']}}">
+      <h3 class="{{=styles['about-page__card-title']}}">
+        Route Parameter Demo
+      </h3>
+      <p class="{{=styles['about-page__param-label']}}">
+        Current URL Parameters:
+      </p>
+      <code class="{{=styles['about-page__param-code']}}"
+        >author={{=author}}, version={{=version}}</code
+      >
+      <p class="{{=styles['about-page__param-tip']}}">
+        Tip: Visit #!/about?author=JohnDoe&amp;version=1.0 to pass parameters
+      </p>
+    </div>
+
+    <button @click="goHome()" class="{{=styles['about-page__button']}}">
+      Back to Home
+    </button>
+  </div>
+</div>

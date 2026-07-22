@@ -389,7 +389,7 @@ type ConnectionPool struct {
 
 **瓶颈**:
 
-1. **Acquire 持锁拨号**: `mu` 锁跨越 `net.DialTimeout(5s)`, 如果目标不可达, 所有并发 Acquire 串行等待, 最坏情况 N 个调用者等待 N*5s。
+1. **Acquire 持锁拨号**: `mu` 锁跨越 `net.DialTimeout(5s)`, 如果目标不可达, 所有并发 Acquire 串行等待, 最坏情况 N 个调用者等待 N\*5s。
 2. **Context 不约束拨号**: ctx 只在 Acquire 入口做非阻塞检查, 不传入 DialTimeout, 调用者取消后拨号仍在进行。
 3. **单连接瓶颈**: 所有 unary + stream 共享一个 readLoop, 一个慢 stream 填满 64 帧缓冲后会阻塞 readLoop 的 Push, 进而阻塞该连接上所有其他请求的响应分用。
 

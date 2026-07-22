@@ -1,0 +1,59 @@
+@import "tailwindcss";
+@import "../src/client.css";
+
+/* !!! For your project, it should be: */
+/* @source "../node_modules/@swifty.js/docs/theme.js" */
+
+/* Scan theme templates for Tailwind class names */
+@source "../src/theme/*.html";
+@source "../src/theme/*.ts";
+
+/* !!! For your project, it should be: */
+/* @source "../node_modules/@swifty.js/docs/theme.js" */
+
+/* daisyUI v5 with custom light-green theme + dark (prefers-color-scheme) */
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark;
+}
+
+/* @font-face {
+  font-family: "Geist Mono";
+  src: url("../assets/GeistMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../assets/GeistMono-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+} */
+
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans:
+    Iosevka, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC, PingFang SC,
+    Microsoft YaHei;
+  --font-mono:
+    Iosevka, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC, PingFang SC,
+    Microsoft YaHei;
+}
+
+/* daisyUI v5: override CSS custom properties for a very light green palette */
+:root {
+  --color-primary: #86b89a;
+  --color-primary-content: #1a2e22;
+  --color-secondary: #7ab3a0;
+  --color-accent: #a3d4b5;
+  --color-neutral: #3d4a42;
+  --color-base-100: #fafcfa;
+  --color-base-200: #edf3ee;
+  --color-base-300: #dce5dd;
+  --color-base-content: #2a332c;
+}

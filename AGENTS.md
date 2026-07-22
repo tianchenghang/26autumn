@@ -9,3 +9,4 @@
 - 生成的 markdown 文档中不要使用表情符号
 - MUST 不要在 markdown 的 codeblock 手动绘制图片, 而是使用 mermaid-cli 生成图片, 大多数时候你不需要绘制图片, 除非知识概念很抽象
 - 使用 mermaid 生成的图片放到 docs/assets 目录下
+- MUST 仅关注 docs 目录, 其他目录下的文件 (例如 js-framework-benchmark, packages) 与你的工作完全无关

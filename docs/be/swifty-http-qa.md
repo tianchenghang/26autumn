@@ -812,7 +812,7 @@ A:
 
 1. **Context 对象池**：引入 `sync.Pool` 复用 Context，减少高 QPS 下的 GC 压力。需要 `reset()` 方法清理所有字段。
 
-2. **路由性能**：当前 Trie 的 children 是 slice，路由数量大时线性扫描。可改为 map[string]*node + 通配子节点分离，或迁移到 radix tree。
+2. **路由性能**：当前 Trie 的 children 是 slice，路由数量大时线性扫描。可改为 map[string]\*node + 通配子节点分离，或迁移到 radix tree。
 
 3. **路由冲突检测**：当前 `/users/:id` 和 `/users/:name` 可以同时注册但行为未定义（先注册的优先）。应在注册时检测冲突并 panic。
 

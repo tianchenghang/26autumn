@@ -1,0 +1,65 @@
+@reference "tailwindcss";
+
+.cdn-page {
+  @apply flex h-screen flex-col bg-sky-50/30;
+}
+
+.cdn-page__header {
+  @apply flex shrink-0 items-center justify-between border-b border-sky-100 bg-white/80 px-6 py-3 backdrop-blur-sm;
+}
+
+.cdn-page__header-left {
+  @apply flex items-center gap-3;
+}
+
+.cdn-page__icon {
+  @apply flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500 text-[11px] font-bold tracking-wider text-white shadow-sm;
+}
+
+.cdn-page__title-group {
+  @apply flex flex-col;
+}
+
+.cdn-page__title {
+  @apply text-sm font-medium tracking-tight text-slate-800;
+}
+
+.cdn-page__subtitle {
+  @apply text-[10px] text-slate-400;
+}
+
+.cdn-page__back-btn {
+  @apply flex items-center gap-1.5 rounded-md border border-sky-200 bg-white px-3 py-1.5 text-xs font-normal text-sky-600 transition-colors hover:bg-sky-50;
+}
+
+.cdn-page__content {
+  @apply relative flex-1 overflow-hidden;
+}
+
+.cdn-page__loading {
+  @apply absolute inset-0 flex flex-col items-center justify-center gap-3 bg-sky-50/50;
+}
+
+.cdn-page__spinner {
+  @apply h-6 w-6 animate-spin rounded-full border-2 border-sky-200 border-t-sky-500;
+}
+
+.cdn-page__loading-text {
+  @apply text-xs text-slate-400;
+}
+
+.cdn-page__error {
+  @apply absolute inset-0 flex flex-col items-center justify-center gap-2 bg-red-50/50 p-6 text-center;
+}
+
+.cdn-page__error-icon {
+  @apply h-8 w-8 text-red-300;
+}
+
+.cdn-page__error-title {
+  @apply text-sm font-medium text-red-600;
+}
+
+.cdn-page__error-detail {
+  @apply max-w-md text-xs text-red-400;
+}

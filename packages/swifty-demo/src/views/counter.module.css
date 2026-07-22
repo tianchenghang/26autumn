@@ -1,0 +1,29 @@
+@reference "tailwindcss";
+
+.counter-page {
+  @apply min-h-screen bg-emerald-50/30 p-6;
+}
+
+.counter-page__container {
+  @apply mx-auto max-w-3xl;
+}
+
+.counter-page__title {
+  @apply mb-2 text-2xl font-normal tracking-tight text-emerald-800;
+}
+
+.counter-page__description {
+  @apply mb-6 text-xs text-emerald-500;
+}
+
+.counter-page__grid {
+  @apply grid grid-cols-2 gap-6;
+}
+
+.counter-page__store-slot {
+  @apply mb-6;
+}
+
+.counter-page__button {
+  @apply rounded-md bg-emerald-500 px-5 py-2 text-xs font-normal text-white transition-colors hover:bg-emerald-600;
+}

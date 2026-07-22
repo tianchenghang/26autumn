@@ -532,13 +532,13 @@ func GetLogMcpTool(ctx context.Context, mcpURL string) ([]tool.BaseTool, error) 
 
 当前方案: 进程内 `map[string]*ConversationMemory` + `container/list` LRU
 
-| 维度     | 内存方案 (当前)                  | Redis 方案               |
-| -------- | -------------------------------- | ------------------------ |
-| 延迟     | 纳秒级, 无网络 IO                | 毫秒级, 每次读写一次 RTT |
-| 持久化   | 进程重启丢失                     | 持久化, 重启不丢         |
-| 多实例   | 不共享, 需 sticky session        | 天然共享                 |
-| 复杂度   | 极低, 无序列化                   | 需要序列化/反序列化      |
-| 内存控制 | LRU 100 session * 6 msg 上界明确 | 需要额外 TTL/淘汰策略    |
+| 维度     | 内存方案 (当前)                   | Redis 方案               |
+| -------- | --------------------------------- | ------------------------ |
+| 延迟     | 纳秒级, 无网络 IO                 | 毫秒级, 每次读写一次 RTT |
+| 持久化   | 进程重启丢失                      | 持久化, 重启不丢         |
+| 多实例   | 不共享, 需 sticky session         | 天然共享                 |
+| 复杂度   | 极低, 无序列化                    | 需要序列化/反序列化      |
+| 内存控制 | LRU 100 session \* 6 msg 上界明确 | 需要额外 TTL/淘汰策略    |
 
 选择内存方案的原因:
 
@@ -677,7 +677,7 @@ Client                          Server
 4. **Redis 指数退避重连**: `MinRetryBackoff: 100ms`, `MaxRetryBackoff: 5s`, `MaxRetries: 3`
 5. **分布式锁防并发删除**: SETNX + 30s TTL, 防止多实例同时删除同一 source 的文档
 6. **工具错误 JSON 化**: 外部服务失败不中断 Agent 循环, LLM 可推理并调整策略
-7. **MaxStep/MaxIterations 双层限制**: ReAct 25 步 + PlanExecute 20 轮 * 10 步/轮, 防止 token 爆炸
+7. **MaxStep/MaxIterations 双层限制**: ReAct 25 步 + PlanExecute 20 轮 \* 10 步/轮, 防止 token 爆炸
 8. **结构化错误提取**: `structuredErrorMessage` 通过反射从 LLM SDK 错误中提取 HTTP 状态码和响应体, 返回可诊断的错误信息
 9. **向量维度自动检测**: 启动时校验索引维度, 不匹配自动重建, 避免静默搜索失败
 10. **Docker 多阶段构建**: golang:1.25-alpine 编译 -> alpine 运行, 最小化镜像体积

@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
+/* Scan theme templates for Tailwind class names */
+@source "./theme/*.html";
+@source "./theme/*.ts";
+
+/* daisyUI v5 with custom light-green theme + dark (prefers-color-scheme) */
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark;
+}
+
+/* Override daisyUI input/textarea focus styles to use a subtle border */
+.input:focus,
+.input:focus-within,
+.textarea:focus,
+.textarea:focus-within {
+  @apply border-primary/40 shadow-none outline-none;
+}
+
+/* Search result highlighting (MiniSearch <mark> wrappers) */
+mark {
+  @apply bg-primary/20 rounded px-0.5 text-inherit;
+}
+
+/* Compact prose: reduce heading sizes and spacing */
+.prose :where(h1):not(:where([class~="not-prose"] *)) {
+  @apply mt-6 mb-2 scroll-mt-16 text-xl font-semibold;
+}
+
+.prose :where(h2):not(:where([class~="not-prose"] *)) {
+  @apply mt-5 mb-2 scroll-mt-16 text-lg font-semibold;
+}
+
+.prose :where(h3):not(:where([class~="not-prose"] *)) {
+  @apply mt-4 mb-1 scroll-mt-16 text-base font-semibold;
+}
+
+.prose :where(h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  @apply mt-3 mb-1 scroll-mt-16 text-sm font-semibold;
+}
+
+.prose :where(p, ul, ol, blockquote):not(:where([class~="not-prose"] *)) {
+  @apply my-1.5;
+}
+
+.prose :where(li):not(:where([class~="not-prose"] *)) {
+  @apply my-0.5;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  @apply text-primary no-underline hover:underline;
+}
+
+.prose :where(pre):not(:where([class~="not-prose"] *)) {
+  @apply border-base-300 my-2 rounded-lg border text-sm;
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *)) {
+  @apply text-[0.9em];
+}
+
+.prose :where(table):not(:where([class~="not-prose"] *)) {
+  @apply my-2;
+}
+
+.prose :where(hr):not(:where([class~="not-prose"] *)) {
+  @apply my-4;
+}

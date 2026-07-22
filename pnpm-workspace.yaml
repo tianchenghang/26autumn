@@ -1,2 +1,5 @@
 allowBuilds:
   puppeteer: true
+
+packages:
+  - "packages/*"

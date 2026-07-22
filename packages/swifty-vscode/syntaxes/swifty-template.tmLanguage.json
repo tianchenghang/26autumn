@@ -1,0 +1,125 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Swifty Template",
+  "scopeName": "text.html.swifty-template",
+  "injectionSelector": "L:text.html",
+  "patterns": [
+    { "include": "#swifty-block-comment" },
+    { "include": "#swifty-control-flow" },
+    { "include": "#swifty-set-expression" },
+    { "include": "#swifty-raw-output" },
+    { "include": "#swifty-ref-output" },
+    { "include": "#swifty-binding-output" },
+    { "include": "#swifty-escaped-output" },
+    { "include": "#swifty-event-attribute" },
+    { "include": "#swifty-view-attribute" },
+    { "include": "#swifty-optimization-attribute" }
+  ],
+  "repository": {
+    "swifty-block-comment": {
+      "name": "comment.block.swifty",
+      "begin": "\\{\\{!--",
+      "end": "--\\}\\}"
+    },
+    "swifty-escaped-output": {
+      "name": "meta.expression.swifty",
+      "begin": "\\{\\{=",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.expression.begin.swifty" }
+      },
+      "end": "\\}\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.expression.end.swifty" }
+      },
+      "contentName": "source.js.embedded.swifty"
+    },
+    "swifty-raw-output": {
+      "name": "meta.expression.raw.swifty",
+      "begin": "\\{\\{!",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.expression.begin.swifty" }
+      },
+      "end": "\\}\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.expression.end.swifty" }
+      },
+      "contentName": "source.js.embedded.swifty"
+    },
+    "swifty-ref-output": {
+      "name": "meta.expression.ref.swifty",
+      "begin": "\\{\\{@",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.expression.begin.swifty" }
+      },
+      "end": "\\}\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.expression.end.swifty" }
+      },
+      "contentName": "source.js.embedded.swifty"
+    },
+    "swifty-binding-output": {
+      "name": "meta.expression.binding.swifty",
+      "begin": "\\{\\{:",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.expression.begin.swifty" }
+      },
+      "end": "\\}\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.expression.end.swifty" }
+      },
+      "contentName": "source.js.embedded.swifty"
+    },
+    "swifty-control-flow": {
+      "patterns": [
+        {
+          "name": "keyword.control.swifty",
+          "match": "\\{\\{\\s*(if|else\\s*if|else|forOf|forIn|for)\\b[^}]*\\}\\}"
+        },
+        {
+          "name": "keyword.control.swifty",
+          "match": "\\{\\{\\s*/(if|forOf|forIn|for)\\s*\\}\\}"
+        }
+      ]
+    },
+    "swifty-set-expression": {
+      "name": "meta.expression.set.swifty",
+      "begin": "\\{\\{\\s*set\\b",
+      "beginCaptures": {
+        "0": { "name": "keyword.operator.assignment.swifty" }
+      },
+      "end": "\\}\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.expression.end.swifty" }
+      },
+      "contentName": "source.js.embedded.swifty"
+    },
+    "swifty-event-attribute": {
+      "name": "meta.attribute.event.swifty",
+      "match": "(@)(\\w+(?:\\.\\w+)?)(\\s*=\\s*)(\"[^\"]*\"|'[^']*')",
+      "captures": {
+        "1": { "name": "punctuation.definition.event.swifty" },
+        "2": { "name": "entity.other.attribute-name.event.swifty" },
+        "3": { "name": "punctuation.separator.key-value.html" },
+        "4": { "name": "string.quoted.double.html" }
+      }
+    },
+    "swifty-view-attribute": {
+      "name": "meta.attribute.view.swifty",
+      "match": "(v-swifty)(\\s*=\\s*)(\"[^\"]*\"|'[^']*')",
+      "captures": {
+        "1": { "name": "entity.other.attribute-name.directive.swifty" },
+        "2": { "name": "punctuation.separator.key-value.html" },
+        "3": { "name": "string.quoted.double.html" }
+      }
+    },
+    "swifty-optimization-attribute": {
+      "name": "meta.attribute.optimization.swifty",
+      "match": "(ldk|lak|lvk)(\\s*=\\s*)(\"[^\"]*\"|'[^']*')",
+      "captures": {
+        "1": { "name": "entity.other.attribute-name.optimization.swifty" },
+        "2": { "name": "punctuation.separator.key-value.html" },
+        "3": { "name": "string.quoted.double.html" }
+      }
+    }
+  }
+}
