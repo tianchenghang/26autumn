@@ -7,9 +7,6 @@
   - [腾讯 - NoSQL 数据库管理系统](#腾讯---nosql-数据库管理系统)
   - [字节跳动 - 搜索推荐算法平台](#字节跳动---搜索推荐算法平台)
   - [阿里巴巴 - 广告技术部](#阿里巴巴---广告技术部)
-- [项目经历相关](#项目经历相关)
-  - [@swifty/sentry - 前端监控 SDK](#swiftysentry---前端监控-sdk)
-  - [@swifty/swifty - CLI Coding Agent](#swiftyswifty---cli-coding-agent)
 
 ---
 
@@ -86,49 +83,3 @@ Webpack 下的 Module Federation 是 webpack 5 的原生特性，通过 plugins 
 16. 模块联邦场景下，远程模块和宿主应用的依赖版本冲突怎么解决？共享依赖的 singleton 配置踩过什么坑？
 
 Module Federation 通过 shared 配置声明共享依赖，webpack/vite 的 runtime 会在运行时做版本协商。核心配置项包括：requiredVersion 指定兼容的版本范围、singleton 标记是否全局只允许一个实例、eager 控制是否在初始加载时就引入共享模块。对于 React 这类必须保持单例的库（多个 React 实例会导致 hooks 报错），必须设置 singleton: true，这样无论宿主和远程模块各自依赖什么版本的 React，运行时只会加载满足版本约束的一个实例。踩过的坑主要有三个：第一，singleton 和版本范围冲突——宿主用 React 18.2，远程模块用 React 17.x，singleton: true 下只会保留一个版本，如果远程模块的 API 调用在 React 18 中不兼容就会运行时报错，解决方案是统一升级到相同大版本；第二，CSS 样式冲突——远程模块带了自己的 CSS（如 Tailwind 的 utility class），和宿主的 CSS 产生优先级冲突，解决方案是远程模块使用 CSS Modules 或 Shadow DOM 做样式隔离；第三，eager: true 的陷阱——为了减少请求数把共享模块设为 eager，导致宿主打包体积膨胀（因为 eager 模块会被打进宿主的 initial chunk），后来改为 eager: false 配合 preload 策略在空闲时预加载共享模块。
-
-## 项目经历相关
-
-### @swifty/sentry - 前端监控 SDK
-
-17. 你的 sentry SDK 上报 JSError 后，服务端如何通过 source map 还原故障现场？source map 的上传和管理流程是怎样的？有没有考虑过 source map 的安全性问题？
-
-SDK 上报 JSError 时会携带错误发生时的堆栈信息（压缩后的文件名、行号、列号），服务端收到后需要将其映射回源码位置。流程是：根据上报的 JS 文件 URL 和版本号，查找对应的 source map 文件，使用 source-map 库（Mozilla 的 source-map 解析器）解析 mappings 字段，将压缩后的行列号映射回原始源文件的行列号，同时还原出原始函数名。source map 的上传流程是：项目构建时（CI/CD pipeline）自动生成 source map 文件，构建完成后通过 CLI 工具或 API 上传到监控平台的 source map 管理服务，以版本号 + 文件路径作为索引存储。管理上支持版本级别的 source map 批量管理，可以按版本号查询、删除过期的 source map。安全性方面，source map 包含完整的源码，泄露风险很高。措施包括：source map 文件不部署到 CDN，只在服务端存储和访问；上传和查询接口都需要鉴权（API Key + 项目 ID）；存储使用独立的私有存储服务，不和前端静态资源放在同一个域名下；前端 SDK 不上传也不存储 source map，只上传压缩后的堆栈信息，还原过程完全在服务端完成。
-
-18. sentry SDK 本身的包体积有多大？对首屏加载性能的影响如何评估和优化？有没有做过 tree-shaking 或按需加载的设计？
-
-SDK 的完整功能（错误捕获 + 性能指标 + 白屏检测 + rrweb 录制）gzip 后约 40KB，其中 rrweb 的录制模块占了约 25KB。对于首屏加载的影响评估方式是：在 Lighthouse 中对比接入 SDK 前后的 LCP 和 TBT（Total Blocking Time）差异，实际测试中 SDK 的初始化（同步注册各类 listener 和 observer）耗时约 2-3ms，对 TBT 影响很小，因为 SDK 的初始化逻辑是异步的，核心初始化在 requestIdleCallback 中执行。包体积优化方面：架构上采用发布订阅 + plugin 模式，core 模块只包含最基础的错误捕获和上报逻辑（gzip 后约 8KB），性能指标、白屏检测、rrweb 录制都是独立的 plugin，用户可以按需引入。构建层面使用 ES Module 导出，支持 tree-shaking，未使用的 plugin 不会被打包。另外 rrweb 的录制模块做了懒加载设计——只在发生错误时才动态 import rrweb 开始录制（录制错误前的事件通过 ring buffer 缓存在内存中），避免正常用户会话中始终加载录制模块的开销。
-
-19. rrweb 的录制原理是什么？它是基于 DOM 快照还是 MutationObserver？gzip 压缩后单次录制的数据量大概是多少？录制对页面性能的影响如何量化和控制？
-
-rrweb 的录制原理结合了全量快照和增量变更两种机制。录制开始时，先对当前页面的 DOM 做一次全量序列化（遍历 DOM 树，将每个节点序列化为包含 tag、attributes、textContent 的 JSON 节点，并为每个节点分配唯一 ID），生成初始快照。之后通过 MutationObserver 监听 DOM 变更（mutations），只记录变更事件（如节点增删、属性修改、文本变化、滚动位置变化等），以增量事件的形式追加。重放时先根据快照重建 DOM，然后按时间线依次应用增量事件。gzip 压缩后的数据量取决于页面复杂度和用户操作频率：一个典型的表单页面，5 分钟的操作录制数据 gzip 后约 50-150KB；如果是内容密集型页面（如长列表滚动），可能达到 200-300KB。录制对性能的影响主要来自两方面：DOM 序列化的 CPU 开销和 MutationObserver 回调的处理开销。量化方式是使用 Performance API 在录制关键路径（全量快照、mutation 回调处理）中打点，监控耗时。控制手段包括：对录制时长设置上限（默认 5 分钟的 ring buffer，超出后丢弃最早的事件）；使用 requestIdleCallback 延迟处理非关键的 mutation 事件；对 DOM 序列化做分批处理，避免长时间阻塞主线程；支持配置采样率，不是每个用户会话都录制。
-
-20. 数据上报的三级降级策略（sendBeacon -> Image beacon -> fetch keepAlive）在什么场景下触发降级？离线时使用 localStorage 存储，数据量上限怎么处理？刷盘时怎么避免重复上报？
-
-三级降级策略的触发场景：navigator.sendBeacon 是首选方案，它可以在页面卸载（unload/pagehide）时仍然可靠地发送数据，因为浏览器会保证 beacon 请求的完成不受页面生命周期影响。降级到 Image beacon（创建一个 Image 对象，src 设为带查询参数的上报 URL）的场景是：sendBeacon 不可用（部分旧版浏览器或 WebView 环境不支持）或者 sendBeacon 返回 false（队列满了）。降级到 fetch keepAlive 的场景是：前两者都失败时，使用 fetch 的 keepalive: true 选项，它在功能上类似 sendBeacon 但兼容性略差。离线存储方面，使用 localStorage 缓存未上报的数据。localStorage 的容量上限通常是 5MB，我们设置了安全阈值为 3MB（留余量给其他业务），达到阈值后使用 LRU 策略淘汰最早的数据。数据以 batch 为单位存储（每 10 条事件为一个 batch），每个 batch 有唯一 ID。刷盘时避免重复上报的机制是：每个 batch 上报前先从 localStorage 读取并标记为"上报中"（设置 sending flag），上报成功后才删除该 batch；如果上报失败（网络仍然不可用），清除 sending flag 使其在下次网络恢复时重试。网络恢复通过监听 window 的 online 事件触发刷盘流程。
-
-21. 白屏检测使用关键点采样的具体实现是怎样的？采样点怎么选取？SPA 场景下路由切换时的白屏检测怎么处理？误报率如何控制？
-
-关键点采样的实现方式是在页面的关键区域（通常是主内容区）预设一组采样点坐标，通过 document.elementsFromPoint(x, y) 检查这些坐标位置是否存在有效的 DOM 元素。采样点的选取策略是：将视口区域等分为 N x M 的网格（默认 4x3），取网格交叉点作为采样点，排除浏览器 chrome（地址栏、工具栏）占据的区域。对每个采样点，检查返回的元素是否是 body 或 html（说明该位置没有实际内容渲染），如果超过阈值的采样点都返回 body/html，则判定为白屏。SPA 场景下的处理是：监听路由变化（通过 History API 的 popstate 和 pushState/replaceState 的 monkey-patch），每次路由切换后启动一个检测定时器，在预计页面渲染完成的时间点（默认 3 秒后）执行一次关键点采样。为了区分"页面正在加载中"和"真正的白屏"，会结合 FCP（First Contentful Paint）指标判断——如果 FCP 已经触发但关键点采样仍然为白，才判定为异常白屏。误报控制的手段包括：需要连续两次检测（间隔 1 秒）都判定为白屏才上报，避免渲染延迟导致的误判；排除已知的 loading 态元素（通过配置 CSS 选择器白名单）；检测页面的 DOM 节点数量，如果节点数极少（可能是一个合法的空白页如登录页），降低白屏判定的敏感度。
-
-22. LCP/FCP/CLS/INP 这些性能指标分别使用什么 Observer API 采集？CLS 的累积计算逻辑是怎样的？LongTask 检测和性能指标关联分析的实践？
-
-各指标使用的 Observer API：LCP（Largest Contentful Paint）使用 PerformanceObserver 监听 "largest-contentful-paint" 类型，取最后一个 entry 的 renderTime 或 loadTime 作为 LCP 值（因为 LCP 会被持续更新直到用户交互）；FCP（First Contentful Paint）使用 PerformanceObserver 监听 "paint" 类型，取 name 为 "first-contentful-paint" 的 entry；CLS（Cumulative Layout Shift）使用 PerformanceObserver 监听 "layout-shift" 类型；INP（Interaction to Next Paint）使用 PerformanceObserver 监听 "event" 类型（type: "event"，durationThreshold 设为 40ms），取所有交互事件中 duration 最大的值（或 P98 值）。CLS 的累积计算逻辑是：每个 layout-shift entry 有一个 value（布局偏移分数），只有 hadRecentInput 为 false 的 entry 才计入（排除用户主动操作引起的偏移）。累积方式采用 session window 策略：将间隔小于 1 秒的连续偏移归入同一个 window，每个 window 的 CLS 值是其中所有偏移分数之和，最终的 CLS 取所有 window 中的最大值。LongTask 检测使用 PerformanceObserver 监听 "longtask" 类型，记录所有执行时间超过 50ms 的任务。关联分析的实践是：将 LongTask 的时间戳和 LCP/INP 等指标的时间戳做关联，如果某个 LongTask 的执行时间段和 LCP 的时间点重叠，说明这个长任务可能阻塞了关键渲染路径；如果 LongTask 和用户交互的时间点接近，则可能是 INP 偏高的直接原因。在 SDK 中上报时会附带 LongTask 的 attribution 信息（如导致长任务的脚本 URL），帮助定位性能瓶颈。
-
-### @swifty/swifty - CLI Coding Agent
-
-23. 基于 ReAct 范式的 Agent Loop 具体是怎么实现的？推理（Reasoning）和行动（Acting）交替的循环逻辑是怎样的？怎么处理 LLM 输出不稳定导致的循环卡死？
-
-Agent Loop 的实现是一个 while 循环，每轮迭代包含三个阶段：Thought（推理）、Action（行动）、Observation（观察）。具体流程是：将用户请求和当前对话历史组装成 Prompt 发送给 LLM，LLM 返回的内容中包含 Thought（对当前状态的分析、下一步计划）和 Action（要调用的工具及参数）。系统解析 LLM 的响应，如果包含 Action，就执行对应的工具调用，将工具的返回结果作为 Observation 追加到对话历史中，然后进入下一轮循环。如果 LLM 的响应中不包含 Action（只有最终回答），则循环结束，将回答返回给用户。为了防止循环卡死，设置了多重保护机制：最大迭代次数限制（默认 25 轮），超出后强制终止并返回当前最佳结果；连续重复 Action 检测（如果连续 3 轮调用相同工具且参数相同，认为陷入了死循环，注入提示引导 LLM 换思路）；单次循环超时控制（每轮 LLM 调用设置超时）；token 用量预算（累计 token 用量超过预算时终止循环）。另外，对 LLM 输出格式不稳定的处理是使用结构化输出（JSON mode 或 function calling），如果 LLM 返回的内容无法解析为合法的 Action 格式，会自动重试一次并在 Prompt 中加入格式纠正提示，仍然失败则将当前内容作为最终回答返回。
-
-24. 5 层权限系统分别是什么？不同权限层级之间的校验流程是怎样的？和 Claude Code 的权限模型对比有什么异同？
-
-5 层权限系统从低到高分别是：Deny（禁止）、Ask（每次询问用户）、Allow-Session（本次会话允许）、Allow-Project（项目级别持久化允许）、Allow-Global（全局允许）。Deny 层用于绝对禁止的操作（如 rm -rf /、git push --force 到 main 分支），无论其他层级如何配置都无法执行。Ask 是默认层级，任何未在更高层级配置的工具调用都会先询问用户确认。Allow-Session 在会话内记住用户的选择，同一会话内相同操作不再询问。Allow-Project 将权限规则持久化到项目级别的配置文件（如 .claude/settings.json），团队成员可以共享。Allow-Global 写入用户的全局配置，所有项目生效。校验流程是：每次工具调用前，从最高优先级（Deny）到最低优先级依次检查，命中第一个匹配的规则即生效。规则匹配基于工具名称和参数模式（支持 glob 匹配，如 "Bash(npm \*)" 匹配所有 npm 开头的 Bash 命令）。和 Claude Code 的权限模型对比：相同点是都采用了分层权限和模式匹配的核心设计；不同点是 Claude Code 的权限模型更精细，支持基于正则表达式的参数匹配和权限继承（global -> project -> local 的优先级覆盖），我的实现简化了正则匹配为 glob 匹配，但在 Session 级别的权限记忆上做了增强——支持自动学习用户在 Ask 层级的选择并建议提升为 Project 级别规则。
-
-25. 上下文压缩是怎么做的？如何保证压缩后不丢失关键信息？压缩比和信息保留之间怎么权衡？
-
-上下文压缩是在对话历史超过 token 预算时触发的。压缩流程是：当对话历史的 token 数接近模型上下文窗口的 70% 时，将较早的对话轮次交给 LLM 做摘要压缩。摘要的 Prompt 要求 LLM 保留以下关键信息：用户的核心需求和约束条件、已经做出的技术决策和原因、当前进度和未完成的任务、文件路径和代码变更的关键信息。压缩后的摘要替代原始的详细对话历史，作为新的"系统上下文"注入。为了保证不丢失关键信息，采用了分层压缩策略：最近 N 轮对话保持原始内容不压缩（保证短期记忆的精确性）；更早的对话做摘要压缩；最早的对话只保留一句话总结。另外维护一个"关键事实列表"（pinned facts），用户明确提到的偏好、决策、重要信息会被标记为不可压缩，在每次压缩时强制保留。压缩比和信息保留的权衡通过实验调优：默认设置是保留最近 5 轮原始对话 + 更早的压缩为摘要，压缩比约 5:1（原始 5000 token 压缩为 1000 token）。如果对话继续增长，会对摘要再做二次压缩，压缩比提升到 10:1，但此时会在系统提示中警告用户"早期对话细节可能已丢失"。
-
-26. MCP（Model Context Protocol）接入的具体实现是怎样的？MCP server 的注册、工具发现和调用流程？和直接内置工具相比有什么优势和劣势？
-
-MCP 的接入实现分为 client 端和 server 端。Client 端（Agent 侧）维护一个 MCP Manager，负责管理多个 MCP server 的生命周期。MCP server 的注册通过配置文件声明，每个 server 定义了启动命令（如 npx @modelcontextprotocol/server-filesystem）和通信方式（stdio 或 SSE）。注册后，MCP Manager 在 Agent 启动时依次拉起各个 MCP server 进程，通过 JSON-RPC 协议通信。工具发现流程是：Agent 启动后向每个 MCP server 发送 tools/list 请求，server 返回其提供的工具列表（包括工具名称、描述、参数 schema），Agent 将这些远程工具合并到自身的工具注册表中，LLM 在推理时可以像调用内置工具一样调用 MCP 工具。工具调用流程是：LLM 决定调用某个 MCP 工具 -> Agent 解析出 server 标识和工具名 -> 通过 JSON-RPC 的 tools/call 请求发送给对应的 MCP server -> server 执行工具逻辑并返回结果 -> Agent 将结果作为 Observation 注入对话历史。和内置工具相比，优势是：生态扩展性强，社区提供了大量现成的 MCP server（文件系统、数据库、GitHub API、Slack 等），无需为每个集成写定制代码；关注点分离，工具的具体实现在 server 端，Agent 只需要关心工具的描述和调用接口。劣势是：多了一层进程间通信的开销（stdio 的序列化/反序列化和进程切换延迟），响应速度不如内置工具；server 进程的稳定性需要额外管理（崩溃重启、资源限制）；调试复杂度增加，需要在 Agent 和 MCP server 两端分别排查问题。

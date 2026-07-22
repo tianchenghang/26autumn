@@ -702,6 +702,7 @@ TeamManager
    - 每个 turn 开始时 drain 自己的 mailbox
 
 2. **SharedTaskStore**（共享任务板）：
+
    ```json
    // .swifty/teams/{team}/tasks.json
    {
