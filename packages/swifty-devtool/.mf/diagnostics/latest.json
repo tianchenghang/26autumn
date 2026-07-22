@@ -1,0 +1,10 @@
+{
+  "latestErrorEvent": {
+    "code": "TYPE-001",
+    "message": "Failed to generate type declaration. Execute the below cmd to reproduce and fix the error. #TYPE-001\nargs: {\"cmd\":\"/Users/hangtiancheng/.nvm/versions/node/v24.16.0/bin/node /Users/hangtiancheng/github/26autumn/node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/bin/tsc --project /Users/hangtiancheng/github/26autumn/packages/swifty-devtool/node_modules/.federation/tsconfig.59f6c2d2423bb7bcf1be11a539194766.json\"}\nView the docs to see how to solve: https://module-federation.io/guide/troubleshooting/type#type-001",
+    "args": {
+      "cmd": "/Users/hangtiancheng/.nvm/versions/node/v24.16.0/bin/node /Users/hangtiancheng/github/26autumn/node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/bin/tsc --project /Users/hangtiancheng/github/26autumn/packages/swifty-devtool/node_modules/.federation/tsconfig.59f6c2d2423bb7bcf1be11a539194766.json"
+    },
+    "timestamp": 1784750472787
+  }
+}
