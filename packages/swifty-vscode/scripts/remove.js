@@ -5,9 +5,7 @@ import { homedir } from "node:os";
 const name = process.argv[2];
 if (!name) {
   console.error("Usage: node scripts/remove.js <publisher.extension-version>");
-  console.error(
-    "Example: node scripts/remove.js hangtiancheng.swifty-vscode-0.1.0",
-  );
+  console.error("Example: node scripts/remove.js hangtiancheng.swifty-vscode-0.1.0");
   process.exit(1);
 }
 

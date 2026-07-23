@@ -1,13 +1,11 @@
 /**
  * @swifty.js/docs barrel exports.
  *
- * Main entry point — browser-safe exports only (SolidJS theme + types).
+ * Main entry point — browser-safe exports only (Preact theme + types).
  *
  * Build-time utilities (defineConfig, scanDocsDir, generateSidebar, etc.)
  * are available from sub-path exports:
  *   - "@swifty.js/docs/vite"     (Vite plugin + build-time helpers)
- *   - "@swifty.js/docs/webpack"  (Webpack loader + build-time helpers)
- *   - "@swifty.js/docs/rspack"   (Rspack loader + build-time helpers)
  *   - "@swifty.js/docs/compiler" (compileMarkdown)
  */
 
@@ -35,11 +33,10 @@ export type {
 // Runtime utilities (browser-safe)
 // ============================================================
 
-// Browser-safe runtime utility (also available at @swifty.js/docs/runtime)
 export { slugify } from "./runtime";
 
 // ============================================================
-// SolidJS theme
+// Preact theme
 // ============================================================
 
 export { DocsProvider, useDocs, type DocsProviderProps } from "./theme/context";
@@ -58,7 +55,7 @@ export { Input } from "./theme/ui/input";
 export { Kbd } from "./theme/ui/kbd";
 export { cn } from "./theme/lib/utils";
 export { createSearchEngine, highlightSegments } from "./theme/lib/search";
-export { createScrollSpy } from "./theme/lib/scroll-spy";
+export { useScrollSpy } from "./theme/lib/scroll-spy";
 export {
   computePrevNext,
   normalizePath,

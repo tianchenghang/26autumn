@@ -1,6 +1,6 @@
-import type { JSX } from "solid-js";
+import type { JSX } from "preact";
 
-type IconProps = JSX.SvgSVGAttributes<SVGSVGElement>;
+type IconProps = JSX.SVGAttributes<SVGSVGElement>;
 
 function createIcon(children: JSX.Element) {
   return (props: IconProps) => (

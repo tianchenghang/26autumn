@@ -1,12 +1,6 @@
-import { useNavigate } from "@solidjs/router";
-import {
-  createEffect,
-  createSignal,
-  onCleanup,
-  Show,
-  type Accessor,
-} from "solid-js";
-import { render } from "solid-js/web";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { render } from "preact";
+import { useLocation } from "wouter-preact";
 import { CheckIcon, CopyIcon } from "./icons";
 import type { PageHeading } from "./lib/content";
 import { cn } from "./lib/utils";
@@ -14,66 +8,53 @@ import { Toc } from "./Toc";
 
 interface ContentRendererProps {
   html: string;
-  headings: Accessor<PageHeading[]>;
+  headings: PageHeading[];
 }
 
-/**
- * Injects the build-time rendered markdown HTML and wires up the runtime
- * behaviors that static HTML cannot provide: SPA link interception, inline
- * [[toc]] mounts, and code-block copy buttons.
- */
-export function ContentRenderer(props: ContentRendererProps) {
-  const navigate = useNavigate();
-  let articleRef: HTMLElement | undefined;
-  const disposers: Array<() => void> = [];
+export function ContentRenderer({ html, headings }: ContentRendererProps) {
+  const [, navigate] = useLocation();
+  const articleRef = useRef<HTMLElement>(null);
+  const disposersRef = useRef<Array<() => void>>([]);
 
-  const disposeAll = () => {
-    for (const dispose of disposers.splice(0, disposers.length)) dispose();
-  };
-
-  createEffect(() => {
-    const html = props.html;
-    const el = articleRef;
+  useEffect(() => {
+    const el = articleRef.current;
     if (!el) return;
 
-    disposeAll();
+    for (const dispose of disposersRef.current.splice(0)) dispose();
+
     // Security: `html` is the build-time output of this package's own
-    // compileMarkdown() pipeline over first-party .md sources in the repo,
-    // embedded as a JSON string in the compiled page module — it never
-    // contains runtime user input. Raw HTML passthrough (markdown-it
-    // `html: true`) is an intentional, documented authoring feature, so
-    // the content is injected as-is rather than sanitized.
+    // compileMarkdown() pipeline over first-party .md sources — it never
+    // contains runtime user input.
     el.innerHTML = html;
 
-    // Restart the entrance animation on every page change.
     el.classList.remove("page-enter");
     void el.offsetWidth;
     el.classList.add("page-enter");
 
-    // Mount inline TOC placeholders emitted by the [[toc]] directive.
     for (const holder of Array.from(
       el.querySelectorAll<HTMLElement>("[data-swifty-toc]"),
     )) {
-      disposers.push(
-        render(() => <Toc headings={props.headings} inline />, holder),
-      );
+      render(<Toc headings={headings} inline />, holder);
+      disposersRef.current.push(() => render(null, holder));
     }
 
-    // Attach copy buttons to code blocks.
     for (const block of Array.from(
       el.querySelectorAll<HTMLElement>(".codeblock"),
     )) {
       const pre = block.querySelector("pre");
-      const holder = document.createElement("div");
-      holder.className = "codeblock-actions";
-      block.appendChild(holder);
-      disposers.push(
-        render(() => <CopyButton target={pre ?? block} />, holder),
-      );
+      const holderEl = document.createElement("div");
+      holderEl.className = "codeblock-actions";
+      block.appendChild(holderEl);
+      render(<CopyButton target={pre ?? block} />, holderEl);
+      disposersRef.current.push(() => render(null, holderEl));
     }
-  });
+  }, [html, headings]);
 
-  onCleanup(disposeAll);
+  useEffect(() => {
+    return () => {
+      for (const dispose of disposersRef.current.splice(0)) dispose();
+    };
+  }, []);
 
   const onClick = (e: MouseEvent) => {
     const target = e.target;
@@ -99,28 +80,26 @@ export function ContentRenderer(props: ContentRendererProps) {
   );
 }
 
-function CopyButton(props: { target: HTMLElement }) {
-  const [copied, setCopied] = createSignal(false);
+function CopyButton({ target }: { target: HTMLElement }) {
+  const [copied, setCopied] = useState(false);
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(props.target.innerText);
+      await navigator.clipboard.writeText(target.innerText);
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      // clipboard unavailable (insecure context) — leave the button inert
+      // clipboard unavailable
     }
   };
 
   return (
     <button
       onClick={() => void copy()}
-      aria-label={copied() ? "Copied" : "Copy code to clipboard"}
-      class={cn("codeblock-copy", copied() && "codeblock-copy-done")}
+      aria-label={copied ? "Copied" : "Copy code to clipboard"}
+      class={cn("codeblock-copy", copied && "codeblock-copy-done")}
     >
-      <Show when={!copied()} fallback={<CheckIcon class="size-3.5" />}>
-        <CopyIcon class="size-3.5" />
-      </Show>
+      {copied ? <CheckIcon class="size-3.5" /> : <CopyIcon class="size-3.5" />}
     </button>
   );
 }

@@ -8,22 +8,15 @@ export function registerOpenInGithubCommand(
   context: vscode.ExtensionContext,
   rootPath: string,
 ): void {
-  const command = vscode.commands.registerCommand(
-    "swifty.openInGithub",
-    (uri?: vscode.Uri) => {
-      void handleOpenInGithub(rootPath, uri);
-    },
-  );
+  const command = vscode.commands.registerCommand("swifty.openInGithub", (uri?: vscode.Uri) => {
+    void handleOpenInGithub(rootPath, uri);
+  });
 
   context.subscriptions.push(command);
 }
 
-async function handleOpenInGithub(
-  rootPath: string,
-  uri?: vscode.Uri,
-): Promise<void> {
-  const filePath =
-    uri?.fsPath ?? vscode.window.activeTextEditor?.document.fileName;
+async function handleOpenInGithub(rootPath: string, uri?: vscode.Uri): Promise<void> {
+  const filePath = uri?.fsPath ?? vscode.window.activeTextEditor?.document.fileName;
   if (filePath === undefined) {
     return;
   }

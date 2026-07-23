@@ -2,8 +2,8 @@
  * Vite configuration for @swifty.js/docs.
  *
  * Dual-mode config:
- *   --mode lib   → Library build (7 entries, ESM+CJS+dts)
- *   --mode docs  → Documentation site (SolidJS app, Vite dev/build)
+ *   --mode lib   → Library build (5 entries, ESM+CJS+dts)
+ *   --mode docs  → Documentation site (Preact app, Vite dev/build)
  *
  * Vite 7 uses Rollup internally, so build.lib is Rollup-based.
  */
@@ -16,7 +16,7 @@ import {
 } from "vite";
 import dts from "vite-plugin-dts";
 import { resolve } from "node:path";
-import solid from "vite-plugin-solid";
+import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 // !!! For your project, it should be:
 // import { swiftyDocsPlugin } from "@swifty.js/docs/vite";
@@ -33,33 +33,22 @@ const PKG_DIR = import.meta.dirname;
 
 /**
  * All deps + peerDeps are externalized in lib mode (users install them).
- * SolidJS stays external too — consumers must share a single solid-js
+ * Preact stays external too — consumers must share a single preact
  * runtime instance with the precompiled theme.
  */
 const EXTERNAL_IDS = [
   ...Object.keys(pkg.dependencies ?? {}),
+  ...Object.keys(pkg.devDependencies ?? {}),
   ...Object.keys(pkg.peerDependencies ?? {}),
-  "solid-js",
-  "solid-js/web",
-  "solid-js/store",
+  "preact",
+  "preact/hooks",
+  "preact/compat",
 ];
 
 function isExternal(id: string): boolean {
   if (id.startsWith("node:")) return true;
   return EXTERNAL_IDS.some((e) => id === e || id.startsWith(e + "/"));
 }
-
-/**
- * __filename / __dirname ESM shims.
- * webpack.ts and rspack.ts use __filename to self-reference as loaders.
- * Injected via Rollup output.banner for ESM chunks only.
- */
-const CJS_SHIMS = [
-  'import { fileURLToPath as __cjs_fileURLToPath } from "url";',
-  'import { dirname as __cjs_dirname } from "path";',
-  "const __filename = __cjs_fileURLToPath(import.meta.url);",
-  "const __dirname = __cjs_dirname(__filename);",
-].join("\n");
 
 // === Mode router ===
 
@@ -71,7 +60,6 @@ export default defineConfig(({ mode, command }) => {
   if (mode === "docs") {
     return docsConfig({ isDev });
   }
-  // Best-effort
   return docsConfig({ isDev });
 });
 
@@ -115,8 +103,6 @@ function libConfig(): UserConfig {
           index: resolve(PKG_DIR, "src/index.ts"),
           compiler: resolve(PKG_DIR, "src/compiler.ts"),
           vite: resolve(PKG_DIR, "src/vite.ts"),
-          webpack: resolve(PKG_DIR, "src/webpack.ts"),
-          rspack: resolve(PKG_DIR, "src/rspack.ts"),
           runtime: resolve(PKG_DIR, "src/runtime.ts"),
           theme: resolve(PKG_DIR, "src/theme/index.ts"),
         },
@@ -133,20 +119,7 @@ function libConfig(): UserConfig {
       sourcemap: false,
     },
     plugins: [
-      // Compile the SolidJS theme JSX to solid-js runtime calls.
-      solid() as PluginOption,
-      {
-        name: "cjs-shims",
-        renderChunk(code, _chunk, outputOptions) {
-          if (outputOptions.format !== "es") return null;
-          // Only inject __filename/__dirname shims when the chunk actually
-          // references them (webpack.ts and rspack.ts use __filename as a
-          // loader self-reference). Browser-targeted chunks (theme, runtime,
-          // index) must not import Node.js built-in modules (url, path).
-          if (!/\b__(?:filename|dirname)\b/.test(code)) return null;
-          return CJS_SHIMS + "\n" + code;
-        },
-      },
+      preact() as PluginOption,
       dts({
         tsconfigPath: "./tsconfig.build.json",
         outDirs: "dist",
@@ -165,8 +138,6 @@ function docsConfig(options?: { isDev?: boolean }): UserConfig {
     root: resolve(PKG_DIR, "app"),
     publicDir: resolve(PKG_DIR, "public"),
     plugins: [
-      // swiftyDocsPlugin returns [docsPlugin, solid()] — .md compilation
-      // plus SolidJS JSX compilation for the theme and the app shell.
       ...swiftyDocsPlugin({
         config: swiftyDocsConfig,
         debug: true,

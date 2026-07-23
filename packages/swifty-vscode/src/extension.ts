@@ -4,9 +4,7 @@ import { ImageHoverProvider } from "./provider/hover-provider.js";
 import { StatusBarManager } from "./status-bar/status-bar-manager.js";
 import { initLogger, log } from "./logger.js";
 
-export async function activate(
-  context: vscode.ExtensionContext,
-): Promise<void> {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const outputChannel = initLogger();
   context.subscriptions.push(outputChannel);
 
@@ -24,9 +22,7 @@ export async function activate(
   }
   const workspaceRoot = firstFolder.uri.fsPath;
 
-  context.subscriptions.push(
-    vscode.languages.registerHoverProvider("*", new ImageHoverProvider()),
-  );
+  context.subscriptions.push(vscode.languages.registerHoverProvider("*", new ImageHoverProvider()));
 
   registerOpenInGithubCommand(context, workspaceRoot);
 

@@ -1,5 +1,4 @@
-import { A } from "@solidjs/router";
-import { splitProps, type ComponentProps } from "solid-js";
+import { Link } from "wouter-preact";
 import { cn } from "./lib/utils";
 
 interface LogoProps {
@@ -8,19 +7,15 @@ interface LogoProps {
   class?: string;
 }
 
-/**
- * Site logotype: a sage gradient tile with a swift-wing mark, the site
- * wordmark in the display face, and a monospace "DOCS" tag.
- */
-export function Logo(props: LogoProps) {
+export function Logo({ href, title, class: className }: LogoProps) {
   return (
-    <A
-      href={props.href}
+    <Link
+      href={href}
       class={cn(
         "group focus-visible:ring-ring/50 flex items-center gap-2.5 rounded-md focus-visible:ring-2 focus-visible:outline-none",
-        props.class,
+        className,
       )}
-      aria-label={`${props.title} — home`}
+      aria-label={`${title} — home`}
     >
       <span class="from-primary to-primary/70 text-primary-foreground shadow-primary/30 grid size-8 place-items-center rounded-lg bg-gradient-to-br shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-105 group-hover:-rotate-6">
         <svg
@@ -39,31 +34,30 @@ export function Logo(props: LogoProps) {
       </span>
       <span class="flex items-baseline gap-2">
         <span class="font-display text-foreground text-lg font-semibold tracking-tight">
-          {props.title}
+          {title}
         </span>
         <span class="border-primary/25 bg-primary/8 text-primary hidden rounded border px-1.5 py-px font-mono text-[10px] font-medium tracking-widest sm:inline-block">
           DOCS
         </span>
       </span>
-    </A>
+    </Link>
   );
 }
 
-export function ThemeToggleIcon(
-  props: ComponentProps<"span"> & { dark: boolean },
-) {
-  const [local, rest] = splitProps(props, ["class", "dark"]);
+export function ThemeToggleIcon({
+  dark,
+  class: className,
+}: {
+  dark: boolean;
+  class?: string;
+}) {
   return (
-    <span
-      class={cn("relative block size-4", local.class)}
-      aria-hidden="true"
-      {...rest}
-    >
+    <span class={cn("relative block size-4", className)} aria-hidden="true">
       <svg
         viewBox="0 0 24 24"
         class={cn(
           "absolute inset-0 size-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          local.dark
+          dark
             ? "scale-100 rotate-0 opacity-100"
             : "scale-50 -rotate-90 opacity-0",
         )}
@@ -79,7 +73,7 @@ export function ThemeToggleIcon(
         viewBox="0 0 24 24"
         class={cn(
           "absolute inset-0 size-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          local.dark
+          dark
             ? "scale-50 rotate-90 opacity-0"
             : "scale-100 rotate-0 opacity-100",
         )}

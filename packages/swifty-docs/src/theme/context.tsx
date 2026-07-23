@@ -1,10 +1,6 @@
-import {
-  createContext,
-  createSignal,
-  useContext,
-  type Accessor,
-  type ParentProps,
-} from "solid-js";
+import { createContext } from "preact";
+import { useContext, useMemo, useState } from "preact/hooks";
+import type { ComponentChildren } from "preact";
 import {
   DocsConfigSchema,
   FALLBACK_CONFIG,
@@ -20,56 +16,53 @@ interface DocsContextValue {
   loadContent: LoadContentFn | null;
   getSearchIndex: GetSearchIndexFn | null;
   searchProvider: "local" | "docsearch" | "none";
-  searchOpen: Accessor<boolean>;
+  searchOpen: boolean;
   setSearchOpen: (open: boolean) => void;
   toggleSearch: () => void;
 }
 
-const DocsContext = createContext<DocsContextValue>();
+const DocsContext = createContext<DocsContextValue | null>(null);
 
 export interface DocsProviderProps {
-  /** Site config object from the generated module (Zod-validated). */
   config: unknown;
-  /** Content loader from the generated module. */
   loadContent: unknown;
-  /** Search index loader from the generated module. */
   getSearchIndex: unknown;
+  children?: ComponentChildren;
 }
 
-/**
- * Root provider for the docs theme. Validates the generated-module values
- * once at the boundary and exposes them (plus search dialog state) to all
- * theme components.
- */
-export function DocsProvider(props: ParentProps<DocsProviderProps>) {
-  const configParse = DocsConfigSchema.safeParse(props.config);
-  if (!configParse.success) {
-    console.warn(
-      "[@swifty.js/docs] docsConfig failed validation — using fallback.",
-      configParse.error.issues,
+export function DocsProvider(props: DocsProviderProps) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const value = useMemo<DocsContextValue>(() => {
+    const configParse = DocsConfigSchema.safeParse(props.config);
+    if (!configParse.success) {
+      console.warn(
+        "[@swifty.js/docs] docsConfig failed validation — using fallback.",
+        configParse.error.issues,
+      );
+    }
+    const config = configParse.success ? configParse.data : FALLBACK_CONFIG;
+
+    const loadContentParse = LoadContentSchema.safeParse(props.loadContent);
+    if (!loadContentParse.success) {
+      console.warn(
+        "[@swifty.js/docs] loadContent not injected — pages cannot be loaded.",
+      );
+    }
+    const searchIndexParse = GetSearchIndexSchema.safeParse(
+      props.getSearchIndex,
     );
-  }
-  const config = configParse.success ? configParse.data : FALLBACK_CONFIG;
 
-  const loadContentParse = LoadContentSchema.safeParse(props.loadContent);
-  if (!loadContentParse.success) {
-    console.warn(
-      "[@swifty.js/docs] loadContent not injected — pages cannot be loaded.",
-    );
-  }
-  const searchIndexParse = GetSearchIndexSchema.safeParse(props.getSearchIndex);
-
-  const [searchOpen, setSearchOpen] = createSignal(false);
-
-  const value: DocsContextValue = {
-    config,
-    loadContent: loadContentParse.success ? loadContentParse.data : null,
-    getSearchIndex: searchIndexParse.success ? searchIndexParse.data : null,
-    searchProvider: config.search?.provider ?? "local",
-    searchOpen,
-    setSearchOpen,
-    toggleSearch: () => setSearchOpen(!searchOpen()),
-  };
+    return {
+      config,
+      loadContent: loadContentParse.success ? loadContentParse.data : null,
+      getSearchIndex: searchIndexParse.success ? searchIndexParse.data : null,
+      searchProvider: config.search?.provider ?? "local",
+      searchOpen,
+      setSearchOpen,
+      toggleSearch: () => setSearchOpen((v) => !v),
+    };
+  }, [props.config, props.loadContent, props.getSearchIndex, searchOpen]);
 
   return (
     <DocsContext.Provider value={value}>{props.children}</DocsContext.Provider>

@@ -1,7 +1,7 @@
 {
   "name": "@swifty.js/docs",
-  "version": "0.1.0",
-  "description": "SolidJS + shadcn-style documentation site generator with a markdown-it pipeline",
+  "version": "0.2.0",
+  "description": "Preact + shadcn-style documentation site generator with a markdown-it pipeline",
   "keywords": [
     "@swifty.js",
     "markdown",
@@ -47,26 +47,6 @@
       "require": {
         "types": "./dist/vite.d.ts",
         "default": "./dist/vite.cjs"
-      }
-    },
-    "./webpack": {
-      "import": {
-        "types": "./dist/webpack.d.ts",
-        "default": "./dist/webpack.js"
-      },
-      "require": {
-        "types": "./dist/webpack.d.ts",
-        "default": "./dist/webpack.cjs"
-      }
-    },
-    "./rspack": {
-      "import": {
-        "types": "./dist/rspack.d.ts",
-        "default": "./dist/rspack.js"
-      },
-      "require": {
-        "types": "./dist/rspack.d.ts",
-        "default": "./dist/rspack.cjs"
       }
     },
     "./runtime": {
@@ -116,8 +96,6 @@
   "dependencies": {
     "@docsearch/css": "^4.6.3",
     "@docsearch/js": "^4.6.3",
-    "@kobalte/core": "^0.13.0",
-    "@solidjs/router": "^0.15.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "ejs": "^3.1.10",
@@ -128,10 +106,11 @@
     "shiki": "^4.3.0",
     "tailwind-merge": "^3.0.0",
     "vite-plugin-pwa": "^1.3.0",
-    "vite-plugin-solid": "^2.11.0",
+    "wouter-preact": "^3.4.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@preact/preset-vite": "^2.10.0",
     "@tailwindcss/vite": "^4.3.2",
     "@types/ejs": "^3.1.5",
     "@types/js-yaml": "^4.0.9",
@@ -139,9 +118,9 @@
     "@types/markdown-it-container": "^4.0.0",
     "@types/node": "^24.13.2",
     "@vitest/coverage-v8": "4.1.9",
+    "preact": "^10.26.0",
     "prettier": "^3.9.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "solid-js": "^1.9.0",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
@@ -149,8 +128,7 @@
     "vitest": "^4.1.9"
   },
   "peerDependencies": {
-    "@tailwindcss/typography": "^0.5.0",
-    "solid-js": "^1.8.0",
+    "preact": "^10.20.0",
     "tailwindcss": "^4.0.0"
   },
   "lint-staged": {

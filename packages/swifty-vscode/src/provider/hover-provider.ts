@@ -16,10 +16,7 @@ const IMAGE_EXTENSIONS = new Set([
 const IMAGE_PATH_REGEX = /['"]([^'"]*\.(png|jpe?g|gif|svg|webp|bmp|ico))['"]/i;
 
 export class ImageHoverProvider implements vscode.HoverProvider {
-  provideHover(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-  ): vscode.Hover | null {
+  provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | null {
     const range = document.getWordRangeAtPosition(position, IMAGE_PATH_REGEX);
     if (range === undefined) {
       return null;
@@ -35,9 +32,7 @@ export class ImageHoverProvider implements vscode.HoverProvider {
 
     // Handle absolute URLs
     if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-      const markdown = new vscode.MarkdownString(
-        `![preview](${imagePath}|width=200)`,
-      );
+      const markdown = new vscode.MarkdownString(`![preview](${imagePath}|width=200)`);
       markdown.supportHtml = true;
       return new vscode.Hover(markdown, range);
     }
@@ -56,9 +51,7 @@ export class ImageHoverProvider implements vscode.HoverProvider {
     }
 
     const fileUri = vscode.Uri.file(resolvedPath);
-    const markdown = new vscode.MarkdownString(
-      `![preview](${fileUri.toString()}|width=200)`,
-    );
+    const markdown = new vscode.MarkdownString(`![preview](${fileUri.toString()}|width=200)`);
     markdown.supportHtml = true;
 
     return new vscode.Hover(markdown, range);

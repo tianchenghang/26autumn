@@ -1,18 +1,15 @@
-import { onMount } from "solid-js";
+import { useEffect, useRef } from "preact/hooks";
 import { z } from "zod";
 import { useDocs } from "./context";
 import { createLocalSearchClient } from "./docs-search-local";
 import { SearchEntrySchema } from "./lib/content";
 
-/**
- * Algolia DocSearch widget backed by the local search index (no Algolia
- * account required). Mounted in the navbar when provider === "docsearch".
- */
 export function DocSearchWidget() {
   const docs = useDocs();
-  let container: HTMLDivElement | undefined;
+  const container = useRef<HTMLDivElement>(null);
 
-  onMount(() => {
+  useEffect(() => {
+    let cancelled = false;
     void (async () => {
       const raw = docs.getSearchIndex ? await docs.getSearchIndex() : [];
       const parsed = z.array(SearchEntrySchema).safeParse(raw);
@@ -22,11 +19,9 @@ export function DocSearchWidget() {
       void import("@docsearch/css");
       try {
         const { default: docsearch } = await import("@docsearch/js");
-        if (!container) return;
+        if (cancelled || !container.current) return;
         docsearch({
-          container,
-          // Dummy credentials — queries are routed to the local index via
-          // transformSearchClient below.
+          container: container.current,
           appId: "local",
           apiKey: "local",
           indexName: "local",
@@ -42,7 +37,10 @@ export function DocSearchWidget() {
         console.warn("[@swifty.js/docs] Failed to initialize DocSearch:", e);
       }
     })();
-  });
+    return () => {
+      cancelled = true;
+    };
+  }, [docs.getSearchIndex]);
 
   return <div id="docsearch-container" ref={container} />;
 }

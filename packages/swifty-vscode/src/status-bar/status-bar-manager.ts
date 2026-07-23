@@ -48,10 +48,7 @@ export class StatusBarManager {
   }
 
   private createStatusBarItem(shortcut: Shortcut): void {
-    const item = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Right,
-      100,
-    );
+    const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     item.text = `$(link-external) ${shortcut.name}`;
     item.tooltip = shortcut.url;
     item.command = {

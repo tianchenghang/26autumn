@@ -1,26 +1,26 @@
 /**
- * SolidJS theme for @swifty.js/docs.
+ * Preact theme for @swifty.js/docs.
  *
- * The theme is a set of Solid components that render the build-time
+ * The theme is a set of Preact components that render the build-time
  * markdown output ({ pageData, contentHtml } modules). Wire it up in your
  * app entry:
  *
  * ```tsx
  * import { DocsProvider, DocsLayout } from "@swifty.js/docs";
  * import { docsConfig, loadContent, getSearchIndex } from "@swifty-docs/generated";
+ * import { render } from "preact";
+ * import { Router, Route } from "wouter-preact";
  *
  * render(
- *   () => (
- *     <DocsProvider
- *       config={docsConfig}
- *       loadContent={loadContent}
- *       getSearchIndex={getSearchIndex}
- *     >
- *       <Router>
- *         <Route path="/*all" component={DocsLayout} />
- *       </Router>
- *     </DocsProvider>
- *   ),
+ *   <DocsProvider
+ *     config={docsConfig}
+ *     loadContent={loadContent}
+ *     getSearchIndex={getSearchIndex}
+ *   >
+ *     <Router>
+ *       <Route path="/*" component={DocsLayout} />
+ *     </Router>
+ *   </DocsProvider>,
  *   document.getElementById("app")!,
  * );
  * ```
@@ -55,7 +55,7 @@ export {
 // Utilities and runtime helpers
 export { cn } from "./lib/utils";
 export { createSearchEngine, highlightSegments } from "./lib/search";
-export { createScrollSpy } from "./lib/scroll-spy";
+export { useScrollSpy } from "./lib/scroll-spy";
 export { createLocalSearchClient } from "./docs-search-local";
 export {
   computePrevNext,

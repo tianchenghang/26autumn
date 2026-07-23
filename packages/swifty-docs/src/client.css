@@ -8,11 +8,10 @@
  */
 
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Scan the Solid theme components for utility classes. */
+/* Scan the Preact theme components for utility classes. */
 @source "./theme";
 
 /* ------------------------------------------------------------------ */
@@ -392,16 +391,44 @@
 }
 
 .prose :where(table):not(:where([class~="not-prose"] *)) {
+  width: 100%;
+  table-layout: auto;
+  text-align: left;
   font-size: 0.875em;
+  line-height: 1.7;
   margin: 1.4rem 0;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prose :where(thead):not(:where([class~="not-prose"] *)) {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--muted) 50%, transparent);
 }
 
 .prose :where(th):not(:where([class~="not-prose"] *)) {
   font-family: var(--font-mono);
   font-size: 0.8em;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted-foreground);
+  padding: 0.55em 0.9em;
+}
+
+.prose :where(td):not(:where([class~="not-prose"] *)) {
+  padding: 0.55em 0.9em;
+  vertical-align: top;
+}
+
+.prose :where(tbody tr):not(:where([class~="not-prose"] *)) {
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+
+.prose :where(tbody tr:last-child):not(:where([class~="not-prose"] *)) {
+  border-bottom: 0;
 }
 
 .prose :where(img):not(:where([class~="not-prose"] *)) {

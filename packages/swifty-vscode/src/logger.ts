@@ -16,4 +16,3 @@ export function log(message: string): void {
     channel.appendLine(`[${timestamp}] ${message}`);
   }
 }
-

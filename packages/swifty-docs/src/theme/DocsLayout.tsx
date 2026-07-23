@@ -1,13 +1,5 @@
-import { useLocation, useNavigate } from "@solidjs/router";
-import {
-  createEffect,
-  createMemo,
-  createResource,
-  createSignal,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
+import { useLocation } from "wouter-preact";
 import { ContentRenderer } from "./ContentRenderer";
 import { useDocs } from "./context";
 import { CompassIcon, XIcon } from "./icons";
@@ -26,86 +18,92 @@ import { Sidebar } from "./Sidebar";
 import { Toc } from "./Toc";
 import { Button } from "./ui/button";
 
-/**
- * Master docs shell: navbar, sidebar rail, prose column, TOC rail, search
- * palette and mobile drawer. Stays mounted across all routes — navigation
- * only swaps the content column.
- */
 export function DocsLayout() {
   const docs = useDocs();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = createSignal(false);
+  const [location, navigate] = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const landing = docs.config.nav?.[0]?.link ?? docs.config.baseUrl ?? "/";
 
-  const normalized = createMemo(() => normalizePath(location.pathname));
-  const path = createMemo(() => normalized().path);
+  const normalized = useMemo(() => normalizePath(location), [location]);
+  const path = normalized.path;
 
-  // Rewrite /index, /index.md, /index.html URLs to the clean directory path.
-  createEffect(() => {
-    const redirect = normalized().redirect;
-    if (redirect !== null && redirect !== location.pathname) {
+  useEffect(() => {
+    const redirect = normalized.redirect;
+    if (redirect !== null && redirect !== location) {
       navigate(redirect, { replace: true });
     }
-  });
+  }, [normalized.redirect, location, navigate]);
 
-  const [content] = createResource<LoadedContent | null, string>(
-    path,
-    async (p) => {
-      if (!docs.loadContent) return null;
-      try {
-        const result = await docs.loadContent(p);
+  const [content, setContent] = useState<LoadedContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    if (!docs.loadContent) {
+      setContent(null);
+      setLoading(false);
+      return;
+    }
+    docs
+      .loadContent(path)
+      .then((result) => {
+        if (cancelled) return;
         const parsed = LoadedContentSchema.safeParse(result);
-        return parsed.success ? parsed.data : null;
-      } catch (err) {
-        console.warn("[@swifty.js/docs] Failed to load content for", p, err);
-        return null;
-      }
-    },
-  );
+        setContent(parsed.success ? parsed.data : null);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.warn("[@swifty.js/docs] Failed to load content for", path, err);
+        setContent(null);
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [path, docs.loadContent]);
 
-  // The bare site root is not a real route — send visitors to the landing page.
-  createEffect(() => {
-    if (content.state !== "ready" || content() !== null) return;
+  useEffect(() => {
+    if (loading || content !== null) return;
     const base = docs.config.baseUrl.replace(/\/+$/, "") || "/";
-    if (path() === base || path() === "/") {
+    if (path === base || path === "/") {
       navigate(landing, { replace: true });
     }
-  });
+  }, [loading, content, path, docs.config.baseUrl, landing, navigate]);
 
-  createEffect(() => {
-    const page = content();
-    document.title = page
-      ? `${page.pageData.title} · ${docs.config.title}`
+  useEffect(() => {
+    document.title = content
+      ? `${content.pageData.title} · ${docs.config.title}`
       : docs.config.title;
-  });
+  }, [content, docs.config.title]);
 
-  // Fresh page → back to the top (unless navigating to an anchor).
-  createEffect(() => {
-    path();
-    if (!location.hash) window.scrollTo({ top: 0 });
-  });
+  useEffect(() => {
+    if (!window.location.hash) window.scrollTo({ top: 0 });
+  }, [path]);
 
-  // Anchor targets only exist once the content HTML is in the DOM.
-  createEffect(() => {
-    const page = content();
-    if (!page) return;
-    const hash = location.hash.slice(1);
+  useEffect(() => {
+    if (!content) return;
+    const hash = window.location.hash.slice(1);
     if (hash) {
       queueMicrotask(() =>
         document.getElementById(hash)?.scrollIntoView({ block: "start" }),
       );
     }
-  });
+  }, [content]);
 
-  // Lock body scroll while the mobile drawer is open.
-  createEffect(() => {
-    document.body.style.overflow = sidebarOpen() ? "hidden" : "";
-  });
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? "hidden" : "";
+  }, [sidebarOpen]);
 
-  const headings = createMemo(() => content()?.pageData.headings ?? []);
-  const pager = createMemo(() => computePrevNext(docs.config.sidebar, path()));
+  const headings = useMemo(() => content?.pageData.headings ?? [], [content]);
+  const pager = useMemo(
+    () => computePrevNext(docs.config.sidebar, path),
+    [docs.config.sidebar, path],
+  );
+
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   return (
     <div class="bg-background text-foreground min-h-screen font-sans antialiased">
@@ -130,29 +128,19 @@ export function DocsLayout() {
           </aside>
 
           <main id="main-content" class="min-w-0 scroll-mt-20 py-8 lg:py-10">
-            <Switch>
-              <Match
-                when={
-                  content.state === "unresolved" || content.state === "pending"
-                }
-              >
-                <PageSkeleton />
-              </Match>
-              <Match when={content()}>
-                {(page) => (
-                  <>
-                    <ContentRenderer
-                      html={page().contentHtml}
-                      headings={headings}
-                    />
-                    <PrevNext prev={pager().prev} next={pager().next} />
-                  </>
-                )}
-              </Match>
-              <Match when={content.state === "ready"}>
-                <NotFound path={path()} home={landing} />
-              </Match>
-            </Switch>
+            {loading ? (
+              <PageSkeleton />
+            ) : content ? (
+              <>
+                <ContentRenderer
+                  html={content.contentHtml}
+                  headings={headings}
+                />
+                <PrevNext prev={pager.prev} next={pager.next} />
+              </>
+            ) : (
+              <NotFound path={path} home={landing} />
+            )}
 
             <footer class="border-border/70 text-muted-foreground mt-16 flex flex-wrap items-center justify-between gap-2 border-t pt-5 pb-10 text-xs">
               <span>
@@ -176,15 +164,15 @@ export function DocsLayout() {
       <div
         class={cn(
           "fixed inset-0 z-50 lg:hidden",
-          !sidebarOpen() && "pointer-events-none",
+          !sidebarOpen && "pointer-events-none",
         )}
-        aria-hidden={!sidebarOpen()}
+        aria-hidden={!sidebarOpen}
       >
         <div
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
           class={cn(
             "bg-foreground/25 absolute inset-0 backdrop-blur-[2px] transition-opacity duration-300 dark:bg-black/50",
-            sidebarOpen() ? "opacity-100" : "opacity-0",
+            sidebarOpen ? "opacity-100" : "opacity-0",
           )}
         />
         <div
@@ -193,7 +181,7 @@ export function DocsLayout() {
           aria-label="Navigation menu"
           class={cn(
             "border-border bg-sidebar absolute inset-y-0 left-0 flex w-72 flex-col border-r shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-            sidebarOpen() ? "translate-x-0" : "-translate-x-full",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           <div class="border-border/70 flex h-14 shrink-0 items-center justify-between border-b px-4">
@@ -201,26 +189,23 @@ export function DocsLayout() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSidebarOpen(false)}
+              onClick={closeSidebar}
               aria-label="Close navigation menu"
             >
               <XIcon class="size-4.5" />
             </Button>
           </div>
           <div class="sidebar-scroll min-h-0 flex-1 overflow-y-auto px-3 py-6">
-            <Sidebar path={path} onNavigate={() => setSidebarOpen(false)} />
+            <Sidebar path={path} onNavigate={closeSidebar} />
           </div>
         </div>
       </div>
 
-      <Show when={docs.searchProvider === "local"}>
-        <SearchDialog />
-      </Show>
+      {docs.searchProvider === "local" && <SearchDialog />}
     </div>
   );
 }
 
-/** Fixed, non-interactive atmosphere: sage washes, dot grid and grain. */
 function BackgroundLayers() {
   return (
     <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
@@ -247,7 +232,7 @@ function PageSkeleton() {
   );
 }
 
-function NotFound(props: { path: string; home: string }) {
+function NotFound({ path, home }: { path: string; home: string }) {
   return (
     <div class="animate-fade-in flex flex-col items-start gap-4 py-16">
       <span class="border-border bg-muted/40 text-muted-foreground grid size-12 place-items-center rounded-xl border">
@@ -259,11 +244,11 @@ function NotFound(props: { path: string; home: string }) {
       <p class="text-muted-foreground max-w-md text-sm leading-relaxed">
         Nothing lives at{" "}
         <code class="bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-xs">
-          {props.path}
+          {path}
         </code>
         . It may have moved, or the link may be out of date.
       </p>
-      <Button onClick={() => (window.location.href = props.home)}>
+      <Button onClick={() => (window.location.href = home)}>
         Back to the docs
       </Button>
     </div>
