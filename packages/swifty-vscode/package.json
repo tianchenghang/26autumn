@@ -2,7 +2,7 @@
   "name": "swifty-vscode",
   "displayName": "Swifty vscode",
   "version": "0.0.1",
-  "description": "Swifty toolchain for vscode",
+  "description": "VSCode utility extension",
   "categories": [
     "Other"
   ],
@@ -25,9 +25,6 @@
     "format": "oxfmt --write ./"
   },
   "dependencies": {
-    "@babel/parser": "^7.29.7",
-    "@babel/types": "^7.29.7",
-    "@swifty.js/mvc": "workspace:^",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -41,12 +38,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "swifty.copyViewPath",
-        "title": "Swifty: Copy View Path"
-      },
-      {
         "command": "swifty.openInGithub",
-        "title": "Swifty: Open in GitHub"
+        "title": "Open in GitHub"
       }
     ],
     "configuration": {
@@ -76,43 +69,14 @@
       },
       "title": "Swifty"
     },
-    "grammars": [
-      {
-        "injectTo": [
-          "text.html.basic"
-        ],
-        "path": "./syntaxes/swifty-template.tmLanguage.json",
-        "scopeName": "text.html.swifty-template"
-      }
-    ],
-    "languages": [
-      {
-        "aliases": [
-          "Swifty Template"
-        ],
-        "configuration": "./language-configuration.json",
-        "extensions": [],
-        "id": "swifty-template"
-      }
-    ],
     "menus": {
       "editor/context": [
-        {
-          "command": "swifty.copyViewPath",
-          "group": "0_swifty",
-          "when": "vs-swifty:isSwifty"
-        },
         {
           "command": "swifty.openInGithub",
           "group": "0_swifty"
         }
       ],
       "explorer/context": [
-        {
-          "command": "swifty.copyViewPath",
-          "group": "0_swifty",
-          "when": "vs-swifty:isSwifty"
-        },
         {
           "command": "swifty.openInGithub",
           "group": "0_swifty"

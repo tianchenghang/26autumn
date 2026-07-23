@@ -15,7 +15,7 @@ const IMAGE_EXTENSIONS = new Set([
 
 const IMAGE_PATH_REGEX = /['"]([^'"]*\.(png|jpe?g|gif|svg|webp|bmp|ico))['"]/i;
 
-export class SwiftyImageHoverProvider implements vscode.HoverProvider {
+export class ImageHoverProvider implements vscode.HoverProvider {
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,

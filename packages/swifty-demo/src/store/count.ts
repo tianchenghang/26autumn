@@ -1,51 +1,45 @@
-import { createStore } from "@swifty.js/mvc";
+import { createStore } from "solid-js/store";
 
-export interface CountStore {
-  // state
+export interface CountState {
   count: number;
   step: number;
   history: string[];
-  // actions
-  increment: () => void;
-  decrement: () => void;
-  reset: () => void;
-  setStep: (val: number) => void;
-  clearHistory: () => void;
 }
 
-const useCountStore = createStore<CountStore>("count", (set, get) => ({
-  // ── state ──
-  count: 0,
-  step: 1,
-  history: [] as string[],
+function createCountStore() {
+  const [state, setState] = createStore<CountState>({
+    count: 0,
+    step: 1,
+    history: [],
+  });
 
-  // ── actions ──
-  increment() {
-    const { count, step } = get();
-    set({
-      count: count + step,
-      history: [...get().history, `+${step} → ${count + step}`],
-    });
-  },
-  decrement() {
-    const { count, step } = get();
-    set({
-      count: count - step,
-      history: [...get().history, `-${step} → ${count - step}`],
-    });
-  },
-  reset() {
-    set({
-      count: 0,
-      history: [...get().history, "Reset → 0"],
-    });
-  },
-  setStep(val: number) {
-    set({ step: val });
-  },
-  clearHistory() {
-    set({ history: [] });
-  },
-}));
+  const actions = {
+    increment() {
+      const next = state.count + state.step;
+      setState({
+        count: next,
+        history: [...state.history, `+${state.step} → ${next}`],
+      });
+    },
+    decrement() {
+      const next = state.count - state.step;
+      setState({
+        count: next,
+        history: [...state.history, `-${state.step} → ${next}`],
+      });
+    },
+    reset() {
+      setState({ count: 0, history: [...state.history, "Reset → 0"] });
+    },
+    setStep(val: number) {
+      setState("step", val);
+    },
+    clearHistory() {
+      setState("history", []);
+    },
+  };
 
-export default useCountStore;
+  return { state, actions };
+}
+
+export const countStore = createCountStore();

@@ -1,46 +1,28 @@
 {
   "name": "swifty-demo",
   "version": "0.0.1",
-  "description": "@swifty.js/mvc framework demo",
+  "description": "SolidJS demo with Module Federation",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:webpack": "webpack serve --mode development",
-    "dev:rsbuild": "rsbuild dev",
     "build": "vite build",
-    "build:webpack": "webpack --mode production --config webpack.config.js",
-    "build:rsbuild": "rsbuild build",
     "preview": "vite preview",
-    "preview:webpack": "webpack serve --mode production",
-    "preview:rsbuild": "rsbuild preview",
     "format": "prettier -w ./ --experimental-cli"
   },
   "dependencies": {
-    "@swifty.js/mvc": "workspace:^",
     "@module-federation/vite": "^1.16.12",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "@solidjs/router": "^0.15.4",
+    "solid-js": "^1.9.7"
   },
   "devDependencies": {
     "@module-federation/runtime-tools": "^2.6.0",
-    "@rsbuild/core": "^2.1.1",
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^24.13.3",
-    "@vitejs/plugin-react": "^6.0.3",
-    "autoprefixer": "^10.5.2",
-    "css-loader": "^7.1.4",
-    "html-webpack-plugin": "^5.6.7",
-    "postcss": "^8.5.16",
-    "postcss-loader": "^8.2.1",
     "prettier": "^3.9.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "style-loader": "^4.0.0",
     "tailwindcss": "^4.3.2",
-    "ts-loader": "^9.6.2",
     "typescript": "^5.9.3",
     "vite": "^8.1.1",
-    "webpack": "^5.108.3",
-    "webpack-cli": "^7.1.0",
-    "webpack-dev-server": "^5.2.5"
+    "vite-plugin-solid": "^2.11.6"
   }
 }

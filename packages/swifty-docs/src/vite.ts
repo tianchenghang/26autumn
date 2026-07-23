@@ -1,11 +1,9 @@
 /**
  * Vite plugin for @swifty.js/docs.
  *
- * A single plugin that handles BOTH:
- * 1. .md file compilation (frontmatter, markdown-it, Shiki)
- * 2. .html template compilation (swifty-mvc template engine)
- *
- * Consumers only need this one plugin — no separate swiftyMvcPlugin7() required.
+ * Returns the plugin pair a docs site needs:
+ * 1. swifty-docs — compiles .md files into { pageData, contentHtml } modules
+ * 2. solid — compiles the SolidJS theme (and your own .tsx components)
  *
  * Usage:
  * ```ts
@@ -21,39 +19,33 @@ import { isAbsolute, resolve, dirname } from "node:path";
 import type { DocsConfig } from "./types";
 import { compileMarkdown } from "./compile-markdown";
 import type { Plugin } from "vite";
-import {
-  swiftyMvcPlugin,
-  type SwiftyMvcVitePluginOptions,
-} from "@swifty.js/mvc/vite";
+import solid from "vite-plugin-solid";
 
 // Re-export build-time utilities for use in vite.config
-// (avoids importing from main entry which pulls in lucide-static SVG ?raw imports)
 export { defineConfig } from "./define-config";
 export { scanDocsDir } from "./scanner";
 export { generateSidebar } from "./sidebar-generator";
 export type { DocsConfig, SidebarConfig } from "./types";
 
-export interface SwiftyDocsVitePluginOptions extends SwiftyMvcVitePluginOptions {
+export interface SwiftyDocsVitePluginOptions {
   /** Full docs config. */
   config: DocsConfig;
+  /** Log resolveId/load activity. */
+  debug?: boolean;
 }
 
 // Suffix used to mark compiled .md files in the module graph
 const MD_SUFFIX = "?swifty-docs";
 
 /**
- * Create a Vite plugin array that handles both .md and .html compilation.
- *
- * Returns an array of two plugins:
+ * Create the Vite plugin array for a docs site:
  * 1. swifty-docs: compiles .md files to JS modules
- * 2. swifty-template (from @swifty.js/mvc): compiles .html templates
- *
- * The vdom option is read from `config.vdom` automatically.
+ * 2. solid (vite-plugin-solid): compiles the SolidJS theme JSX
  */
 export function swiftyDocsPlugin(
   options: SwiftyDocsVitePluginOptions,
 ): Plugin[] {
-  const { config, debug = false, vdom = false } = options;
+  const { config, debug = false } = options;
 
   const docsPlugin: Plugin = {
     name: "swifty-docs",
@@ -118,9 +110,5 @@ export function swiftyDocsPlugin(
     },
   };
 
-  // The swifty-mvc template plugin handles .html template compilation.
-  // We integrate it internally so consumers don't need to configure it separately.
-  const mvcPlugin = swiftyMvcPlugin({ debug, vdom });
-
-  return [docsPlugin, mvcPlugin as Plugin];
+  return [docsPlugin, solid() as Plugin];
 }

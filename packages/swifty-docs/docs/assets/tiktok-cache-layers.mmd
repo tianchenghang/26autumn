@@ -1,0 +1,6 @@
+flowchart TD
+  A[前端请求] --> B["BFF (Nest.js)"]
+  B --> C["L1: BFF 进程内缓存<br/>TTL 30s, 约 1000 条热点查询"]
+  C -- miss --> D["L2: Redis 缓存<br/>TTL 5min, 全实例共享"]
+  D -- miss --> E["L3: ClickHouse / MySQL<br/>物化视图预聚合"]
+  E --> F[结果回写 L1 / L2]

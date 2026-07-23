@@ -1,9 +1,7 @@
 /**
  * @swifty.js/docs barrel exports.
  *
- * Main entry point — browser-safe exports only.
- * Includes re-exports from @swifty.js/mvc so consumers only need
- * to install @swifty.js/docs — no separate @swifty.js/mvc dependency required.
+ * Main entry point — browser-safe exports only (SolidJS theme + types).
  *
  * Build-time utilities (defineConfig, scanDocsDir, generateSidebar, etc.)
  * are available from sub-path exports:
@@ -12,26 +10,6 @@
  *   - "@swifty.js/docs/rspack"   (Rspack loader + build-time helpers)
  *   - "@swifty.js/docs/compiler" (compileMarkdown)
  */
-
-import type { FrameworkConfig as SwiftyMvcFrameworkConfig } from "@swifty.js/mvc";
-
-// ============================================================
-// Re-exports from @swifty.js/mvc (so consumers don't need it directly)
-// ============================================================
-
-export {
-  Framework,
-  defineView,
-  State,
-  Router,
-  registerViewClass,
-} from "@swifty.js/mvc";
-
-export type FrameworkConfig = Omit<SwiftyMvcFrameworkConfig, "routeMode"> & {
-  routeMode: "history";
-};
-
-export type { ViewCtx, ViewSetup } from "@swifty.js/mvc";
 
 // ============================================================
 // @swifty.js/docs types (browser-safe)
@@ -60,15 +38,35 @@ export type {
 // Browser-safe runtime utility (also available at @swifty.js/docs/runtime)
 export { slugify } from "./runtime";
 
-// Theme view factories
-export {
-  createDocsLayoutView,
-  createSidebarView,
-  createTocView,
-  createSearchView,
-  createLocalSearchClient,
-  registerThemeViews,
-} from "./theme";
+// ============================================================
+// SolidJS theme
+// ============================================================
 
-// Theme icons (lucide-static raw SVG strings)
-export { icons } from "./theme/icons";
+export {
+  DocsProvider,
+  useDocs,
+  type DocsProviderProps,
+} from "./theme/context";
+export { DocsLayout } from "./theme/DocsLayout";
+export { Navbar } from "./theme/Navbar";
+export { Sidebar } from "./theme/Sidebar";
+export { Toc } from "./theme/Toc";
+export { SearchDialog } from "./theme/SearchDialog";
+export { DocSearchWidget } from "./theme/DocSearchWidget";
+export { ContentRenderer } from "./theme/ContentRenderer";
+export { PrevNext } from "./theme/PrevNext";
+export { ThemeToggle } from "./theme/ThemeToggle";
+export { Logo } from "./theme/Logo";
+export { Button, buttonVariants } from "./theme/ui/button";
+export { Input } from "./theme/ui/input";
+export { Kbd } from "./theme/ui/kbd";
+export { cn } from "./theme/lib/utils";
+export { createSearchEngine, highlightSegments } from "./theme/lib/search";
+export { createScrollSpy } from "./theme/lib/scroll-spy";
+export {
+  computePrevNext,
+  normalizePath,
+  type LoadedContent,
+  type PageHeading,
+} from "./theme/lib/content";
+export { createLocalSearchClient } from "./theme/docs-search-local";

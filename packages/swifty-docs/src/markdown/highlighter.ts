@@ -67,20 +67,24 @@ const initPromises = new Map<string, Promise<Highlighter>>();
 function cacheKey(
   theme: string | undefined,
   languages: string[] | undefined,
+  darkTheme?: string,
 ): string {
   const langs = (languages ?? []).slice().sort().join(",") || "default";
-  return `${theme ?? "github-dark"}:${langs}`;
+  return `${theme ?? "github-dark"}+${darkTheme ?? ""}:${langs}`;
 }
 
 /**
  * Get or create the Shiki highlighter for the given theme+languages.
  * Thread-safe: concurrent calls with the same key share the init promise.
+ * When `darkTheme` is set, both themes are loaded so codeToHtml can emit
+ * dual-theme output (see highlightCode).
  */
 export async function getHighlighter(
   theme?: string,
   languages?: string[],
+  darkTheme?: string,
 ): Promise<Highlighter> {
-  const key = cacheKey(theme, languages);
+  const key = cacheKey(theme, languages, darkTheme);
   const cached = cache.get(key);
   if (cached) return cached;
   const existing = initPromises.get(key);
@@ -88,8 +92,10 @@ export async function getHighlighter(
 
   const promise = (async () => {
     const { createHighlighter } = await import("shiki");
+    const themes = [theme ?? "github-dark"];
+    if (darkTheme && darkTheme !== themes[0]) themes.push(darkTheme);
     const h = await createHighlighter({
-      themes: [theme ?? "github-dark"],
+      themes,
       langs: (languages as BundledLanguage[]) ?? DEFAULT_LANGUAGES,
     });
     cache.set(key, h);
@@ -109,7 +115,12 @@ export function resetHighlighter(): void {
 }
 
 /**
- * Highlight a code string. Returns complete `<pre>` HTML with inline styles.
+ * Highlight a code string. Returns complete `<pre>` HTML.
+ *
+ * With a single theme the output uses inline colors. With `darkTheme` set,
+ * output uses `themes: { light, dark }` with `defaultColor: false` — every
+ * token then carries `--shiki-light` / `--shiki-dark` variables and no
+ * inline color, letting the theme stylesheet switch schemes under `.dark`.
  * Falls back to escaped plain text on any error.
  */
 export function highlightCode(
@@ -117,12 +128,24 @@ export function highlightCode(
   code: string,
   lang: string,
   theme?: string,
+  darkTheme?: string,
 ): string {
   try {
     const loadedLangs = hl.getLoadedLanguages();
     const safeLang = loadedLangs.includes(lang as BundledLanguage)
       ? lang
       : "text";
+
+    if (darkTheme) {
+      return hl.codeToHtml(code, {
+        lang: safeLang,
+        themes: {
+          light: theme ?? "github-light",
+          dark: darkTheme,
+        },
+        defaultColor: false,
+      });
+    }
 
     return hl.codeToHtml(code, {
       lang: safeLang,

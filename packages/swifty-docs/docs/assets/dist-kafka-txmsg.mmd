@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    participant U as 上游服务(订单)
+    participant DB as 本地DB(业务表+消息表)
+    participant J as 补偿任务(定时扫描)
+    participant K as Kafka
+    participant D as 下游服务(积分)
+    participant DDB as 下游DB(业务表+去重表)
+
+    U->>DB: 本地事务: 写订单 + 写消息表(status=INIT)<br/>同一事务原子提交
+    U->>K: 发送消息(带唯一 msgID)
+    K-->>U: ack (acks=all)
+    U->>DB: 更新消息表 status=SENT
+    Note over J,DB: 若发送失败/宕机
+    J->>DB: 扫描超时 INIT 消息
+    J->>K: 重新投递(至少一次, 可能重复)
+    K->>D: 消费消息
+    D->>DDB: 事务: 查去重表(msgID)<br/>不存在则 加积分 + 插去重表
+    D->>K: 提交 offset (手动提交)
+    Note over U,DDB: 本地事务保证"业务成功=消息必发"<br/>消费端幂等保证"重复投递不重复执行"<br/>整体达到最终一致性

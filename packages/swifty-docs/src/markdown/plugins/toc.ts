@@ -1,8 +1,9 @@
 /**
  * Custom markdown-it plugin: [[toc]] directive.
  *
- * Replaces `[[toc]]` in markdown content with a `<div v-swifty="theme/toc">`
- * placeholder that gets mounted as a TocView at runtime.
+ * Replaces `[[toc]]` in markdown content with a `<div data-swifty-toc>`
+ * placeholder. At runtime the SolidJS ContentRenderer mounts an inline
+ * Toc component into every placeholder.
  */
 import type MarkdownIt from "markdown-it";
 
@@ -23,8 +24,8 @@ export function tocPlugin(md: MarkdownIt): void {
     return true;
   });
 
-  // Render the [[toc]] placeholder as a v-swifty mount point
+  // Render the [[toc]] placeholder as a mount point for the Solid Toc.
   md.renderer.rules["toc_placeholder"] = () => {
-    return '<div v-swifty="theme/toc"></div>';
+    return '<div data-swifty-toc></div>';
   };
 }

@@ -1,0 +1,5 @@
+flowchart LR
+  GQ["全局队列<br/>G10, G11, G12 ..."] -. work stealing .-> P0
+  P0["P0 本地队列<br/>G1, G2, G3"] --> M0["M0 (OS 线程)<br/>执行 G1"]
+  P1["P1 本地队列<br/>G4, G5, G6"] --> M1["M1 (OS 线程)<br/>执行 G4"]
+  P2["P2 本地队列<br/>G7, G8, G9"] --> M2["M2 (OS 线程)<br/>执行 G7"]

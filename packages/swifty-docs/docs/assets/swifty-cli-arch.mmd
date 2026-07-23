@@ -1,0 +1,61 @@
+flowchart TB
+    subgraph Entry["cmd/swifty 入口"]
+        MAIN["main.go<br/>TUI / -p print / --remote / --teammate"]
+    end
+
+    subgraph Core["Agent 核心"]
+        AGENT["agent.Agent<br/>主循环 Run()"]
+        EXEC["StreamingExecutor<br/>读并发 / 写串行"]
+        CONV["conversation.Manager<br/>消息历史 + UsageAnchor"]
+    end
+
+    subgraph LLMLayer["LLM 抽象层"]
+        CLIENT["llm.Client 接口<br/>Stream / SetSystemPrompt"]
+        ANTH["anthropicClient<br/>prompt cache / thinking"]
+        OAI["openaiClient / openai-compat"]
+    end
+
+    subgraph CtxMgmt["上下文管理"]
+        L1["Layer 1: tool_result 预算<br/>50K 单条 / 200K 聚合外溢"]
+        L2["Layer 2: compact 压缩<br/>LLM 摘要 + 保留尾部"]
+        MEM["memory 长期记忆<br/>提取 / 召回 / 整合"]
+        SESS["session JSONL 持久化<br/>compact_boundary"]
+    end
+
+    subgraph Safety["安全层"]
+        PERM["permissions.Checker<br/>5 层决策"]
+        SB["sandbox<br/>seatbelt / bwrap"]
+        HOOKS["hooks.Engine<br/>9 类事件"]
+    end
+
+    subgraph Tools["工具系统"]
+        REG["tools.Registry<br/>read/write/command 分类"]
+        MCP["MCP 客户端<br/>stdio / SSE / streamable"]
+        SKILL["skills<br/>SKILL.md inline/fork"]
+    end
+
+    subgraph Multi["多智能体"]
+        SUB["subagent AgentTool<br/>fork / 角色子代理"]
+        TEAM["teams<br/>FileMailBox + tmux/iTerm"]
+        WT["worktree 隔离<br/>git worktree add -B"]
+    end
+
+    MAIN --> AGENT
+    AGENT --> CONV
+    AGENT --> EXEC
+    AGENT --> CLIENT
+    CLIENT --> ANTH
+    CLIENT --> OAI
+    AGENT --> L1
+    AGENT --> L2
+    L2 --> SESS
+    AGENT --> MEM
+    EXEC --> PERM
+    PERM --> SB
+    EXEC --> HOOKS
+    EXEC --> REG
+    REG --> MCP
+    REG --> SKILL
+    REG --> SUB
+    SUB --> TEAM
+    SUB --> WT

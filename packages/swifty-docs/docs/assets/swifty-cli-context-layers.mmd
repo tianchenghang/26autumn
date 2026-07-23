@@ -1,0 +1,35 @@
+flowchart TB
+    START["每轮迭代开始"] --> L1
+
+    subgraph L1G["Layer 1: tool_result.Apply (每轮必执行)"]
+        L1["扫描全部 tool_result"]
+        L1 --> P1{"单条 > 50K 字符?"}
+        P1 -- 是 --> SPILL1["外溢到 .swifty/tool_results/&lt;id&gt;<br/>替换为 2KB 预览"]
+        P1 -- 否 --> P2{"单消息聚合 > 200K?"}
+        P2 -- 是 --> SPILL2["按大小降序外溢<br/>直到 ≤ 200K"]
+        P2 -- 否 --> FREEZE["冻结决策 SeenIDs<br/>字节级复现保 Prompt Cache"]
+        SPILL1 --> FREEZE
+        SPILL2 --> FREEZE
+    end
+
+    FREEZE --> EST["ComputeUsedTokens<br/>真实用量锚点 + 增量估算 (3.5 字符/token)"]
+
+    subgraph L2G["Layer 2: compact.ManageContext"]
+        EST --> T1{"tokens ≥ 窗口 − 20K − 13K?"}
+        T1 -- 否 --> SEND["发送 LLM 请求"]
+        T1 -- 是 --> T2{"tokens ≥ 窗口 − 20K − 3K?"}
+        T2 -- 是 --> FORCE["ForceCompact 强制压缩<br/>绕过熔断器"]
+        T2 -- 否 --> CB{"连续失败 ≥ 3?"}
+        CB -- 是 --> SEND
+        CB -- 否 --> AUTO["autoCompact"]
+        AUTO --> KEEP["computeKeepStartIndex<br/>保尾部 ≥10K token 或 ≥5 条, 上限 40K<br/>不拆 tool_use/tool_result 对"]
+        FORCE --> KEEP
+        KEEP --> SUM["LLM 生成 9 段结构化摘要<br/>PTL 重试: 按 API 轮次丢最老组, 最多 3 次"]
+        SUM --> BOUND["写 compact_boundary 到会话 JSONL"]
+        BOUND --> REBUILD["摘要 + 恢复块(最近文件读/激活技能/工具清单) + 尾部"]
+        REBUILD --> SEND
+    end
+
+    SEND --> ERR{"ContextTooLongError?"}
+    ERR -- 是 --> FORCE
+    ERR -- 否 --> DONE["流式处理响应"]

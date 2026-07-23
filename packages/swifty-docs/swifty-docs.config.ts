@@ -7,15 +7,16 @@ export default defineConfig({
   title: "Swifty Docs",
   description: "@swifty.js/docs -- Documentation site generator",
   nav: [
-    { text: "Base", link: "/swifty/base/" },
-    { text: "Frontend", link: "/swifty/frontend/" },
-    { text: "Backend", link: "/swifty/backend/" },
+    { text: "Swifty Docs", link: "/swifty/v2/swifty-docs/" },
+    { text: "Swifty MVC", link: "/swifty/v2/swifty-mvc/" },
+    { text: "English", link: "/swifty/en/swifty-mvc/" },
   ],
   sidebar: {
-    "/swifty/base/": "auto",
-    "/swifty/frontend/": "auto",
-    "/swifty/backend/": "auto",
+    "/swifty/v2/swifty-docs/": "auto",
+    "/swifty/v2/swifty-mvc/": "auto",
+    "/swifty/en/swifty-mvc/": "auto",
+    "/swifty/en/swifty-docs/": "auto",
   },
-  highlight: { theme: "github-light" },
+  highlight: { theme: "github-light", darkTheme: "github-dark" },
   search: { provider: "local" },
 });

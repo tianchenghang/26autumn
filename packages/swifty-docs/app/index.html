@@ -3,16 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#ecfdf5" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f4f8f4" />
     <meta name="description" content="Swifty Docs" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <title>Swifty Docs</title>
+    <script>
+      // Apply the persisted (or system) color scheme before first paint.
+      (function () {
+        try {
+          var stored = localStorage.getItem("swifty-docs-theme");
+          var dark = stored
+            ? stored === "dark"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.classList.toggle("dark", dark);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="./boot.ts"></script>
+    <script type="module" src="./boot.tsx"></script>
   </body>
 </html>

@@ -3,7 +3,9 @@
  *
  * Overrides the default fence renderer to:
  * - Delegate to Shiki for syntax highlighting when configured
- * - Fall back to escaped plain text with Tailwind/DaisyUI styling
+ * - Wrap the output in a .codeblock chrome container (language chip,
+ *   hover border, copy-button mount point — see client.css)
+ * - Fall back to escaped plain text when no highlighter is configured
  */
 import type MarkdownIt from "markdown-it";
 
@@ -13,22 +15,25 @@ export function codeBlockPlugin(md: MarkdownIt): void {
     const lang = token.info.trim().split(/\s+/)[0] || "";
     const code = token.content;
 
-    // If markdown-it's highlight option is set (e.g. via Shiki),
-    // delegate to it. Shiki produces fully styled <pre><code> output
-    // with inline CSS -- no additional wrapper needed.
+    let inner: string;
     if (mdOptions.highlight) {
+      // Shiki produces a fully styled <pre class="shiki"> with either
+      // inline colors (single theme) or --shiki-light/--shiki-dark
+      // variables (dual theme, switched by client.css).
       const highlighted = mdOptions.highlight(code, lang, "");
-      if (highlighted) {
-        return `${highlighted}\n`;
-      }
+      inner =
+        highlighted ||
+        fallbackBlock(code, lang);
+    } else {
+      inner = fallbackBlock(code, lang);
     }
 
-    // Fallback: plain escaped code with Tailwind/DaisyUI styling
-    return `
-    <pre class="bg-neutral text-neutral-content rounded-box p-4 overflow-x-auto">
-      <code class="language-${escapeHtml(lang)}">${escapeHtml(code)}</code>
-    </pre>\n`;
+    return `<div class="codeblock" data-lang="${escapeHtml(lang || "text")}">${inner}</div>\n`;
   };
+}
+
+function fallbackBlock(code: string, lang: string): string {
+  return `<pre class="codeblock-plain"><code class="language-${escapeHtml(lang)}">${escapeHtml(code)}</code></pre>`;
 }
 
 function escapeHtml(s: string): string {

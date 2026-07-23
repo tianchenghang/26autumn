@@ -1,0 +1,7 @@
+flowchart TD
+  A["构建 messages<br/>System Prompt + 历史消息 + 压缩后的上下文"] --> B["调用 LLM (SSE 流式输出)"]
+  B --> C{解析 LLM 响应}
+  C -- 纯文本 --> D[展示给用户, 结束循环]
+  C -- tool_use --> E["Action 执行<br/>权限检查 -> 工具路由 -> 捕获结果"]
+  E --> F["Observation 回注<br/>tool_result 追加到 messages"]
+  F --> B

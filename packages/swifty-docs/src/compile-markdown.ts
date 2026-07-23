@@ -1,9 +1,8 @@
 /**
- * Markdown-to-swifty-mvc-View compiler.
+ * Markdown-to-page-module compiler.
  *
- * Transforms a .md source string into a JS module string that exports
- * a swifty-mvc View class. The compiled module is consumed at runtime
- * by the swifty-mvc framework.
+ * Transforms a .md source string into a JS module string that the SolidJS
+ * theme consumes at runtime ({ pageData, contentHtml }).
  *
  * Pipeline:
  * 1. Extract YAML frontmatter (js-yaml)
@@ -11,7 +10,7 @@
  * 3. Parse markdown body to token stream (markdown-it + plugins)
  * 4. Render tokens to HTML string (with syntax-highlighted code blocks)
  * 5. Extract page metadata (title, headings)
- * 6. Wrap HTML in a JS module exporting pageData + template
+ * 6. Wrap HTML in a JS module exporting pageData + contentHtml
  */
 import { extractFrontmatter } from "./markdown/frontmatter";
 import { createParser } from "./markdown/parser";
@@ -30,8 +29,8 @@ import { isAbsolute, relative, resolve } from "node:path";
  * Compile a .md file source into a JS module string.
  *
  * The output module exports:
- * - `default`: a swifty-mvc View-compatible object { pageData, template }
  * - `pageData`: static page metadata (title, description, headings)
+ * - `contentHtml`: the rendered HTML string for the content column
  *
  * This function is async because Shiki highlighter initialization
  * requires loading WASM and TextMate grammars on first call.
@@ -53,10 +52,12 @@ export async function compileMarkdown(
     const hl = await getHighlighter(
       options.config.highlight.theme,
       options.config.highlight.languages,
+      options.config.highlight.darkTheme,
     );
     const theme = options.config.highlight.theme;
+    const darkTheme = options.config.highlight.darkTheme;
     md.options.highlight = (code: string, lang: string) => {
-      return highlightCode(hl, code, lang, theme);
+      return highlightCode(hl, code, lang, theme, darkTheme);
     };
   }
 

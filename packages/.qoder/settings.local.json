@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /Users/hangtiancheng/github/26autumn/packages/swifty-demo && find /Users/hangtiancheng/github/26autumn/packages/swifty-demo -type f -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" | head -200)"
+    ]
+  }
+}

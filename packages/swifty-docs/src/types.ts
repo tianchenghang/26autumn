@@ -85,6 +85,12 @@ export interface MarkdownOptions {
 export interface HighlightOptions {
   /** Shiki theme name. Default: "github-dark" */
   theme?: string;
+  /**
+   * Optional dark-mode theme. When set, code blocks are emitted with
+   * dual-theme tokens (`--shiki-light` / `--shiki-dark`) and the theme
+   * stylesheet switches schemes under `.dark` — no rebuild needed.
+   */
+  darkTheme?: string;
   /** Languages to load. Default: common web languages. */
   languages?: string[];
 }

@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant A as 客户端 A (持有锁)
+  participant B as 客户端 B (等待锁)
+  participant R as Redis (锁状态)
+  participant E as etcd (事件通知)
+
+  B->>R: SET lock uuidB NX PX 30000
+  R-->>B: nil (加锁失败)
+  B->>E: Watch /notify/lock (阻塞等待事件)
+  A->>R: EVAL 释放锁 (lua: GET==uuidA 则 DEL)
+  A->>E: Put /notify/lock (触发释放事件)
+  E-->>B: Watch 回调: /notify/lock 有 PUT 事件
+  B->>R: SET lock uuidB NX PX 30000
+  R-->>B: OK (加锁成功)

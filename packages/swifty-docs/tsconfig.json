@@ -6,6 +6,8 @@
     "exactOptionalPropertyTypes": false,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
     "lib": ["esnext", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "moduleDetection": "force",
@@ -31,5 +33,5 @@
     "types": ["node", "vitest/globals"],
     "verbatimModuleSyntax": true
   },
-  "include": ["./**/*.ts", "./**/*.d.ts"]
+  "include": ["./**/*.ts", "./**/*.tsx", "./**/*.d.ts"]
 }

@@ -6,7 +6,8 @@
     "types": ["node"],
     "sourceMap": true,
     "strict": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
@@ -16,18 +17,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     // NOTE: Do NOT put `"./@mf-types"` in `types` here.
-    //
-    // The DTS plugin generates a tsconfig at node_modules/.federation/tsconfig.*.json
-    // and copies the `types` array verbatim. A relative path like `"./@mf-types"`
-    // would be resolved relative to the .federation directory — breaking with
-    // `error TS2688: Cannot find type definition file for './@mf-types'` (TYPE-001).
-    // This blocks type generation, which in turn prevents the remote host
-    // (swifty-demo) from downloading @mf-types.zip from this project.
-    //
     // Instead, @mf-types/index.d.ts is loaded via a triple-slash reference in
     // src/vite-env.d.ts (relative to the source file, not the tsconfig).
-    // The `paths` mapping below handles `import "swifty_devtool/*"` resolution.
-    /* Path mappings for Module Federation remote modules */
     "paths": {
       "swifty_devtool/*": ["./@mf-types/swifty_devtool/*"]
     }
