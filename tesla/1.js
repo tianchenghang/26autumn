@@ -1,23 +1,24 @@
 // @ts-check
 
-import $ from "jquery"
+import $ from "jquery";
 
 /**
- * 
- * @param {string} today 
- * @param {number} limit 
+ *
+ * @param {string} today
+ * @param {number} limit
  */
-function solution(today, limit) { 
+function solution(today, limit) {
   let errorCount = 0;
   const todayDate = new Date(today);
 
-  $('table tbody tr').each(function () { 
+  $("table tbody tr").each(function () {
     const row = $(this);
 
-    const styleAttr = row.attr('style') || '';
-    const isMarkedRed = styleAttr.includes('background-color') && styleAttr.includes("red");
+    const styleAttr = row.attr("style") || "";
+    const isMarkedRed =
+      styleAttr.includes("background-color") && styleAttr.includes("red");
 
-    const cells = row.find('td');
+    const cells = row.find("td");
     const borrowDateStr = $(cells[1]).text().trim();
     const returnDateStr = $(cells[2]).text().trim();
 
@@ -30,13 +31,13 @@ function solution(today, limit) {
     if (returnDateStr) {
       const returnDate = new Date(returnDateStr);
       isOverDue = returnDate > dueDate;
-    } else { 
+    } else {
       isOverDue = todayDate > dueDate;
     }
 
-    if (isMarkedRed !== isOverDue) { 
+    if (isMarkedRed !== isOverDue) {
       errorCount++;
     }
-  })
+  });
   return errorCount;
 }

@@ -1,8 +1,0 @@
-@import "tailwindcss";
-@import "../src/client.css";
-
-/* !!! For your project, it should be: */
-/* @source "../node_modules/@swifty.js/docs/theme.js" */
-
-/* Scan theme components for Tailwind class names */
-@source "../src/theme";

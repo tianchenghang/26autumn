@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(find /Users/hangtiancheng/github/26autumn/packages/swifty-docs -type f | head -200)"
-    ]
-  }
-}

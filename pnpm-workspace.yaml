@@ -1,8 +1,7 @@
-
 packages:
   - "packages/*"
 allowBuilds:
-  '@vscode/vsce-sign': true
+  "@vscode/vsce-sign": true
   docsify: true
   esbuild: true
   keytar: true
