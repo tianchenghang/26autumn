@@ -57,9 +57,7 @@ export function DocsProvider(props: ParentProps<DocsProviderProps>) {
       "[@swifty.js/docs] loadContent not injected — pages cannot be loaded.",
     );
   }
-  const searchIndexParse = GetSearchIndexSchema.safeParse(
-    props.getSearchIndex,
-  );
+  const searchIndexParse = GetSearchIndexSchema.safeParse(props.getSearchIndex);
 
   const [searchOpen, setSearchOpen] = createSignal(false);
 

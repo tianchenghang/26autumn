@@ -54,7 +54,9 @@ export function ContentRenderer(props: ContentRendererProps) {
     for (const holder of Array.from(
       el.querySelectorAll<HTMLElement>("[data-swifty-toc]"),
     )) {
-      disposers.push(render(() => <Toc headings={props.headings} inline />, holder));
+      disposers.push(
+        render(() => <Toc headings={props.headings} inline />, holder),
+      );
     }
 
     // Attach copy buttons to code blocks.
@@ -65,7 +67,9 @@ export function ContentRenderer(props: ContentRendererProps) {
       const holder = document.createElement("div");
       holder.className = "codeblock-actions";
       block.appendChild(holder);
-      disposers.push(render(() => <CopyButton target={pre ?? block} />, holder));
+      disposers.push(
+        render(() => <CopyButton target={pre ?? block} />, holder),
+      );
     }
   });
 
@@ -90,7 +94,9 @@ export function ContentRenderer(props: ContentRendererProps) {
     }
   };
 
-  return <article ref={articleRef} onClick={onClick} class="prose max-w-none" />;
+  return (
+    <article ref={articleRef} onClick={onClick} class="prose max-w-none" />
+  );
 }
 
 function CopyButton(props: { target: HTMLElement }) {

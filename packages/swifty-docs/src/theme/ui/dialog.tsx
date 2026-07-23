@@ -2,7 +2,7 @@ import { Dialog as DialogPrimitive } from "@kobalte/core/dialog";
 import { splitProps, type ComponentProps, type ParentProps } from "solid-js";
 import { cn } from "../lib/utils";
 
-export const Dialog = DialogPrimitive.Root;
+export const Dialog = DialogPrimitive;
 export const DialogTrigger = DialogPrimitive.Trigger;
 export const DialogPortal = DialogPrimitive.Portal;
 export const DialogClose = DialogPrimitive.CloseButton;
@@ -16,7 +16,7 @@ export function DialogOverlay(
   return (
     <DialogPrimitive.Overlay
       class={cn(
-        "fixed inset-0 z-50 bg-foreground/25 backdrop-blur-[2px] animate-overlay-in dark:bg-black/50",
+        "bg-foreground/25 animate-overlay-in fixed inset-0 z-50 backdrop-blur-[2px] dark:bg-black/50",
         local.class,
       )}
       {...rest}
@@ -31,7 +31,7 @@ export function DialogContent(
   return (
     <DialogPrimitive.Content
       class={cn(
-        "fixed z-50 flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-2xl shadow-foreground/10 outline-none animate-dialog-in",
+        "border-border bg-card text-card-foreground shadow-foreground/10 animate-dialog-in fixed z-50 flex flex-col overflow-hidden rounded-xl border shadow-2xl outline-none",
         local.class,
       )}
       {...rest}

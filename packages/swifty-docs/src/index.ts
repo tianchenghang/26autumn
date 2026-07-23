@@ -42,11 +42,7 @@ export { slugify } from "./runtime";
 // SolidJS theme
 // ============================================================
 
-export {
-  DocsProvider,
-  useDocs,
-  type DocsProviderProps,
-} from "./theme/context";
+export { DocsProvider, useDocs, type DocsProviderProps } from "./theme/context";
 export { DocsLayout } from "./theme/DocsLayout";
 export { Navbar } from "./theme/Navbar";
 export { Sidebar } from "./theme/Sidebar";

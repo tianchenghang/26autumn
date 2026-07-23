@@ -8,10 +8,6 @@
  */
 
 @import "tailwindcss";
-@import "@fontsource-variable/bricolage-grotesque";
-@import "@fontsource-variable/instrument-sans";
-@import "@fontsource-variable/spline-sans-mono";
-
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -98,15 +94,14 @@
   --color-code: var(--code);
 
   --font-display:
-    "Bricolage Grotesque Variable", "Instrument Sans Variable", ui-sans-serif,
-    system-ui, "PingFang SC", "Sarasa Gothic SC", "Microsoft YaHei",
-    sans-serif;
+    Geist Mono, Swifty, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC,
+    PingFang SC, Microsoft YaHei, monospace;
   --font-sans:
-    "Instrument Sans Variable", ui-sans-serif, system-ui, "PingFang SC",
-    "Sarasa Gothic SC", "Microsoft YaHei", sans-serif;
+    Geist Mono, Swifty, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC,
+    PingFang SC, Microsoft YaHei, monospace;
   --font-mono:
-    "Spline Sans Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas,
-    "Sarasa Gothic SC", monospace;
+    Geist Mono, Swifty, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC,
+    PingFang SC, Microsoft YaHei, monospace;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

@@ -1,10 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  For,
-  Show,
-  type Accessor,
-} from "solid-js";
+import { createEffect, createSignal, For, Show, type Accessor } from "solid-js";
 import { ListIcon } from "./icons";
 import type { PageHeading } from "./lib/content";
 import { createScrollSpy } from "./lib/scroll-spy";
@@ -51,22 +45,22 @@ export function Toc(props: TocProps) {
       <div
         class={cn(
           props.inline &&
-            "not-prose my-6 rounded-xl border border-border/80 bg-muted/30 p-4",
+            "not-prose border-border/80 bg-muted/30 my-6 rounded-xl border p-4",
         )}
       >
-        <p class="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p class="text-muted-foreground flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-[0.14em] uppercase">
           <ListIcon class="size-3.5" />
           On this page
         </p>
         <div class="relative mt-3">
           <span
             aria-hidden="true"
-            class="absolute inset-y-0 left-0 w-px bg-border/80"
+            class="bg-border/80 absolute inset-y-0 left-0 w-px"
           />
           <span
             aria-hidden="true"
             class={cn(
-              "absolute left-0 w-px rounded-full bg-primary transition-[top,height,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+              "bg-primary absolute left-0 w-px rounded-full transition-[top,height,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
               !marker().show && "opacity-0",
             )}
             style={{ top: `${marker().top}px`, height: `${marker().height}px` }}
@@ -83,7 +77,7 @@ export function Toc(props: TocProps) {
                       "block py-1 text-xs leading-snug transition-colors duration-200",
                       h.level >= 3 && "pl-3",
                       active() === h.slug
-                        ? "font-medium text-primary"
+                        ? "text-primary font-medium"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >

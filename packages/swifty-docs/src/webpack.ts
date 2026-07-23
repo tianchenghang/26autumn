@@ -17,7 +17,8 @@ import type { DocsConfig } from "./types";
 import { compileMarkdown } from "./compile-markdown";
 
 // Re-export build-time utilities for use in webpack.config
-// (avoids importing from main entry which pulls in lucide-static SVG ?raw imports)
+// (avoids importing from the main entry, which pulls in the browser-only
+// SolidJS theme and is not valid in Node loader contexts)
 export { scanDocsDir } from "./scanner";
 export { generateSidebar } from "./sidebar-generator";
 export type { DocsConfig, SidebarConfig } from "./types";

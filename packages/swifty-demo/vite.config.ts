@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
-import solid from "vite-plugin-solid";
+import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import { federation } from "@module-federation/vite";
 
@@ -9,7 +9,7 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   plugins: [
-    solid(),
+    preact(),
     tailwindcss(),
     federation({
       name: "swifty_demo",
@@ -27,7 +27,7 @@ export default defineConfig({
         },
       },
       shared: {
-        "solid-js": {
+        preact: {
           singleton: true,
           requiredVersion: "*",
         },

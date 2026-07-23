@@ -26,6 +26,6 @@ export function tocPlugin(md: MarkdownIt): void {
 
   // Render the [[toc]] placeholder as a mount point for the Solid Toc.
   md.renderer.rules["toc_placeholder"] = () => {
-    return '<div data-swifty-toc></div>';
+    return "<div data-swifty-toc></div>";
   };
 }

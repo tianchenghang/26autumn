@@ -6,7 +6,7 @@ export function Kbd(props: ComponentProps<"kbd">) {
   return (
     <kbd
       class={cn(
-        "pointer-events-none inline-flex h-5 min-w-5 select-none items-center justify-center rounded border border-border bg-muted/60 px-1 font-mono text-[10px] font-medium text-muted-foreground",
+        "border-border bg-muted/60 text-muted-foreground pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded border px-1 font-mono text-[10px] font-medium select-none",
         local.class,
       )}
       {...rest}

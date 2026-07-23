@@ -37,8 +37,7 @@ export function DocsLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = createSignal(false);
 
-  const landing =
-    docs.config.nav?.[0]?.link ?? docs.config.baseUrl ?? "/";
+  const landing = docs.config.nav?.[0]?.link ?? docs.config.baseUrl ?? "/";
 
   const normalized = createMemo(() => normalizePath(location.pathname));
   const path = createMemo(() => normalized().path);
@@ -109,7 +108,7 @@ export function DocsLayout() {
   const pager = createMemo(() => computePrevNext(docs.config.sidebar, path()));
 
   return (
-    <div class="min-h-screen bg-background font-sans text-foreground antialiased">
+    <div class="bg-background text-foreground min-h-screen font-sans antialiased">
       <a href="#main-content" class="skip-link">
         Skip to content
       </a>
@@ -155,7 +154,7 @@ export function DocsLayout() {
               </Match>
             </Switch>
 
-            <footer class="mt-16 flex flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-5 pb-10 text-xs text-muted-foreground">
+            <footer class="border-border/70 text-muted-foreground mt-16 flex flex-wrap items-center justify-between gap-2 border-t pt-5 pb-10 text-xs">
               <span>
                 © {new Date().getFullYear()} {docs.config.title}
               </span>
@@ -184,7 +183,7 @@ export function DocsLayout() {
         <div
           onClick={() => setSidebarOpen(false)}
           class={cn(
-            "absolute inset-0 bg-foreground/25 backdrop-blur-[2px] transition-opacity duration-300 dark:bg-black/50",
+            "bg-foreground/25 absolute inset-0 backdrop-blur-[2px] transition-opacity duration-300 dark:bg-black/50",
             sidebarOpen() ? "opacity-100" : "opacity-0",
           )}
         />
@@ -193,11 +192,11 @@ export function DocsLayout() {
           aria-modal="true"
           aria-label="Navigation menu"
           class={cn(
-            "absolute inset-y-0 left-0 flex w-72 flex-col border-r border-border bg-sidebar shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+            "border-border bg-sidebar absolute inset-y-0 left-0 flex w-72 flex-col border-r shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
             sidebarOpen() ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <div class="flex h-14 shrink-0 items-center justify-between border-b border-border/70 px-4">
+          <div class="border-border/70 flex h-14 shrink-0 items-center justify-between border-b px-4">
             <Logo href={landing} title={docs.config.title} />
             <Button
               variant="ghost"
@@ -209,10 +208,7 @@ export function DocsLayout() {
             </Button>
           </div>
           <div class="sidebar-scroll min-h-0 flex-1 overflow-y-auto px-3 py-6">
-            <Sidebar
-              path={path}
-              onNavigate={() => setSidebarOpen(false)}
-            />
+            <Sidebar path={path} onNavigate={() => setSidebarOpen(false)} />
           </div>
         </div>
       </div>
@@ -230,7 +226,7 @@ function BackgroundLayers() {
     <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
       <div class="absolute inset-0 bg-[radial-gradient(56rem_30rem_at_16%_-10%,color-mix(in_oklab,var(--primary)_10%,transparent),transparent_70%)]" />
       <div class="absolute inset-0 bg-[radial-gradient(44rem_26rem_at_96%_-4%,color-mix(in_oklab,var(--primary)_6%,transparent),transparent_70%)]" />
-      <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      <div class="via-primary/40 absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent" />
       <div class="docs-grid absolute inset-0" />
       <div class="docs-grain absolute inset-0" />
     </div>
@@ -254,15 +250,15 @@ function PageSkeleton() {
 function NotFound(props: { path: string; home: string }) {
   return (
     <div class="animate-fade-in flex flex-col items-start gap-4 py-16">
-      <span class="grid size-12 place-items-center rounded-xl border border-border bg-muted/40 text-muted-foreground">
+      <span class="border-border bg-muted/40 text-muted-foreground grid size-12 place-items-center rounded-xl border">
         <CompassIcon class="size-6" />
       </span>
       <h1 class="font-display text-3xl font-semibold tracking-tight">
         Page not found
       </h1>
-      <p class="max-w-md text-sm leading-relaxed text-muted-foreground">
+      <p class="text-muted-foreground max-w-md text-sm leading-relaxed">
         Nothing lives at{" "}
-        <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+        <code class="bg-muted text-foreground rounded px-1.5 py-0.5 font-mono text-xs">
           {props.path}
         </code>
         . It may have moved, or the link may be out of date.

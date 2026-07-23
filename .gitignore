@@ -198,3 +198,5 @@ swifty-vscode/swifty-vscode-*.vsix
 tsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
 .swifty/
+**/dist-docs
+**/.playwright-cli

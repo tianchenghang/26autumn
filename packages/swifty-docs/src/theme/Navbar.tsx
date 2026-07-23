@@ -32,7 +32,7 @@ export function Navbar(props: NavbarProps) {
       class={cn(
         "fixed inset-x-0 top-0 z-40 transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
         scrolled()
-          ? "border-b border-border/80 bg-background/80 shadow-[0_1px_12px_-6px_rgb(0_0_0/0.08)] backdrop-blur-xl"
+          ? "border-border/80 bg-background/80 border-b shadow-[0_1px_12px_-6px_rgb(0_0_0/0.08)] backdrop-blur-xl"
           : "border-b border-transparent bg-transparent",
       )}
     >
@@ -49,7 +49,10 @@ export function Navbar(props: NavbarProps) {
 
         <Logo href={props.landing} title={docs.config.title} />
 
-        <nav class="ml-4 hidden items-center gap-0.5 md:flex" aria-label="Primary">
+        <nav
+          class="ml-4 hidden items-center gap-0.5 md:flex"
+          aria-label="Primary"
+        >
           <For each={docs.config.nav ?? []}>
             {(item) => <NavMenuItem item={item} path={props.path} />}
           </For>
@@ -67,7 +70,7 @@ export function Navbar(props: NavbarProps) {
               <button
                 onClick={docs.toggleSearch}
                 aria-label="Search documentation"
-                class="group hidden h-8 w-52 items-center gap-2 rounded-md border border-border/80 bg-muted/40 px-2.5 text-left text-xs text-muted-foreground transition-[border-color,background-color,width] duration-300 hover:border-primary/40 hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 sm:flex lg:w-60"
+                class="group border-border/80 bg-muted/40 text-muted-foreground hover:border-primary/40 hover:bg-accent/60 focus-visible:ring-ring/50 hidden h-8 w-52 items-center gap-2 rounded-md border px-2.5 text-left text-xs transition-[border-color,background-color,width] duration-300 focus-visible:ring-2 focus-visible:outline-none sm:flex lg:w-60"
               >
                 <SearchIcon class="size-3.5 shrink-0 opacity-70 transition-transform duration-300 group-hover:scale-110" />
                 <span class="flex-1 truncate">Search documentation…</span>

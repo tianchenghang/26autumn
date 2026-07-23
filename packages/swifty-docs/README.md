@@ -1,24 +1,26 @@
 # @swifty.js/docs
 
-Documentation site generator for `@swifty.js/mvc`.
+A documentation site generator with a SolidJS + shadcn-style theme.
 
-If `@swifty.js/mvc` is to React or Vue, then `@swifty.js/docs` is to Docusaurus or VitePress -- providing an out-of-the-box documentation site experience built on top of the Swifty MVC framework.
+If SolidJS is to React, then `@swifty.js/docs` is to Docusaurus or VitePress -- an out-of-the-box documentation site experience: a `markdown-it` build pipeline that compiles your `.md` files, paired with a polished, accessible SolidJS theme (shadcn-style primitives on Tailwind CSS v4) that renders them at runtime.
 
 ## Features
 
 - File-based routing: recursively scans a `docs/` directory and generates SPA routes
-- Dual routing modes: supports `@swifty.js/mvc` Router in both `history` and `hash` modes
+- SolidJS runtime: a single catch-all route keeps the layout mounted; only the content column swaps on navigation (`@solidjs/router`, history mode)
 - Markdown compilation pipeline: `markdown-it` with four custom plugins (anchors, TOC, containers, code blocks)
 - YAML frontmatter: metadata extraction via `js-yaml` for page titles, descriptions, sidebar positioning, and draft control
-- Code syntax highlighting: Shiki-powered highlighting with lazy WASM initialization and singleton caching
-- Admonition containers: `::: tip`, `::: warning`, `::: danger`, `::: details` rendered as DaisyUI alert components
-- Auto-generated sidebar: directory-structure-based navigation with `sidebarPosition` and `sidebarLabel` frontmatter overrides
-- Three search providers: MiniSearch-powered local modal (same engine as VitePress), Algolia DocSearch UI with local index (no account required), or disabled
-- Table of contents: per-page heading outline with smooth-scroll navigation
-- Three-column responsive layout: Tailwind CSS v4 + DaisyUI v5 with sticky navbar, frosted glass effect, and mobile-responsive sidebars
+- Code syntax highlighting: Shiki with lazy WASM initialization, singleton caching, and dual-theme output (light + dark tokens that switch with the color scheme, no rebuild)
+- Code-block chrome: language chip, hover border, and a copy-to-clipboard button on every fence
+- Admonition containers: `::: tip`, `::: warning`, `::: danger`, `::: details` rendered as themed callouts with inline SVG glyphs
+- Auto-generated sidebar: directory-structure-based navigation with `sidebarPosition` and `sidebarLabel` frontmatter overrides, collapsible groups, and active-item tracking
+- Three search providers: a MiniSearch-powered command palette (same engine as VitePress) with keyboard navigation, Algolia DocSearch UI backed by the local index (no account required), or disabled
+- Table of contents: per-page heading outline with an IntersectionObserver scroll-spy and a springing active marker
+- Light/dark theme: shadcn-style semantic tokens, a no-FOUC inline bootstrap script, and `localStorage` persistence
+- Responsive three-column layout: sticky frosted navbar, left sidebar rail, prose column, right TOC rail, and a slide-in mobile drawer
+- Accessible primitives: shadcn-style components built on `@kobalte/core` (dialog, focus management, ARIA)
 - Three bundler integrations: Vite, Webpack, and Rspack / Rsbuild
-- Zero-config boot: `defineConfig()` auto-generates routes, sidebars, and search index into `.swifty-docs/generated/`
-- Single-call theme registration: `registerThemeViews()` registers all theme components at once
+- Zero-config boot: `defineConfig()` auto-generates routes, sidebars, and the lazy search index into `.swifty-docs/generated/`
 - Dual-format library build: ships ESM + CJS with full TypeScript declarations
 
 ## Architecture
@@ -29,20 +31,21 @@ If `@swifty.js/mvc` is to React or Vue, then `@swifty.js/docs` is to Docusaurus 
 
 **Phase 2 -- Compilation (bundler plugin).** Each `.md` import is intercepted by the bundler plugin (`swiftyDocsPlugin` for Vite, `SwiftyDocsPlugin` for Webpack/Rspack) and compiled through `compileMarkdown()`. The pipeline extracts YAML frontmatter, initializes the Shiki highlighter on first call (async singleton), parses the markdown body with `markdown-it` plus four custom plugins, renders to HTML, builds page metadata, and emits a JS module that exports `pageData` and `contentHtml`.
 
-**Phase 3 -- Runtime (browser).** The `@swifty.js/mvc` Framework boots with the generated routes. The layout view stays mounted across navigation and asynchronously loads page content via `loadContent()`. Four theme Views (layout, sidebar, TOC, search) render the documentation UI. Search is lazily initialized on first query.
+**Phase 3 -- Runtime (browser).** A SolidJS app mounts `<DocsProvider>` (which validates the generated config/loader at the boundary) around a `<Router>` with a single catch-all route rendering `<DocsLayout>`. The layout stays mounted across navigation and loads each page's content through a Solid `createResource` over the route path. Theme components (`Navbar`, `Sidebar`, `Toc`, `SearchDialog`, `ContentRenderer`, `PrevNext`) render the documentation UI from fine-grained signals; the build-time `contentHtml` is injected into the article element and wired up for SPA links, inline `[[toc]]` mounts, and code-block copy buttons. Search is lazily built on first query.
 
 ```
 swifty-docs.config.ts          Bundler Plugin              Browser Runtime
        |                            |                          |
-  defineConfig()              compileMarkdown()          Framework.boot()
+  defineConfig()              compileMarkdown()          render(<DocsProvider>)
        |                            |                          |
-  scanDocsDir()               extractFrontmatter         registerThemeViews()
-  generateSidebar()           createParser()             routes + loadContent
-       |                      getHighlighter()           from generated module
-       |                            |                          |
-  .swifty-docs/generated/        JS module string          4 theme Views
-  index.js                   ({pageData,                 render the docs UI
-                               contentHtml})
+  scanDocsDir()               extractFrontmatter         <Router> + DocsLayout
+  generateSidebar()           createParser()             (single catch-all route)
+       |                      getHighlighter()                 |
+       |                            |                    createResource(path)
+  .swifty-docs/generated/        JS module string          -> loadContent()
+  index.js                   ({pageData,                       |
+                               contentHtml})             theme components
+                                                         render the docs UI
 ```
 
 ## Quick Start
@@ -50,15 +53,17 @@ swifty-docs.config.ts          Bundler Plugin              Browser Runtime
 ### 1. Install
 
 ```bash
-pnpm add @swifty.js/docs @swifty.js/mvc tailwindcss daisyui @tailwindcss/typography
+pnpm add @swifty.js/docs solid-js @solidjs/router tailwindcss @tailwindcss/typography
 ```
 
-The theme templates use Tailwind CSS utility classes, DaisyUI components, and the Typography plugin for `prose` styling. All are peer dependencies -- your project must have them installed and configured in your CSS entry:
+`solid-js` is a **peer dependency**: the theme is precompiled against the SolidJS runtime, so your app and the theme must share a single `solid-js` instance (install it once at the app level). The theme ships its own stylesheet -- Tailwind CSS v4 with the Typography plugin, shadcn-style semantic tokens, and self-hosted variable fonts -- so your CSS entry only needs to import Tailwind, the theme stylesheet, and scan the theme for utility classes:
 
 ```css
 @import "tailwindcss";
-@plugin "daisyui";
-@plugin "@tailwindcss/typography";
+@import "@swifty.js/docs/client.css";
+
+/* Scan the precompiled theme so its utility classes survive tree-shaking. */
+@source "@swifty.js/docs/theme.js";
 ```
 
 ### 2. Configure
@@ -71,7 +76,6 @@ import { defineConfig } from "@swifty.js/docs/vite";
 export default defineConfig({
   docs: "docs",
   baseUrl: "/docs/",
-  routeMode: "history",
   title: "My Library",
   description: "Documentation for My Library",
   nav: [
@@ -83,7 +87,8 @@ export default defineConfig({
     "/docs/api/": "auto",
   },
   highlight: {
-    theme: "github-dark",
+    theme: "github-light",
+    darkTheme: "github-dark",
     languages: ["typescript", "javascript", "html", "css", "bash", "json"],
   },
   search: { provider: "local" },
@@ -99,7 +104,6 @@ export default defineConfig({
 ```ts
 import { defineConfig } from "vite";
 import { swiftyDocsPlugin } from "@swifty.js/docs/vite";
-import { swiftyMvcPlugin7 } from "@swifty.js/mvc/vite";
 import tailwindcss from "@tailwindcss/vite";
 import docsConfig from "./swifty-docs.config";
 import { resolve } from "node:path";
@@ -109,8 +113,8 @@ const PKG_DIR = import.meta.dirname;
 export default defineConfig({
   root: resolve(PKG_DIR, "app"),
   plugins: [
+    // Returns [md-compiler, vite-plugin-solid] -- no separate Solid plugin needed.
     swiftyDocsPlugin({ config: docsConfig }),
-    swiftyMvcPlugin7({ debug: true, vdom: true }),
     tailwindcss(),
   ],
   resolve: {
@@ -145,52 +149,41 @@ export default {
 
 ### 4. Boot
 
-Create `app/boot.ts`:
+Create `app/boot.tsx`:
 
-```ts
-import { Framework, State } from ".js/mvc";
-import type { FrameworkConfig } from "@swifty.js/mvc";
+```tsx
+import { render } from "solid-js/web";
+import { Route, Router } from "@solidjs/router";
+import { DocsLayout, DocsProvider } from "@swifty.js/docs";
 
 // Auto-generated by defineConfig()
 import {
-  routes,
   docsConfig,
   loadContent,
   getSearchIndex,
 } from "@swifty-docs/generated";
 
-// Theme views (layout, sidebar, toc, search) -- registered in one call.
-// The framework imports and compiles the .html templates internally,
-// so consumers don't need to import .html files or call registerViewClass
-// for each theme component.
-import { registerThemeViews } from "@swifty.js/docs/theme";
-
 import "./main.css";
 
-// === Register theme views ===
-
-registerThemeViews();
-
-// === Inject site data + content loader into State ===
-
-State.set({ docsConfig, loadContent, getSearchIndex });
-
-// === Boot ===
-
-const config: FrameworkConfig = {
-  rootId: "app",
-  routeMode: "history",
-  defaultPath: "/docs/",
-  // All /docs/* routes map to "theme/docs-layout" (see generated routes).
-  // The layout stays mounted across navigation; observeLocation triggers
-  // an async render that loads the matching .md content via loadContent.
-  defaultView: "theme/docs-layout",
-  routes,
-  unmatchedView: "theme/docs-layout",
-};
-
-Framework.boot(config);
+// A single catch-all route: DocsLayout stays mounted across navigation and
+// only the content column swaps (it loads each page via a Solid resource).
+render(
+  () => (
+    <DocsProvider
+      config={docsConfig}
+      loadContent={loadContent}
+      getSearchIndex={getSearchIndex}
+    >
+      <Router>
+        <Route path="/*all" component={DocsLayout} />
+      </Router>
+    </DocsProvider>
+  ),
+  document.getElementById("app")!,
+);
 ```
+
+`DocsProvider` validates the generated values with Zod at the boundary and exposes them (plus the search-dialog open state) to every theme component via context. `DocsLayout` renders the navbar, sidebar, prose column, TOC, search palette, and mobile drawer.
 
 ### 5. TypeScript Setup
 
@@ -201,7 +194,7 @@ Create `shims.d.ts` in your project root:
 /// <reference types="vite/client" />
 ```
 
-The `/// <reference types="@swifty.js/docs/client" />` directive loads ambient module declarations for `@swifty-docs/generated` (routes, docsConfig, loadContent, getSearchIndex, SearchEntry) and `*.html` template imports.
+The `/// <reference types="@swifty.js/docs/client" />` directive loads the ambient module declaration for `@swifty-docs/generated` (`docsConfig`, `loadContent`, `getSearchIndex`, `SearchEntry`), so the generated module type-checks without a committed `.d.ts` file.
 
 Add a `paths` mapping in `tsconfig.json` to help the IDE resolve the generated module:
 
@@ -235,11 +228,11 @@ Welcome to the documentation.
 Install via npm:
 
 ```bash
-pnpm add @swifty.js/mvc
+pnpm add @swifty.js/docs
 ```
 
 ::: tip
-Always call `registerThemeViews` before `Framework.boot()`.
+Set `title` and `description` in frontmatter to control the page heading and search snippet; omit `title` to derive it from the first `# heading` or the filename.
 :::
 ````
 
@@ -251,10 +244,8 @@ The `DocsConfig` interface defines all configuration options:
 | ------------- | ------------------------------- | ----------------------- | ----------------------------------------------- |
 | `docs`        | `string`                        | `"docs"`                | Docs source directory, relative to project root |
 | `baseUrl`     | `string`                        | `"/docs/"`              | Base URL prefix for all generated routes        |
-| `routeMode`   | `"history" \| "hash"`           | `"history"`             | Routing mode, maps to `@swifty.js/mvc` Router   |
 | `title`       | `string`                        | (required)              | Site title displayed in the navbar              |
 | `description` | `string`                        | `""`                    | Site description for meta tags                  |
-| `lang`        | `string`                        | `"en-US"`               | Language code                                   |
 | `nav`         | `NavItem[]`                     | `[]`                    | Top navigation items                            |
 | `sidebar`     | `Record<string, SidebarConfig>` | `{}`                    | Sidebar config per path prefix                  |
 | `markdown`    | `MarkdownOptions`               | `{}`                    | Markdown processing options                     |
@@ -356,11 +347,11 @@ All h1, h2, and h3 headings automatically receive:
 
 ### Internal Links
 
-Links starting with `/` or `#` are automatically tagged with `data-swifty-nav="true"` for SPA navigation interception by the swifty-mvc Router. External links receive `target="_blank"` and `rel="noopener noreferrer"`.
+Links starting with `/` or `#` are automatically tagged with `data-swifty-nav="true"` so the SolidJS `ContentRenderer` can intercept them for SPA navigation (anchor links smooth-scroll to the heading instead). External links receive `target="_blank"` and `rel="noopener noreferrer"`.
 
 ### Table of Contents
 
-Insert `[[toc]]` anywhere in your markdown to render a table of contents inline. The `[[toc]]` marker is compiled to `<div v-swifty="theme/toc"></div>`, which mounts the TOC theme View at that position.
+Insert `[[toc]]` anywhere in your markdown to render a table of contents inline. The `[[toc]]` marker is compiled to `<div data-swifty-toc></div>`, into which the `ContentRenderer` mounts an inline `Toc` component at runtime.
 
 ### Admonition Containers
 
@@ -384,12 +375,12 @@ Hidden content revealed on click.
 :::
 ```
 
-Containers are rendered as DaisyUI `alert` components:
+Containers are rendered as themed `.callout` components (styled by the theme stylesheet, each with an inline SVG glyph in its title):
 
-- `tip` maps to `alert-info`
-- `warning` maps to `alert-warning`
-- `danger` maps to `alert-error`
-- `details` maps to a `<details>` element with `<summary>`, styled as `alert-neutral`
+- `tip` → `.callout-tip` (sage accent)
+- `warning` → `.callout-warning` (amber accent)
+- `danger` → `.callout-danger` (red accent)
+- `details` → a `.callout-details` `<details>` element with a `<summary>` title and a rotating chevron
 
 Container labels can be customized via `markdown.containers` config.
 
@@ -403,81 +394,83 @@ const x: number = 42;
 ```
 ````
 
-Without Shiki, code blocks fall back to a styled `<pre>` with `bg-neutral text-neutral-content rounded-box p-4 overflow-x-auto` classes.
+Every fence is wrapped in a `.codeblock` chrome container (language chip, hover border, copy button). With Shiki configured the inner `<pre>` is syntax-highlighted (dual-theme when `highlight.darkTheme` is set); without Shiki it falls back to a plain escaped `<pre>`.
 
 ## Theme System
 
-The theme consists of four View factories, each paired with an HTML template. The `registerThemeViews()` convenience function registers all of them in a single call.
+The theme is a set of SolidJS components that consume the build-time `{ pageData, contentHtml }` modules. You wire it up once with `<DocsProvider>` + `<DocsLayout>` (see [Boot](#4-boot)); there is no view registry or template compilation step.
 
-### View Factories
+### Components
 
-| Factory                          | View ID             | Purpose                                               |
-| -------------------------------- | ------------------- | ----------------------------------------------------- |
-| `createDocsLayoutView(template)` | `theme/docs-layout` | Root layout: navbar, three-column body, prev/next nav |
-| `createSidebarView(template)`    | `theme/sidebar`     | Left sidebar navigation tree                          |
-| `createTocView(template)`        | `theme/toc`         | Right-side heading outline with smooth scroll         |
-| `createSearchView(template)`     | `theme/search`      | Search modal (local provider only)                    |
+| Component         | Purpose                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| `DocsProvider`    | Context root: validates the generated config/loader and holds search-dialog state  |
+| `DocsLayout`      | Shell: navbar, sidebar rail, prose column, TOC rail, search palette, mobile drawer |
+| `Navbar`          | Sticky frosted top bar: logo, nav items, search trigger, theme toggle              |
+| `Sidebar`         | Left navigation tree with collapsible groups and active-item tracking              |
+| `Toc`             | Right heading outline with IntersectionObserver scroll-spy                         |
+| `ContentRenderer` | Injects `contentHtml` and wires SPA links, inline `[[toc]]`, copy buttons          |
+| `SearchDialog`    | MiniSearch command palette (local provider)                                        |
+| `DocSearchWidget` | Algolia DocSearch UI backed by the local index (docsearch provider)                |
+| `PrevNext`        | Previous/next pager derived from sidebar order                                     |
 
-### registerThemeViews
-
-The recommended way to set up the theme:
-
-```ts
-// No need to import View — registerThemeViews uses defineView internally
-import { registerThemeViews } from "@swifty.js/docs/theme";
-
-registerThemeViews();
-```
-
-This function imports all `.html` templates internally (compiled by `swiftyMvcPlugin` at build time), creates the view classes, and calls `registerViewClass()` for each. Consumers never need to import `.html` files or call `registerViewClass` manually.
+Reusable shadcn-style primitives (`Button`, `Input`, `Kbd`, `Dialog`) live under `theme/ui` and are built on `@kobalte/core` for accessibility.
 
 ### Layout Structure
 
 ```
-docs-layout (root)
-+-- Navbar (sticky top, backdrop-blur)
-|   +-- Site title
-|   +-- Nav items (horizontal menu, hidden on mobile)
-|   +-- Search (local button or DocSearch container)
-+-- Flex container (max-w-7xl, centered)
-|   +-- Sidebar (w-64, left, visible on lg+)
-|   +-- Content (flex-1, prose max-w-none)
-|   +-- TOC (w-56, right, visible on xl+)
-+-- Prev/Next navigation (bottom of content)
-+-- Search modal (conditional, local provider only)
+DocsLayout (root, mounted once)
++-- Navbar (fixed top, backdrop-blur on scroll)
+|   +-- Logo (gradient mark + display wordmark)
+|   +-- Nav items (horizontal, hidden below md)
+|   +-- Search trigger (palette button or DocSearch container)
+|   +-- Theme toggle (light/dark)
++-- Grid (max-w-[1440px], centered)
+|   +-- Sidebar rail (236px, left, visible on lg+)
+|   +-- Content column (prose, ContentRenderer + PrevNext)
+|   +-- TOC rail (224px, right, visible on xl+)
++-- Mobile drawer (slide-in sidebar, below lg)
++-- SearchDialog (Kobalte dialog portal, local provider only)
 ```
 
-The layout view stays mounted across all `/docs/*` routes. When the user navigates, `observeLocation` triggers an async `render()` that calls `loadContent(path)` to fetch the new page's compiled markdown, then updates the view data. The compiled markdown HTML is rendered inline via `contentHtml`.
+The layout stays mounted across all routes. On navigation the route path changes, the `createResource` re-runs `loadContent(path)`, and only the content column re-renders; the sidebar and TOC update from the same signals.
 
 ### Responsive Behavior
 
-- Below `lg` breakpoint (1024px): sidebar is hidden
-- Below `xl` breakpoint (1280px): TOC is hidden
-- Nav items hidden on small screens, visible from `md` breakpoint
-- Search button always visible; DocSearch provides its own keyboard shortcut (Ctrl+K)
+- Below `lg` (1024px): the left sidebar collapses into the mobile drawer (hamburger toggle)
+- Below `xl` (1280px): the right TOC rail is hidden
+- Nav items are hidden below `md` (768px)
+- The search trigger shows a full input on `sm+` and an icon button below it; the palette opens on click, `⌘K` / `Ctrl+K`, or `/`
+
+### Design tokens and dark mode
+
+The theme uses shadcn-style semantic tokens (`--background`, `--foreground`, `--primary`, `--border`, ...) defined as `oklch` custom properties on `:root` and `.dark`, mapped into the Tailwind color scale via `@theme inline`. A small inline script in `index.html` applies the persisted (or system-preferred) scheme before first paint, so there is no flash of the wrong theme; the navbar toggle persists the choice to `localStorage`.
+
+Code blocks use Shiki's dual-theme output: each token carries `--shiki-light` / `--shiki-dark` variables with no inline color, and the stylesheet switches them under `.dark` -- so code follows the color scheme with no rebuild.
 
 ### Icons
 
-Theme views use `lucide-static` for SVG icons, imported as raw strings via Vite's `?raw` suffix. Icons are centralized in `src/theme/icons.ts` and set in `init()` (not `assign()`) since they are static data. Templates render icons with the raw output operator:
+Icons are small inline-SVG Solid components in `src/theme/icons.tsx` (stroke style, `currentColor`), so they inherit color from their parent and need no extra dependency or `?raw` import:
 
-```html
-<span class="h-5 w-5 [&>svg]:h-full [&>svg]:w-full"> {{!icons.search}} </span>
+```tsx
+import { SearchIcon } from "@swifty.js/docs";
+
+<SearchIcon class="text-muted-foreground size-4" />;
 ```
-
-The wrapper `<span>` controls sizing. Tailwind utilities `[&>svg]:w-full [&>svg]:h-full` force the child `<svg>` to fill the container. Icons inherit `currentColor` from their parent, so color is controlled via standard CSS utilities (e.g., `text-primary`).
 
 ## Search System
 
 ### Local Search (provider: "local")
 
-The built-in search is powered by [MiniSearch](https://github.com/lucaong/minisearch) (the same engine used by VitePress). It provides a modal dialog with:
+The built-in search is powered by [MiniSearch](https://github.com/lucaong/minisearch) (the same engine used by VitePress). It provides a command palette (a `@kobalte/core` dialog) with:
 
 - Prefix matching: typing "conf" matches "configuration"
 - Fuzzy matching: tolerates typos (fuzzy factor 0.2)
 - Field-weighted scoring: title matches boosted 2x, headings 1.5x, excerpt 1x
-- Highlighted results: matched terms wrapped in `<mark>` in both title and excerpt
-- Lazy index construction: the MiniSearch instance is built on first query from the build-time `searchIndex`, then reused to subsequent searches
-- Open/close state driven by `State.searchOpen` so the navbar button can toggle the modal without a direct view reference
+- Highlighted results: matched terms rendered as real `<mark>` elements (no `innerHTML`) in both title and excerpt
+- Keyboard navigation: arrow keys move the active row, Enter opens, Esc closes
+- Lazy index construction: the MiniSearch instance is built on first query from `getSearchIndex()` (which loads every page module once), then reused for subsequent searches
+- Open/close driven by a Solid signal in the `DocsProvider` context, so the navbar trigger, the `⌘K` / `Ctrl+K` shortcut, and the `/` key all toggle the same palette without direct component references
 
 ### DocSearch Integration (provider: "docsearch")
 
@@ -504,7 +497,7 @@ export default defineConfig({
 });
 ```
 
-The plugin runs in the `pre` enforcement phase. Its `resolveId` hook appends a `?swifty-docs` suffix to `.md` imports so Vite does not treat them as static assets. Its `load` hook reads the raw markdown, compiles it through `compileMarkdown()`, and returns the JS module string.
+The plugin returns a two-plugin array: the `swifty-docs` markdown compiler and `vite-plugin-solid` (which compiles the theme's JSX). Its `resolveId` hook runs in the `pre` enforcement phase and appends a `?swifty-docs` suffix to `.md` imports so Vite does not treat them as static assets. Its `load` hook reads the raw markdown, compiles it through `compileMarkdown()`, and returns the JS module string.
 
 Options: `{ config: DocsConfig, debug?: boolean }`.
 
@@ -536,20 +529,20 @@ Same API as Webpack, but the loader returns `Promise<string>` directly (Rspack a
 
 ## Package Exports
 
-| Sub-path                   | Description                                                                                                     |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `@swifty.js/docs`          | Main barrel: all types, scanner, sidebar, markdown, compiler, runtime, theme factories                          |
-| `@swifty.js/docs/compiler` | `compileMarkdown()` + `CompileMarkdownOptions` type                                                             |
-| `@swifty.js/docs/vite`     | `swiftyDocsPlugin()` Vite plugin + build-time utility re-exports                                                |
-| `@swifty.js/docs/webpack`  | `SwiftyDocsPlugin` class + `swiftyDocsLoader()` function                                                        |
-| `@swifty.js/docs/rspack`   | `SwiftyDocsPlugin` class + `swiftyDocsLoader()` async function                                                  |
-| `@swifty.js/docs/runtime`  | `slugify()` (browser-safe, no build deps)                                                                       |
-| `@swifty.js/docs/theme`    | `registerThemeViews()` + 4 view factories + `createLocalSearchClient` + `icons`                                 |
-| `@swifty.js/docs/client`   | Types-only: ambient module declarations for `@swifty-docs/generated` and `*.html` (for `/// <reference types>`) |
+| Sub-path                   | Description                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `@swifty.js/docs`          | Main barrel: SolidJS theme components (`DocsProvider`, `DocsLayout`, ...), primitives, types, runtime |
+| `@swifty.js/docs/compiler` | `compileMarkdown()` + `CompileMarkdownOptions` type                                                   |
+| `@swifty.js/docs/vite`     | `swiftyDocsPlugin()` Vite plugin + build-time utility re-exports                                      |
+| `@swifty.js/docs/webpack`  | `SwiftyDocsPlugin` class + `swiftyDocsLoader()` function                                              |
+| `@swifty.js/docs/rspack`   | `SwiftyDocsPlugin` class + `swiftyDocsLoader()` async function                                        |
+| `@swifty.js/docs/runtime`  | `slugify()` (browser-safe, no build deps)                                                             |
+| `@swifty.js/docs/theme`    | SolidJS theme components + `createLocalSearchClient` + helpers                                        |
+| `@swifty.js/docs/client`   | Types-only: ambient module declaration for `@swifty-docs/generated` (for `/// <reference types>`)     |
 
-The `/vite`, `/webpack`, and `/rspack` sub-paths re-export build-time utilities (`scanDocsDir`, `generateSidebar`, `defineConfig`) to avoid pulling in the main entry's `lucide-static` SVG `?raw` imports, which are not valid in Node.js contexts.
+The `/vite`, `/webpack`, and `/rspack` sub-paths re-export build-time utilities (`scanDocsDir`, `generateSidebar`, `defineConfig`) so Node.js contexts (config files, loaders) don't pull in the browser-only theme code.
 
-The `/client` sub-path is types-only (no runtime code). It ships `client.d.ts` which provides `declare module "@swifty-docs/generated"` and `declare module "*.html"` ambient declarations. Consumer projects reference it via `/// <reference types="@swifty.js/docs/client" />` in their `shims.d.ts`.
+The `/client` sub-path is types-only (no runtime code). It ships `client.d.ts` which provides the `declare module "@swifty-docs/generated"` ambient declaration. Consumer projects reference it via `/// <reference types="@swifty.js/docs/client" />` in their `shims.d.ts`.
 
 ## API Reference
 
@@ -557,9 +550,28 @@ The `/client` sub-path is types-only (no runtime code). It ships `client.d.ts` w
 
 Type-safe configuration helper. Returns the config unchanged while triggering route generation. The optional `projectRoot` parameter controls path resolution for the `docs` directory and the generated output. Defaults to `process.cwd()`.
 
-### `registerThemeViews(options?: RegisterThemeViewsOptions): void`
+### `DocsProvider(props: DocsProviderProps)`
 
-Registers all four theme views (layout, sidebar, TOC, search) with the swifty-mvc view registry. Imports the `.html` templates internally so consumers don't need to handle them.
+The context root. Props: `config` (the generated `docsConfig`), `loadContent` (the generated loader), `getSearchIndex` (the generated lazy index builder). Each value is validated with Zod at the boundary; invalid values fall back to safe defaults with a console warning. Holds the search-dialog open state and exposes everything to descendants via `useDocs()`.
+
+### `DocsLayout()`
+
+The documentation shell. Renders the navbar, sidebar, prose column (`ContentRenderer` + `PrevNext`), TOC, search palette, and mobile drawer. Mount it on a single catch-all route; it reads the current path from `@solidjs/router` and loads content via a Solid resource.
+
+### Other theme exports
+
+```ts
+Navbar; // top bar
+Sidebar; // navigation tree
+Toc; // heading outline (also mounted inline for [[toc]])
+SearchDialog; // MiniSearch palette (local provider)
+DocSearchWidget; // Algolia DocSearch UI (docsearch provider)
+ContentRenderer; // injects contentHtml + wires links/copy buttons
+PrevNext; // pager
+ThemeToggle; // light/dark switch
+(Button, Input, Kbd, Dialog); // shadcn-style primitives
+createLocalSearchClient(index); // Algolia-compatible search client
+```
 
 ### `scanDocsDir(docsDir: string, baseUrl: string, options?: { excludeDrafts?: boolean }): DocsRoute[]`
 
@@ -576,16 +588,6 @@ Compiles a `.md` source string into a JS module string that exports `pageData` a
 ### `slugify(text: string): string`
 
 Converts text to a URL-safe slug: lowercase, strip non-word chars (except spaces and dashes), replace whitespace with dashes, collapse consecutive dashes.
-
-### Theme View Factories
-
-```ts
-createDocsLayoutView(template); // root layout
-createSidebarView(template); // sidebar navigation
-createTocView(template); // heading outline
-createSearchView(template); // search modal
-createLocalSearchClient(index); // Algolia-compatible search client
-```
 
 ## Type Definitions
 
@@ -640,20 +642,28 @@ Type declarations for `@swifty-docs/generated` are provided by the `@swifty.js/d
 
 - `@docsearch/css` ^4.6.3 -- DocSearch widget styles (dynamic import, only for `"docsearch"` provider)
 - `@docsearch/js` ^4.6.3 -- DocSearch widget (dynamic import, only for `"docsearch"` provider)
-- `@swifty.js/mvc` ^0.0.17 -- MVC framework (re-exported by `@swifty.js/docs` so consumers do not need to install it separately)
-- `ejs` ^3.1.10 -- Template engine for generated module output
+- `@fontsource-variable/bricolage-grotesque` -- display typeface (self-hosted)
+- `@fontsource-variable/instrument-sans` -- body typeface (self-hosted)
+- `@fontsource-variable/spline-sans-mono` -- mono typeface (self-hosted)
+- `@kobalte/core` ^0.13.0 -- accessible primitives (dialog, focus management)
+- `@solidjs/router` ^0.15.0 -- client-side routing
+- `class-variance-authority` ^0.7.0 -- variant-driven component classes
+- `clsx` ^2.1.0 -- conditional class composition
+- `ejs` ^3.1.10 -- template engine for generated module output
 - `js-yaml` ^5.2.0 -- YAML frontmatter parsing
-- `lucide-static` ^1.21.0 -- SVG icons via `?raw` import
 - `markdown-it` ^14.2.0 -- Markdown parser
 - `markdown-it-container` ^4.0.0 -- Admonition container syntax
 - `minisearch` ^7.2.0 -- Full-text search engine (same as VitePress)
 - `shiki` ^4.3.0 -- Code syntax highlighting (dynamic import, lazy singleton)
-- `zod` ^4.4.3 -- Runtime schema validation for State-injected values
+- `tailwind-merge` ^3.0.0 -- deduplicate conflicting Tailwind classes
+- `vite-plugin-pwa` ^1.3.0 -- PWA / service-worker generation
+- `vite-plugin-solid` ^2.11.0 -- SolidJS JSX compilation (bundled into the Vite plugin)
+- `zod` ^4.4.3 -- Runtime schema validation of the generated config/loader at the provider boundary
 
 **Peer:**
 
 - `@tailwindcss/typography` ^0.5.0 -- `prose` class for markdown content
-- `daisyui` ^5.0.0 -- UI component classes
+- `solid-js` ^1.8.0 -- UI runtime (shared single instance between app and theme)
 - `tailwindcss` ^4.0.0 -- Utility-first CSS
 
 ## License

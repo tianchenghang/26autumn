@@ -92,7 +92,7 @@ function SidebarGroup(props: {
       <button
         onClick={() => setCollapsed(!collapsed())}
         aria-expanded={!collapsed()}
-        class="group flex w-full items-center justify-between rounded-md px-2 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        class="group text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-md px-2 py-1.5 font-mono text-[11px] font-semibold tracking-[0.14em] uppercase transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
       >
         {props.title}
         <ChevronDownIcon
@@ -105,11 +105,13 @@ function SidebarGroup(props: {
       <div
         class={cn(
           "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed() ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
+          collapsed()
+            ? "grid-rows-[0fr] opacity-0"
+            : "grid-rows-[1fr] opacity-100",
         )}
       >
         <div class="overflow-hidden">
-          <ul class="mt-1.5 ml-2 border-l border-border/70 pl-px">
+          <ul class="border-border/70 mt-1.5 ml-2 border-l pl-px">
             <For each={props.items}>
               {(item) => (
                 <SidebarNode
@@ -135,8 +137,7 @@ function SidebarNode(props: {
     () => Array.isArray(props.item.items) && props.item.items.length > 0,
   );
   const active = createMemo(
-    () =>
-      !!props.item.link && stripSlash(props.item.link) === props.path(),
+    () => !!props.item.link && stripSlash(props.item.link) === props.path(),
   );
   const containsActive = createMemo(() =>
     hasChildren() && props.item.items
@@ -158,10 +159,10 @@ function SidebarNode(props: {
             onClick={() => props.onNavigate?.()}
             aria-current={active() ? "page" : undefined}
             class={cn(
-              "relative -ml-px block border-l-2 py-1.5 pl-3.5 pr-2 text-[13px] leading-snug transition-[color,background-color,border-color] duration-200",
+              "relative -ml-px block border-l-2 py-1.5 pr-2 pl-3.5 text-[13px] leading-snug transition-[color,background-color,border-color] duration-200",
               active()
-                ? "border-primary bg-primary/8 font-medium text-primary"
-                : "border-transparent text-muted-foreground hover:border-border hover:bg-accent/50 hover:text-foreground",
+                ? "border-primary bg-primary/8 text-primary font-medium"
+                : "text-muted-foreground hover:border-border hover:bg-accent/50 hover:text-foreground border-transparent",
             )}
           >
             {props.item.text}
@@ -172,7 +173,7 @@ function SidebarNode(props: {
           onClick={() => setCollapsed(!collapsed())}
           aria-expanded={!collapsed()}
           class={cn(
-            "flex w-full items-center gap-1.5 rounded-md py-1.5 pl-2.5 pr-2 text-[13px] font-medium transition-colors duration-200",
+            "flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 pl-2.5 text-[13px] font-medium transition-colors duration-200",
             containsActive()
               ? "text-foreground"
               : "text-muted-foreground hover:text-foreground",
@@ -195,7 +196,7 @@ function SidebarNode(props: {
           )}
         >
           <div class="overflow-hidden">
-            <ul class="ml-3.5 border-l border-border/70 pl-px">
+            <ul class="border-border/70 ml-3.5 border-l pl-px">
               <For each={props.item.items ?? []}>
                 {(child) => (
                   <SidebarNode

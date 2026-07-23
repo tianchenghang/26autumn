@@ -37,7 +37,7 @@ describe("createParser", () => {
     const md = createParser({ anchor: { permalink: true } });
     const html = md.render("## Linked Heading");
 
-    expect(html).toContain('class="link link-hover');
+    expect(html).toContain('class="header-anchor"');
     expect(html).toContain('href="#linked-heading"');
   });
 

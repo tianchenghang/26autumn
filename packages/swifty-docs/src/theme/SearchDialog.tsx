@@ -130,11 +130,11 @@ export function SearchDialog() {
     <Dialog open={docs.searchOpen()} onOpenChange={docs.setSearchOpen}>
       <DialogPortal>
         <DialogOverlay />
-        <DialogContent class="left-1/2 top-[10vh] w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2">
+        <DialogContent class="top-[10vh] left-1/2 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2">
           <DialogAccessibleTitle>Search documentation</DialogAccessibleTitle>
 
-          <div class="flex items-center gap-2.5 border-b border-border/80 px-4">
-            <SearchIcon class="size-4 shrink-0 text-muted-foreground" />
+          <div class="border-border/80 flex items-center gap-2.5 border-b px-4">
+            <SearchIcon class="text-muted-foreground size-4 shrink-0" />
             <input
               ref={inputRef}
               value={query()}
@@ -144,12 +144,12 @@ export function SearchDialog() {
               aria-label="Search documentation"
               autocomplete="off"
               spellcheck={false}
-              class="h-12 min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              class="text-foreground placeholder:text-muted-foreground h-12 min-w-0 flex-1 bg-transparent text-sm outline-none"
             />
             <Show when={query()}>
               <button
                 onClick={() => void runSearch("")}
-                class="rounded px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                class="text-muted-foreground hover:bg-accent hover:text-foreground rounded px-1.5 py-0.5 text-[11px] transition-colors"
               >
                 Clear
               </button>
@@ -160,7 +160,7 @@ export function SearchDialog() {
           <div class="max-h-[46vh] min-h-32 overflow-y-auto overscroll-contain p-2">
             <Switch>
               <Match when={!query().trim()}>
-                <div class="px-3 py-10 text-center text-xs leading-relaxed text-muted-foreground">
+                <div class="text-muted-foreground px-3 py-10 text-center text-xs leading-relaxed">
                   <SearchIcon class="mx-auto mb-3 size-6 opacity-40" />
                   Search across{" "}
                   {indexSize() > 0
@@ -170,11 +170,9 @@ export function SearchDialog() {
                 </div>
               </Match>
               <Match when={searched() && results().length === 0}>
-                <div class="px-3 py-10 text-center text-xs text-muted-foreground">
+                <div class="text-muted-foreground px-3 py-10 text-center text-xs">
                   No results for{" "}
-                  <span class="font-medium text-foreground">
-                    “{query()}”
-                  </span>
+                  <span class="text-foreground font-medium">“{query()}”</span>
                   <p class="mt-1.5">Try a shorter or more general term.</p>
                 </div>
               </Match>
@@ -203,12 +201,16 @@ export function SearchDialog() {
                               </For>
                             </span>
                             <Show when={hit.excerpt}>
-                              <span class="mt-0.5 block truncate text-xs text-muted-foreground">
+                              <span class="text-muted-foreground mt-0.5 block truncate text-xs">
                                 <For
                                   each={highlightSegments(hit.excerpt, query())}
                                 >
                                   {(seg) =>
-                                    seg.mark ? <mark>{seg.text}</mark> : seg.text
+                                    seg.mark ? (
+                                      <mark>{seg.text}</mark>
+                                    ) : (
+                                      seg.text
+                                    )
                                   }
                                 </For>
                               </span>
@@ -216,7 +218,7 @@ export function SearchDialog() {
                           </span>
                           <CornerDownLeftIcon
                             class={cn(
-                              "mt-1 size-3.5 shrink-0 text-muted-foreground transition-opacity duration-150",
+                              "text-muted-foreground mt-1 size-3.5 shrink-0 transition-opacity duration-150",
                               i() === activeIdx() ? "opacity-70" : "opacity-0",
                             )}
                           />
@@ -229,7 +231,7 @@ export function SearchDialog() {
             </Switch>
           </div>
 
-          <div class="flex items-center gap-3 border-t border-border/80 bg-muted/30 px-4 py-2.5 text-[11px] text-muted-foreground">
+          <div class="border-border/80 bg-muted/30 text-muted-foreground flex items-center gap-3 border-t px-4 py-2.5 text-[11px]">
             <span class="flex items-center gap-1">
               <Kbd>↑</Kbd>
               <Kbd>↓</Kbd> navigate

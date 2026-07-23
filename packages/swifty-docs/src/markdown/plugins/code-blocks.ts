@@ -21,9 +21,7 @@ export function codeBlockPlugin(md: MarkdownIt): void {
       // inline colors (single theme) or --shiki-light/--shiki-dark
       // variables (dual theme, switched by client.css).
       const highlighted = mdOptions.highlight(code, lang, "");
-      inner =
-        highlighted ||
-        fallbackBlock(code, lang);
+      inner = highlighted || fallbackBlock(code, lang);
     } else {
       inner = fallbackBlock(code, lang);
     }

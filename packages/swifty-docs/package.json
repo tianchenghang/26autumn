@@ -116,9 +116,6 @@
   "dependencies": {
     "@docsearch/css": "^4.6.3",
     "@docsearch/js": "^4.6.3",
-    "@fontsource-variable/bricolage-grotesque": "^5.0.0",
-    "@fontsource-variable/instrument-sans": "^5.0.0",
-    "@fontsource-variable/spline-sans-mono": "^5.0.0",
     "@kobalte/core": "^0.13.0",
     "@solidjs/router": "^0.15.0",
     "class-variance-authority": "^0.7.0",

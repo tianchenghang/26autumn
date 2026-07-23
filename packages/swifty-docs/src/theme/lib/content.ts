@@ -52,7 +52,7 @@ const PageHeadingSchema = z.looseObject({
   slug: z.string(),
 });
 
-const LoadedContentSchema = z.object({
+export const LoadedContentSchema = z.object({
   pageData: z.looseObject({
     title: z.string(),
     headings: z.array(PageHeadingSchema),
@@ -62,9 +62,7 @@ const LoadedContentSchema = z.object({
 export type LoadedContent = z.infer<typeof LoadedContentSchema>;
 export type PageHeading = z.infer<typeof PageHeadingSchema>;
 
-export type LoadContentFn = (
-  path: string,
-) => Promise<LoadedContent | null>;
+export type LoadContentFn = (path: string) => Promise<LoadedContent | null>;
 
 export const SearchEntrySchema = z.object({
   title: z.string(),

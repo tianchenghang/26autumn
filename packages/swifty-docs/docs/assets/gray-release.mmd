@@ -1,6 +1,0 @@
-flowchart TD
-  A["灰度配置中心<br/>规则: 用户 ID 取模 / 地域 / 用户标签 / 流量比例"] --> B["灰度 API<br/>GET /api/feature-flags?userId=xxx"]
-  B --> C["前端 SDK 初始化拉取<br/>localStorage 缓存 + 5 分钟 TTL"]
-  C --> D{feature flag}
-  D -- enabled --> E["灰度版本组件<br/>动态 import"]
-  D -- disabled --> F[对照版本组件]

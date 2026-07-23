@@ -17,12 +17,12 @@ export function Logo(props: LogoProps) {
     <A
       href={props.href}
       class={cn(
-        "group flex items-center gap-2.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+        "group focus-visible:ring-ring/50 flex items-center gap-2.5 rounded-md focus-visible:ring-2 focus-visible:outline-none",
         props.class,
       )}
       aria-label={`${props.title} — home`}
     >
-      <span class="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm shadow-primary/30 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-rotate-6 group-hover:scale-105">
+      <span class="from-primary to-primary/70 text-primary-foreground shadow-primary/30 grid size-8 place-items-center rounded-lg bg-gradient-to-br shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-105 group-hover:-rotate-6">
         <svg
           viewBox="0 0 24 24"
           class="size-4.5"
@@ -38,10 +38,10 @@ export function Logo(props: LogoProps) {
         </svg>
       </span>
       <span class="flex items-baseline gap-2">
-        <span class="font-display text-lg font-semibold tracking-tight text-foreground">
+        <span class="font-display text-foreground text-lg font-semibold tracking-tight">
           {props.title}
         </span>
-        <span class="hidden rounded border border-primary/25 bg-primary/8 px-1.5 py-px font-mono text-[10px] font-medium tracking-widest text-primary sm:inline-block">
+        <span class="border-primary/25 bg-primary/8 text-primary hidden rounded border px-1.5 py-px font-mono text-[10px] font-medium tracking-widest sm:inline-block">
           DOCS
         </span>
       </span>
@@ -49,7 +49,9 @@ export function Logo(props: LogoProps) {
   );
 }
 
-export function ThemeToggleIcon(props: ComponentProps<"span"> & { dark: boolean }) {
+export function ThemeToggleIcon(
+  props: ComponentProps<"span"> & { dark: boolean },
+) {
   const [local, rest] = splitProps(props, ["class", "dark"]);
   return (
     <span
@@ -62,8 +64,8 @@ export function ThemeToggleIcon(props: ComponentProps<"span"> & { dark: boolean 
         class={cn(
           "absolute inset-0 size-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
           local.dark
-            ? "rotate-0 scale-100 opacity-100"
-            : "-rotate-90 scale-50 opacity-0",
+            ? "scale-100 rotate-0 opacity-100"
+            : "scale-50 -rotate-90 opacity-0",
         )}
         fill="none"
         stroke="currentColor"
@@ -78,8 +80,8 @@ export function ThemeToggleIcon(props: ComponentProps<"span"> & { dark: boolean 
         class={cn(
           "absolute inset-0 size-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
           local.dark
-            ? "rotate-90 scale-50 opacity-0"
-            : "rotate-0 scale-100 opacity-100",
+            ? "scale-50 rotate-90 opacity-0"
+            : "scale-100 rotate-0 opacity-100",
         )}
         fill="none"
         stroke="currentColor"
