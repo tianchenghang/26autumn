@@ -40,16 +40,16 @@ export { slugify } from "./runtime";
 // ============================================================
 
 export { DocsProvider, useDocs, type DocsProviderProps } from "./theme/context";
-export { DocsLayout } from "./theme/DocsLayout";
-export { Navbar } from "./theme/Navbar";
-export { Sidebar } from "./theme/Sidebar";
-export { Toc } from "./theme/Toc";
-export { SearchDialog } from "./theme/SearchDialog";
-export { DocSearchWidget } from "./theme/DocSearchWidget";
-export { ContentRenderer } from "./theme/ContentRenderer";
-export { PrevNext } from "./theme/PrevNext";
-export { ThemeToggle } from "./theme/ThemeToggle";
-export { Logo } from "./theme/Logo";
+export { DocsLayout } from "./theme/docs-layout";
+export { Navbar } from "./theme/navbar";
+export { Sidebar } from "./theme/sidebar";
+export { Toc } from "./theme/toc";
+export { SearchDialog } from "./theme/search-dialog";
+export { DocSearchWidget } from "./theme/doc-search-widget";
+export { ContentRenderer } from "./theme/content-renderer";
+export { PrevNext } from "./theme/prev-next";
+export { ThemeToggle } from "./theme/theme-toggle";
+export { Logo } from "./theme/logo";
 export { Button, buttonVariants } from "./theme/ui/button";
 export { Input } from "./theme/ui/input";
 export { Kbd } from "./theme/ui/kbd";

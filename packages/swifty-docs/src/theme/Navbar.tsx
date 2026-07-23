@@ -4,9 +4,9 @@ import { useDocs } from "./context";
 import { ArrowUpRightIcon, MenuIcon, SearchIcon } from "./icons";
 import { cn } from "./lib/utils";
 import type { NavItem } from "../types";
-import { Logo } from "./Logo";
-import { DocSearchWidget } from "./DocSearchWidget";
-import { ThemeToggle } from "./ThemeToggle";
+import { Logo } from "./logo";
+import { DocSearchWidget } from "./doc-search-widget";
+import { ThemeToggle } from "./theme-toggle";
 import { Button } from "./ui/button";
 import { Kbd } from "./ui/kbd";
 

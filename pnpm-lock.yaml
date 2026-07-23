@@ -11,9 +11,15 @@ importers:
       '@mermaid-js/mermaid-cli':
         specifier: ^11.16.0
         version: 11.16.0(@babel/core@7.29.7)(@babel/template@7.29.7)(@types/react@19.2.17)(puppeteer@25.3.0(yauzl@3.4.0))(tailwindcss@4.3.3)
+      '@types/jquery':
+        specifier: ^4.0.1
+        version: 4.0.1
       docsify-cli:
         specifier: ^4.4.4
         version: 4.4.4
+      jquery:
+        specifier: ^4.0.0
+        version: 4.0.0
       mermaid:
         specifier: ^11.16.0
         version: 11.16.0
@@ -2175,6 +2181,9 @@ packages:
   '@types/hast@3.0.5':
     resolution: {integrity: sha512-rp/ezSWaD1m44dPKICGhiskI13nVr7qTloFwDa/IYkhhf5nzwP+zIQcIJh3WIFSBOy/H1PzB40jPjMDksN4F+g==}
 
+  '@types/jquery@4.0.1':
+    resolution: {integrity: sha512-9a59A/tycXgYuPABcp6/3spSShn0NT2UOM4EfHvMumjYi4lJWTsK5SZWjhx3yRm9IHGCeWXdV2YfNsrWrft/CA==}
+
   '@types/js-yaml@4.0.9':
     resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
 
@@ -3907,6 +3916,9 @@ packages:
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
+
+  jquery@4.0.0:
+    resolution: {integrity: sha512-TXCHVR3Lb6TZdtw1l3RTLf8RBWVGexdxL6AC8/e0xZKEpBflBsjh9/8LXw+dkNFuOyW9B7iB3O1sP7hS0Kiacg==}
 
   js-tokens@10.0.0:
     resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
@@ -8070,6 +8082,8 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
+  '@types/jquery@4.0.1': {}
+
   '@types/js-yaml@4.0.9': {}
 
   '@types/json-schema@7.0.15':
@@ -10082,6 +10096,8 @@ snapshots:
       react: 19.2.8
 
   joycon@3.1.1: {}
+
+  jquery@4.0.0: {}
 
   js-tokens@10.0.0: {}
 

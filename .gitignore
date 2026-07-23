@@ -200,3 +200,6 @@ tsconfig.tsbuildinfo
 .swifty/
 **/dist-docs
 **/.playwright-cli
+
+.qoder
+**/.qoder

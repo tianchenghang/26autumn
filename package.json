@@ -8,18 +8,7 @@
     "build": "docsify generate docs",
     "git:commit": "git add -A && git commit -m \"feat: Introduce new features\"",
     "git:push": "pnpm git:commit && git push origin main",
-    "format": "prettier -w ./ --experimental-cli",
-    "vite": "concurrently \"pnpm swifty-demo:dev\" \"pnpm swifty-devtool:dev\"",
-    "webpack": "concurrently \"pnpm swifty-demo:dev:webpack\" \"pnpm swifty-devtool:dev:webpack\"",
-    "rsbuild": "concurrently \"pnpm swifty-demo:dev:rsbuild\" \"pnpm swifty-devtool:dev:rsbuild\"",
-    "swifty-demo:dev": "pnpm --filter swifty-demo dev",
-    "swifty-demo:dev:webpack": "pnpm --filter swifty-demo dev:webpack",
-    "swifty-demo:dev:rsbuild": "pnpm --filter swifty-demo dev:rsbuild",
-    "swifty-demo:build": "pnpm --filter swifty-demo format",
-    "swifty-devtool:dev": "pnpm --filter @swifty.js/devtool dev",
-    "swifty-devtool:dev:webpack": "pnpm --filter @swifty.js/devtool dev:webpack",
-    "swifty-devtool:dev:rsbuild": "pnpm --filter @swifty.js/devtool dev:rsbuild",
-    "swifty-mvc:build": "pnpm --filter @swifty.js/mvc build"
+    "format": "prettier -w ./ --experimental-cli"
   },
   "keywords": [
     "2026",
@@ -30,7 +19,9 @@
   "packageManager": "pnpm@10.32.1",
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.16.0",
+    "@types/jquery": "^4.0.1",
     "docsify-cli": "^4.4.4",
+    "jquery": "^4.0.0",
     "mermaid": "^11.16.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1"

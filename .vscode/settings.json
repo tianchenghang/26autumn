@@ -4,10 +4,15 @@
     "hangtiancheng",
     "HITL",
     "htmx",
+    "linkify",
     "minisearch",
+    "noopener",
+    "noreferrer",
+    "qoder",
     "rspack",
     "shiki",
     "swifty",
+    "vitepress",
     "worktree",
     "wouter"
   ]

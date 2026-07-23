@@ -4,7 +4,7 @@ import { useLocation } from "wouter-preact";
 import { CheckIcon, CopyIcon } from "./icons";
 import type { PageHeading } from "./lib/content";
 import { cn } from "./lib/utils";
-import { Toc } from "./Toc";
+import { Toc } from "./toc";
 
 interface ContentRendererProps {
   html: string;

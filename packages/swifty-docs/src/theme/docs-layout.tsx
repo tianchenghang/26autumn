@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import { useLocation } from "wouter-preact";
-import { ContentRenderer } from "./ContentRenderer";
+import { ContentRenderer } from "./content-renderer";
 import { useDocs } from "./context";
 import { CompassIcon, XIcon } from "./icons";
 import {
@@ -10,12 +10,12 @@ import {
   type LoadedContent,
 } from "./lib/content";
 import { cn } from "./lib/utils";
-import { Logo } from "./Logo";
-import { Navbar } from "./Navbar";
-import { PrevNext } from "./PrevNext";
-import { SearchDialog } from "./SearchDialog";
-import { Sidebar } from "./Sidebar";
-import { Toc } from "./Toc";
+import { Logo } from "./logo";
+import { Navbar } from "./navbar";
+import { PrevNext } from "./prev-next";
+import { SearchDialog } from "./search-dialog";
+import { Sidebar } from "./sidebar";
+import { Toc } from "./toc";
 import { Button } from "./ui/button";
 
 export function DocsLayout() {

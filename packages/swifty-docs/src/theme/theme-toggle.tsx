@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { Button } from "./ui/button";
-import { ThemeToggleIcon } from "./Logo";
+import { ThemeToggleIcon } from "./logo";
 
 const STORAGE_KEY = "swifty-docs-theme";
 

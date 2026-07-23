@@ -26,16 +26,16 @@
  * ```
  */
 export { DocsProvider, useDocs, type DocsProviderProps } from "./context";
-export { DocsLayout } from "./DocsLayout";
-export { Navbar } from "./Navbar";
-export { Sidebar } from "./Sidebar";
-export { Toc } from "./Toc";
-export { SearchDialog } from "./SearchDialog";
-export { DocSearchWidget } from "./DocSearchWidget";
-export { ContentRenderer } from "./ContentRenderer";
-export { PrevNext } from "./PrevNext";
-export { ThemeToggle } from "./ThemeToggle";
-export { Logo } from "./Logo";
+export { DocsLayout } from "./docs-layout";
+export { Navbar } from "./navbar";
+export { Sidebar } from "./sidebar";
+export { Toc } from "./toc";
+export { SearchDialog } from "./search-dialog";
+export { DocSearchWidget } from "./doc-search-widget";
+export { ContentRenderer } from "./content-renderer";
+export { PrevNext } from "./prev-next";
+export { ThemeToggle } from "./theme-toggle";
+export { Logo } from "./logo";
 
 // shadcn-style primitives
 export { Button, buttonVariants } from "./ui/button";
