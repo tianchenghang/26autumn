@@ -1,0 +1,666 @@
+/*
+ * @swifty.js/docs — theme stylesheet (Tailwind CSS v4, CSS-first config).
+ *
+ * shadcn-style token architecture: semantic tokens are defined as CSS
+ * custom properties on :root / .dark, then mapped into the Tailwind color
+ * scale via `@theme inline` so utilities like bg-background / text-primary
+ * work. Consumers only need to import this file.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Scan the Preact theme components for utility classes. */
+@source "./theme";
+
+/* ------------------------------------------------------------------ */
+/* Semantic tokens                                                     */
+/* ------------------------------------------------------------------ */
+
+:root {
+  color-scheme: light;
+
+  --background: oklch(0.979 0.004 145);
+  --foreground: oklch(0.243 0.022 152);
+  --card: oklch(0.992 0.003 145);
+  --card-foreground: oklch(0.243 0.022 152);
+  --primary: oklch(0.507 0.09 155);
+  --primary-foreground: oklch(0.984 0.008 150);
+  --secondary: oklch(0.94 0.014 150);
+  --secondary-foreground: oklch(0.3 0.03 152);
+  --muted: oklch(0.947 0.009 150);
+  --muted-foreground: oklch(0.472 0.022 152);
+  --accent: oklch(0.922 0.028 155);
+  --accent-foreground: oklch(0.29 0.05 155);
+  --destructive: oklch(0.577 0.215 27);
+  --border: oklch(0.882 0.014 150);
+  --input: oklch(0.882 0.014 150);
+  --ring: oklch(0.507 0.09 155);
+  --sidebar: oklch(0.966 0.006 145);
+  --code: oklch(0.971 0.005 150);
+
+  --callout-warning: oklch(0.66 0.14 70);
+  --callout-danger: oklch(0.577 0.215 27);
+
+  --radius: 0.625rem;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.162 0.013 150);
+  --foreground: oklch(0.912 0.008 150);
+  --card: oklch(0.187 0.013 150);
+  --card-foreground: oklch(0.912 0.008 150);
+  --primary: oklch(0.723 0.098 155);
+  --primary-foreground: oklch(0.16 0.02 150);
+  --secondary: oklch(0.232 0.015 150);
+  --secondary-foreground: oklch(0.88 0.01 150);
+  --muted: oklch(0.232 0.015 150);
+  --muted-foreground: oklch(0.677 0.02 152);
+  --accent: oklch(0.268 0.032 155);
+  --accent-foreground: oklch(0.88 0.02 155);
+  --destructive: oklch(0.65 0.2 25);
+  --border: oklch(0.297 0.015 150);
+  --input: oklch(0.297 0.015 150);
+  --ring: oklch(0.723 0.098 155);
+  --sidebar: oklch(0.148 0.012 150);
+  --code: oklch(0.191 0.013 150);
+
+  --callout-warning: oklch(0.76 0.13 75);
+  --callout-danger: oklch(0.68 0.19 25);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-code: var(--code);
+
+  --font-display:
+    Geist Mono, Swifty, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC,
+    PingFang SC, Microsoft YaHei, monospace;
+  --font-sans:
+    Geist Mono, Swifty, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC,
+    PingFang SC, Microsoft YaHei, monospace;
+  --font-mono:
+    Geist Mono, Swifty, Maple Mono, Menlo, Cascadia Code, Sarasa Gothic SC,
+    PingFang SC, Microsoft YaHei, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-page-in: page-in 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-dialog-in: dialog-in 0.24s cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-overlay-in: overlay-in 0.2s ease-out both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 24%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--ring) 65%, transparent);
+    outline-offset: 2px;
+  }
+
+  mark {
+    background: color-mix(in oklab, var(--primary) 24%, transparent);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Chrome                                                              */
+/* ------------------------------------------------------------------ */
+
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: top 0.2s ease-out;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Dot grid, faded out below the fold. */
+.docs-grid {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--foreground) 8%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom, black, transparent 440px);
+  opacity: 0.55;
+}
+
+.dark .docs-grid {
+  opacity: 0.3;
+}
+
+/* Film grain for a paper-like tooth. */
+.docs-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+.dark .docs-grain {
+  opacity: 0.05;
+  mix-blend-mode: screen;
+}
+
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--foreground) 18%, transparent)
+    transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Loading skeleton shimmer. */
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    var(--muted) 40%,
+    color-mix(in oklab, var(--muted) 45%, var(--background)) 50%,
+    var(--muted) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+.page-enter {
+  animation: page-in 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Prose                                                               */
+/* ------------------------------------------------------------------ */
+
+.prose {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  line-height: 1.8;
+}
+
+.prose :where(h1):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-display);
+  font-size: 2.15rem;
+  font-weight: 640;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  margin-top: 0.25rem;
+  margin-bottom: 1.1rem;
+  color: var(--foreground);
+}
+
+.prose :where(h2):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  margin-top: 2.9rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  color: var(--foreground);
+}
+
+.prose :where(h3):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-display);
+  font-size: 1.14rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2.1rem;
+  margin-bottom: 0.6rem;
+  color: var(--foreground);
+}
+
+.prose :where(h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  font-weight: 600;
+  margin-top: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose :where(p, ul, ol, blockquote):not(:where([class~="not-prose"] *)) {
+  margin-top: 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+.prose :where(li):not(:where([class~="not-prose"] *)) {
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+
+.prose :where(li::marker):not(:where([class~="not-prose"] *)) {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease-out;
+}
+
+.prose :where(a:hover):not(:where([class~="not-prose"] *)) {
+  text-decoration-color: var(--primary);
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 500;
+  background: color-mix(in oklab, var(--muted) 80%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  border-radius: 5px;
+  padding: 0.12em 0.38em;
+}
+
+.prose :where(pre code):not(:where([class~="not-prose"] *)) {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-weight: 400;
+}
+
+.prose :where(blockquote):not(:where([class~="not-prose"] *)) {
+  border-left: 3px solid color-mix(in oklab, var(--primary) 45%, transparent);
+  padding-left: 1rem;
+  font-style: normal;
+  color: var(--muted-foreground);
+}
+
+.prose :where(hr):not(:where([class~="not-prose"] *)) {
+  border-color: color-mix(in oklab, var(--border) 80%, transparent);
+  margin: 2.6rem auto;
+}
+
+.prose :where(table):not(:where([class~="not-prose"] *)) {
+  width: 100%;
+  table-layout: auto;
+  text-align: left;
+  font-size: 0.875em;
+  line-height: 1.7;
+  margin: 1.4rem 0;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prose :where(thead):not(:where([class~="not-prose"] *)) {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--muted) 50%, transparent);
+}
+
+.prose :where(th):not(:where([class~="not-prose"] *)) {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  padding: 0.55em 0.9em;
+}
+
+.prose :where(td):not(:where([class~="not-prose"] *)) {
+  padding: 0.55em 0.9em;
+  vertical-align: top;
+}
+
+.prose :where(tbody tr):not(:where([class~="not-prose"] *)) {
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+
+.prose :where(tbody tr:last-child):not(:where([class~="not-prose"] *)) {
+  border-bottom: 0;
+}
+
+.prose :where(img):not(:where([class~="not-prose"] *)) {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Heading anchor permalinks */
+.prose :where(.header-anchor):not(:where([class~="not-prose"] *)) {
+  text-decoration: none;
+  margin-left: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.prose :where(h1, h2, h3, h4):hover .header-anchor {
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------------ */
+/* Code blocks                                                         */
+/* ------------------------------------------------------------------ */
+
+.codeblock {
+  position: relative;
+  margin: 1.4rem 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--code);
+  overflow: hidden;
+  transition: border-color 0.2s ease-out;
+}
+
+.codeblock:hover {
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+}
+
+.codeblock::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 11px;
+  left: 16px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 40%, transparent);
+  pointer-events: none;
+}
+
+.codeblock pre {
+  margin: 0;
+  padding: 2.5rem 1.1rem 1.1rem;
+  overflow-x: auto;
+  background: transparent !important;
+  font-size: 0.8125rem;
+  line-height: 1.75;
+  scrollbar-width: thin;
+}
+
+.codeblock code {
+  display: block;
+  font-family: var(--font-mono);
+}
+
+/* Shiki dual-theme output sets --shiki-light/--shiki-dark per token with
+   no inline color (defaultColor: false); the active scheme wins. */
+.codeblock .shiki span {
+  color: var(--shiki-light, inherit);
+}
+
+.dark .codeblock .shiki span {
+  color: var(--shiki-dark, var(--shiki-light, inherit));
+}
+
+.codeblock-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.codeblock-copy {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  color: var(--muted-foreground);
+  opacity: 0;
+  transition:
+    opacity 0.2s ease-out,
+    background-color 0.15s ease-out,
+    color 0.15s ease-out,
+    border-color 0.15s ease-out;
+}
+
+.codeblock:hover .codeblock-copy,
+.codeblock-copy:focus-visible {
+  opacity: 1;
+}
+
+.codeblock-copy:hover {
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.codeblock-copy-done {
+  color: var(--primary);
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .codeblock-copy {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Callouts (::: tip / warning / danger / details)                     */
+/* ------------------------------------------------------------------ */
+
+.callout {
+  margin: 1.4rem 0;
+  border: 1px solid;
+  border-radius: 10px;
+  padding: 0.85rem 1rem 0.85rem 1.1rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.callout > :first-child {
+  margin-top: 0;
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.callout-title svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.callout p {
+  margin: 0.3rem 0;
+}
+
+.callout-tip {
+  border-color: color-mix(in oklab, var(--primary) 32%, transparent);
+  background: color-mix(in oklab, var(--primary) 7%, var(--background));
+}
+
+.callout-tip .callout-title {
+  color: var(--primary);
+}
+
+.callout-warning {
+  border-color: color-mix(in oklab, var(--callout-warning) 38%, transparent);
+  background: color-mix(in oklab, var(--callout-warning) 8%, var(--background));
+}
+
+.callout-warning .callout-title {
+  color: var(--callout-warning);
+}
+
+.callout-danger {
+  border-color: color-mix(in oklab, var(--callout-danger) 36%, transparent);
+  background: color-mix(in oklab, var(--callout-danger) 7%, var(--background));
+}
+
+.callout-danger .callout-title {
+  color: var(--callout-danger);
+}
+
+.callout-details {
+  border-color: var(--border);
+  background: color-mix(in oklab, var(--muted) 45%, transparent);
+}
+
+.callout-details .callout-title {
+  color: var(--foreground);
+  cursor: pointer;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+.callout-details .callout-title::-webkit-details-marker {
+  display: none;
+}
+
+.callout-details .callout-title svg {
+  transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.callout-details[open] .callout-title {
+  margin-bottom: 0.4rem;
+}
+
+.callout-details[open] .callout-title svg {
+  transform: rotate(90deg);
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion safety                                                       */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
