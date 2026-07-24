@@ -6,6 +6,7 @@ import docsConfig from "./swifty-docs.config";
 import { docsGuardPlugin } from "./plugins/docs-guard";
 
 export default defineConfig({
+  base: "/26autumn/",
   root: "app",
   plugins: [
     swiftyDocsPlugin({ config: docsConfig }),
