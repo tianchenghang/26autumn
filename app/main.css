@@ -147,15 +147,6 @@ body::before {
   animation: sakura-drift 26s var(--sakura-ease-out) infinite alternate;
 }
 
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.035;
-}
-
 .dark body::before {
   background:
     radial-gradient(
@@ -190,10 +181,6 @@ body::after {
 
 /* --- Scrollbar (WebKit/Blink) --- */
 
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
 ::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -352,21 +339,6 @@ body::after {
   background: var(--card);
   color: var(--muted-foreground);
   font-size: 0.82em;
-}
-
-/* --- Page entrance animation --- */
-
-@keyframes sakura-page-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
 }
 
 /* --- Sidebar nav active indicator (sakura accent bar) --- */

@@ -42,22 +42,22 @@ protected: true
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   Public API Layer                    │
+│                   Public API Layer                  │
 │  init() / destroy() / traceError() / enablePlugin() │
 ├─────────────────────────────────────────────────────┤
-│                   Core Layer                         │
+│                   Core Layer                        │
 │  sdk-lifecycle / setup / bus / decorates / handlers │
 ├─────────────────────────────────────────────────────┤
-│                  Reporter Layer                      │
+│                  Reporter Layer                     │
 │  DataReporter / transports / offline-cache / batch  │
 ├─────────────────────────────────────────────────────┤
-│                  Plugin Layer                        │
+│                  Plugin Layer                       │
 │  PerformancePlugin / ScreenRecordPlugin / Exposure  │
 ├─────────────────────────────────────────────────────┤
-│                  Framework Layer                     │
+│                  Framework Layer                    │
 │  react.ts / vue.ts / preact.ts / vite.ts / webpack  │
 ├─────────────────────────────────────────────────────┤
-│                  Utils Layer                         │
+│                  Utils Layer                        │
 │  data-structures / session / base64 / throttle      │
 └─────────────────────────────────────────────────────┘
 ```
