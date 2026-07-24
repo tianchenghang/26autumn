@@ -120,9 +120,7 @@ function parseNullDelimited(output) {
  */
 async function getTrackedFiles(repoRoot) {
   const { stdout } = await execGit(repoRoot, ["ls-files", "-z"]);
-  return parseNullDelimited(stdout).map((relativePath) =>
-    path.resolve(repoRoot, relativePath),
-  );
+  return parseNullDelimited(stdout).map((relativePath) => path.resolve(repoRoot, relativePath));
 }
 
 /**
@@ -282,8 +280,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(
-    `Unexpected error: ${err instanceof Error ? err.message : String(err)}`,
-  );
+  console.error(`Unexpected error: ${err instanceof Error ? err.message : String(err)}`);
   process.exit(1);
 });

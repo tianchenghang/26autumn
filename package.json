@@ -1,8 +1,14 @@
 {
   "name": "26autumn",
   "version": "0.0.0",
-  "description": "",
   "private": true,
+  "description": "",
+  "keywords": [
+    "2026",
+    "autumn"
+  ],
+  "license": "MIT",
+  "author": "",
   "scripts": {
     "dev": "docsify serve docs --port 4173",
     "build": "docsify generate docs",
@@ -10,13 +16,6 @@
     "git:push": "pnpm git:commit && git push origin main",
     "format": "prettier -w ./ --experimental-cli"
   },
-  "keywords": [
-    "2026",
-    "autumn"
-  ],
-  "author": "",
-  "license": "MIT",
-  "packageManager": "pnpm@10.32.1",
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.16.0",
     "@types/jquery": "^4.0.1",
@@ -25,5 +24,6 @@
     "mermaid": "^11.16.0",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1"
-  }
+  },
+  "packageManager": "pnpm@10.32.1"
 }

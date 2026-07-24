@@ -458,9 +458,7 @@ if err != nil {
 
 ```json
 {
-  "tool_calls": [
-    { "function": { "name": "get_current_time", "arguments": "" } }
-  ]
+  "tool_calls": [{ "function": { "name": "get_current_time", "arguments": "" } }]
 }
 ```
 

@@ -323,13 +323,7 @@ export async function createStreamSessionAndSendMessageStream(ctx: Context) {
   res.write(`data: ${JSON.stringify({ session_id: sessionId })}\n\n`);
 
   // 4. 流式生成, 逐 token 写入
-  await sessionService.sendMessageStream2session(
-    username,
-    question,
-    model_type,
-    sessionId,
-    res,
-  );
+  await sessionService.sendMessageStream2session(username, question, model_type, sessionId, res);
 
   // 5. 结束连接
   res.end();

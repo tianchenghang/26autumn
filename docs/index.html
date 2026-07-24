@@ -156,30 +156,18 @@
           document.body.appendChild(bubble);
           bubble.addEventListener("animationend", () => bubble.remove());
         });
-        document.addEventListener("mouseup", () =>
-          ring.classList.remove("clicking"),
-        );
+        document.addEventListener("mouseup", () => ring.classList.remove("clicking"));
         document.querySelectorAll("a, button, .sidebar-nav a").forEach((el) => {
-          el.addEventListener("mouseenter", () =>
-            ring.classList.add("hovering"),
-          );
-          el.addEventListener("mouseleave", () =>
-            ring.classList.remove("hovering"),
-          );
+          el.addEventListener("mouseenter", () => ring.classList.add("hovering"));
+          el.addEventListener("mouseleave", () => ring.classList.remove("hovering"));
         });
         new MutationObserver(() => {
-          document
-            .querySelectorAll("a, button, .sidebar-nav a")
-            .forEach((el) => {
-              if (el._cursorBound) return;
-              el._cursorBound = true;
-              el.addEventListener("mouseenter", () =>
-                ring.classList.add("hovering"),
-              );
-              el.addEventListener("mouseleave", () =>
-                ring.classList.remove("hovering"),
-              );
-            });
+          document.querySelectorAll("a, button, .sidebar-nav a").forEach((el) => {
+            if (el._cursorBound) return;
+            el._cursorBound = true;
+            el.addEventListener("mouseenter", () => ring.classList.add("hovering"));
+            el.addEventListener("mouseleave", () => ring.classList.remove("hovering"));
+          });
         }).observe(document.body, { childList: true, subtree: true });
       })();
     </script>

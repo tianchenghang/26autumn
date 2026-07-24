@@ -115,17 +115,10 @@ function applyRegex(name, compiled) {
  * @returns {boolean}
  */
 function isGitRepo(root) {
-  const result = spawnSync(
-    "git",
-    ["-C", root, "rev-parse", "--is-inside-work-tree"],
-    {
-      stdio: ["pipe", "pipe", "pipe"],
-    },
-  );
-  return (
-    result.status === 0 &&
-    (result.stdout ?? Buffer.alloc(0)).toString().trim() === "true"
-  );
+  const result = spawnSync("git", ["-C", root, "rev-parse", "--is-inside-work-tree"], {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  return result.status === 0 && (result.stdout ?? Buffer.alloc(0)).toString().trim() === "true";
 }
 
 /**
@@ -138,14 +131,10 @@ function gitIgnored(root, candidates) {
   if (candidates.length === 0) return new Set();
 
   const stdin = candidates.join("\x00");
-  const result = spawnSync(
-    "git",
-    ["-C", root, "check-ignore", "--stdin", "-z"],
-    {
-      input: stdin,
-      stdio: ["pipe", "pipe", "pipe"],
-    },
-  );
+  const result = spawnSync("git", ["-C", root, "check-ignore", "--stdin", "-z"], {
+    input: stdin,
+    stdio: ["pipe", "pipe", "pipe"],
+  });
 
   if (result.status !== 0 && result.status !== 1) return new Set();
   const output = (result.stdout ?? Buffer.alloc(0)).toString();
@@ -193,9 +182,7 @@ function collectPaths(root, respectGitignore) {
       }
     });
     /** @type {string[]} */
-    const kept = allPaths.filter(
-      (p) => !ignored.has(p) && !isUnder(p, ignoredDirs),
-    );
+    const kept = allPaths.filter((p) => !ignored.has(p) && !isUnder(p, ignoredDirs));
     return kept.sort((a, b) => b.length - a.length);
   }
 
@@ -238,17 +225,13 @@ function walkRecursive(dir) {
  */
 function buildPlans(paths, rules, regex) {
   /** @type {Array<[RegExp, string]>} */
-  const compiled = regex
-    ? rules.map(([src, dst]) => [new RegExp(src), dst])
-    : [];
+  const compiled = regex ? rules.map(([src, dst]) => [new RegExp(src), dst]) : [];
 
   /** @type {RenamePlan[]} */
   const plans = [];
   for (const src of paths) {
     const baseName = path.basename(src);
-    const newName = regex
-      ? applyRegex(baseName, compiled)
-      : applyLiteral(baseName, rules);
+    const newName = regex ? applyRegex(baseName, compiled) : applyLiteral(baseName, rules);
     if (newName === baseName || !newName) continue;
     plans.push({ src, dst: path.join(path.dirname(src), newName) });
   }
@@ -388,16 +371,11 @@ function main(argv) {
     regex: cli.regex,
     respectGitignore: !cli.noGitignore,
   });
-  console.log(
-    `\nDone. renamed=${renamed}, skipped=${skipped}, dry_run=${!cli.apply}`,
-  );
+  console.log(`\nDone. renamed=${renamed}, skipped=${skipped}, dry_run=${!cli.apply}`);
   return 0;
 }
 
-if (
-  process.argv[1] &&
-  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
-) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   process.exit(main(process.argv));
 }
 

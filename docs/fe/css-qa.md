@@ -1,6 +1,6 @@
 # CSS 面试 Q/A 大全
 
-本文档收录 41 道 CSS 高频面试题, 覆盖选择器、布局、工程化、渲染原理、性能优化、响应式、动画与跨端等方向, 解答兼顾原理深度与工程实践, 适合中高级前端面试准备。
+本文档收录 55 道 CSS 高频面试题, 覆盖选择器、布局、工程化、渲染原理、性能优化、响应式、动画、跨端与现代 CSS 新特性等方向, 解答兼顾原理深度与工程实践, 适合中高级前端面试准备。
 
 ## 目录
 
@@ -8,6 +8,8 @@
   - [1. CSS 选择器的优先级?](#1-css-选择器的优先级)
   - [2. 伪类和伪元素有什么区别?](#2-伪类和伪元素有什么区别)
   - [3. CSS 属性继承是什么? 哪些属性可以继承?](#3-css-属性继承是什么-哪些属性可以继承)
+  - [42. CSS 中的 :root 和 html 选择器有什么区别?](#42-css-中的-root-和-html-选择器有什么区别)
+  - [43. CSS 中的 :is() 和 :where() 伪类有什么区别?](#43-css-中的-is-和-where-伪类有什么区别)
 - [盒模型与布局](#盒模型与布局)
   - [4. 标准盒模型与怪异盒模型 (IE 盒模型) 有什么区别?](#4-标准盒模型与怪异盒模型-ie-盒模型-有什么区别)
   - [5. 什么是 BFC? 如何触发 BFC? BFC 有什么作用?](#5-什么是-bfc-如何触发-bfc-bfc-有什么作用)
@@ -17,12 +19,16 @@
   - [9. 什么是 margin 塌陷与 margin 合并? 如何解决?](#9-什么是-margin-塌陷与-margin-合并-如何解决)
   - [10. position 有哪些取值? sticky 是如何工作的?](#10-position-有哪些取值-sticky-是如何工作的)
   - [11. z-index 为什么会失效? 什么是层叠上下文?](#11-z-index-为什么会失效-什么是层叠上下文)
+  - [44. CSS 中的浮动有什么特点? 如何清除浮动?](#44-css-中的浮动有什么特点-如何清除浮动)
+  - [45. CSS 中的 grid 和 flex 应该如何选择?](#45-css-中的-grid-和-flex-应该如何选择)
+  - [46. CSS 中的 gap 属性在 flex 和 grid 中有什么区别?](#46-css-中的-gap-属性在-flex-和-grid-中有什么区别)
 - [视觉绘制与常见效果](#视觉绘制与常见效果)
   - [12. CSS 如何绘制一个三角形?](#12-css-如何绘制一个三角形)
   - [13. 移动端 1px 问题是什么? 如何实现 0.5px 边框?](#13-移动端-1px-问题是什么-如何实现-05px-边框)
   - [14. 隐藏元素有哪些方式? 它们有什么区别?](#14-隐藏元素有哪些方式-它们有什么区别)
   - [15. 如何实现单行和多行文本溢出省略号?](#15-如何实现单行和多行文本溢出省略号)
   - [16. px、em、rem、vw、vh 有什么区别? 如何选择?](#16-px-em-rem-vw-vh-有什么区别-如何选择)
+  - [47. 什么是 CSS 的 aspect-ratio 属性?](#47-什么是-css-的-aspect-ratio-属性)
 - [CSS 工程化与样式方案](#css-工程化与样式方案)
   - [17. 介绍 CSS 原子化 (tailwindcss 的核心原理)、css-in-js 的核心原理、CSS 模块化 (.module.css 的核心原理), 按性能排序, 解释 css-in-js 为什么性能差?](#17-介绍-css-原子化-tailwindcss-的核心原理-css-in-js-的核心原理-css-模块化-modulecss-的核心原理-按性能排序-解释-css-in-js-为什么性能差)
   - [18. Web Component 如何实现样式隔离?](#18-web-component-如何实现样式隔离)
@@ -30,6 +36,9 @@
   - [20. PostCSS 是什么? 有什么用?](#20-postcss-是什么-有什么用)
   - [21. CSS 变量 (自定义属性) 与 SCSS 变量有什么区别?](#21-css-变量-自定义属性-与-scss-变量有什么区别)
   - [22. link 和 @import 有什么区别?](#22-link-和-import-有什么区别)
+  - [48. 什么是 CSS Modules? 它的原理是什么?](#48-什么是-css-modules-它的原理是什么)
+  - [49. 如何实现 CSS 的按需加载和懒加载?](#49-如何实现-css-的按需加载和懒加载)
+  - [50. 什么是 CSS 的 @layer 规则?](#50-什么是-css-的-layer-规则)
 - [渲染原理与性能优化](#渲染原理与性能优化)
   - [23. 什么是重排 (reflow) 和重绘 (repaint)? 如何避免?](#23-什么是重排-reflow-和重绘-repaint-如何避免)
   - [24. CSS 会阻塞渲染吗? 会阻塞 JS 执行吗?](#24-css-会阻塞渲染吗-会阻塞-js-执行吗)
@@ -37,11 +46,16 @@
   - [26. 浏览器渲染页面的完整流程是什么? 什么是 CSSOM?](#26-浏览器渲染页面的完整流程是什么-什么是-cssom)
   - [27. CSS 选择器是从左往右还是从右往左匹配的? 为什么?](#27-css-选择器是从左往右还是从右往左匹配的-为什么)
   - [28. content-visibility 和 contain 属性有什么用?](#28-content-visibility-和-contain-属性有什么用)
+  - [51. CSS 中的 will-change 属性有什么作用?](#51-css-中的-will-change-属性有什么作用)
+  - [52. CSS 中的 transform 和 position 有什么区别?](#52-css-中的-transform-和-position-有什么区别)
 - [响应式与现代 CSS](#响应式与现代-css)
   - [29. 响应式布局有哪些方案? 媒体查询怎么用?](#29-响应式布局有哪些方案-媒体查询怎么用)
   - [30. 什么是容器查询 (container query)? 与媒体查询有什么区别?](#30-什么是容器查询-container-query-与媒体查询有什么区别)
   - [31. :has() 选择器有什么用?](#31-has-选择器有什么用)
   - [32. 如何用 prefers-color-scheme 实现暗色模式?](#32-如何用-prefers-color-scheme-实现暗色模式)
+  - [53. CSS 中的 calc()、min()、max()、clamp() 函数如何使用?](#53-css-中的-calcminmaxclamp-函数如何使用)
+  - [54. 什么是 CSS 的 @supports 规则?](#54-什么是-css-的-supports-规则)
+  - [55. 什么是 CSS 的 scroll-snap?](#55-什么是-css-的-scroll-snap)
 - [动画与交互](#动画与交互)
   - [33. CSS 动画和 JS 动画 (requestAnimationFrame) 有什么区别?](#33-css-动画和-js-动画-requestanimationframe-有什么区别)
   - [34. transition 和 animation 有什么区别?](#34-transition-和-animation-有什么区别)
@@ -162,6 +176,174 @@ A:
 - `revert-layer`: 回滚到上一个 `@layer` 的值
 
 经典面试追问: 为什么 `a` 标签的 `color` 不继承父元素? 因为浏览器的 UA 默认样式表直接给 `a` 设置了颜色, 直接命中的声明优先级高于继承值; 想继承需显式写 `a { color: inherit; }`。
+
+### 42. CSS 中的 :root 和 html 选择器有什么区别?
+
+A:
+
+`:root` 和 `html` 在大多数情况下指向同一个元素, 但在语义、特异性和使用场景上有区别。
+
+特异性差异:
+
+- `:root` 是伪类, 特异性为 (0, 1, 0, 0)
+- `html` 是元素选择器, 特异性为 (0, 0, 0, 1)
+- `:root` 的优先级高于 `html`
+
+```css
+html {
+  color: red;
+}
+:root {
+  color: blue;
+}
+/* 最终颜色为 blue, 因为 :root 特异性更高 */
+```
+
+使用场景:
+
+`:root` 的适用场景:
+
+- 定义全局 CSS 变量 (约定俗成)
+- 在独立的 SVG 文档中, `:root` 匹配根 `<svg>` 元素而非 `<html>` (内联在 HTML 中的 SVG 不适用, `:root` 仍匹配 html)
+- XML 文档中, `:root` 匹配文档的根元素 (不一定是 html)
+
+```css
+:root {
+  --color-primary: #1890ff;
+  --spacing-unit: 8px;
+  --font-family: -apple-system, sans-serif;
+}
+```
+
+`html` 的适用场景:
+
+- 设置基础字体大小 (用于 rem 计算)
+- 设置全局背景色
+- 需要被更低特异性选择器覆盖时
+
+```css
+html {
+  font-size: 16px;
+  background: #f5f5f5;
+  scroll-behavior: smooth;
+}
+```
+
+在独立 SVG 文档 (.svg 文件) 中的区别: 文档根元素是 `<svg>`, 因此 `:root` 能匹配到根 `<svg>` 元素, 而 `html` 选择器匹配不到任何元素 — 这是两者在非 HTML 文档中语义分野的典型例子。
+
+### 43. CSS 中的 :is() 和 :where() 伪类有什么区别?
+
+A:
+
+`:is()` 和 `:where()` 都是 CSS 伪类函数, 用于简化选择器书写, 接受一个选择器列表作为参数。两者的唯一区别在于特异性计算。
+
+特异性区别:
+
+```css
+/* :is() 的特异性 = 参数中特异性最高的选择器 */
+:is(#id, .class, div) {
+  color: red;
+}
+/* 特异性 = #id 的特异性 = (1, 0, 0, 0) */
+
+/* :where() 的特异性始终为 0 */
+:where(#id, .class, div) {
+  color: red;
+}
+/* 特异性 = (0, 0, 0, 0) */
+```
+
+实际影响:
+
+```css
+:is(.article, .post) p {
+  color: blue;
+}
+/* 特异性 = (0, 1, 0, 1) */
+
+:where(.article, .post) p {
+  color: blue;
+}
+/* 特异性 = (0, 0, 0, 1) */
+```
+
+简化选择器:
+
+```css
+/* 传统写法 */
+.article h1,
+.article h2,
+.article h3,
+.post h1,
+.post h2,
+.post h3 {
+  margin-bottom: 16px;
+}
+
+/* :is() 简化 */
+:is(.article, .post) :is(h1, h2, h3) {
+  margin-bottom: 16px;
+}
+
+/* :where() 简化 (低优先级) */
+:where(.article, .post) :where(h1, h2, h3) {
+  margin-bottom: 16px;
+}
+```
+
+使用场景:
+
+`:is()` 适用:
+
+- 需要保持正常特异性
+- 简化复杂选择器, 不改变优先级
+
+```css
+:is(input, select, textarea):focus {
+  outline: 2px solid #1890ff;
+}
+
+:is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 600;
+}
+```
+
+`:where()` 适用:
+
+- 需要低优先级的默认样式, 方便覆盖
+- 重置样式、基础样式
+- 组件库的默认主题, 允许用户轻松覆盖
+
+```css
+:where(ul, ol) {
+  list-style: none;
+  padding: 0;
+}
+
+:where(.btn) {
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+```
+
+容错性:
+
+- `:is()` 和 `:where()` 都支持容错解析
+- 选择器列表中有一个无效, 不会导致整个规则失效
+- 传统选择器列表中有一个无效, 整个规则被丢弃
+
+```css
+/* 传统: 如果 :unsupported 无效, 整个规则失效 */
+.valid,
+:unsupported {
+  color: red;
+}
+
+/* :is(): 忽略无效的, 保留有效的 */
+:is(.valid, :unsupported) {
+  color: red;
+}
+```
 
 ---
 
@@ -502,6 +684,244 @@ z-index 失效的典型场景:
 
 工程解法: 全局规划层级区间 (如基础 0、吸顶 100、抽屉 500、弹窗 1000、toast 2000), 弹窗类组件用 portal 挂到 `body` 下避开祖先层叠上下文, 或使用原生 `<dialog>` (top layer, 顶层渲染, 天然不被任何 z-index 遮挡)。
 
+### 44. CSS 中的浮动有什么特点? 如何清除浮动?
+
+A:
+
+浮动 (float) 最初设计用于实现文字环绕图片的效果, 后来被广泛用于页面布局。理解浮动的特性对掌握 CSS 布局至关重要。
+
+浮动的特点:
+
+- 浮动元素脱离正常文档流, 向左或向右移动, 直到碰到包含块边界或另一个浮动元素
+- 浮动元素不占据原文档流中的位置, 后续块级元素会忽略浮动元素的位置 (但行内内容会环绕)
+- 浮动元素会创建 BFC (块级格式化上下文)
+- 浮动元素的 display 计算值会被强制转为 block (如 float 的 span 表现为块级)
+- 浮动元素的高度不会撑开父元素 (高度塌陷问题)
+
+高度塌陷问题:
+
+```html
+<div class="parent">
+  <div class="child" style="float: left; height: 100px;">浮动子元素</div>
+</div>
+<!-- parent 高度为 0, 因为子元素脱离了文档流 -->
+```
+
+清除浮动的方案:
+
+方案一: 额外标签 + clear:
+
+```html
+<div class="parent">
+  <div class="child" style="float: left;">浮动</div>
+  <div style="clear: both;"></div>
+</div>
+```
+
+缺点: 增加无意义的 DOM 节点。
+
+方案二: 父元素触发 BFC:
+
+```css
+.parent {
+  overflow: hidden;
+}
+```
+
+原理: BFC 计算高度时会包含浮动子元素。
+
+方案三: ::after 伪元素 (推荐):
+
+```css
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+/* 更健壮的写法 */
+.clearfix::before,
+.clearfix::after {
+  content: "";
+  display: table;
+}
+.clearfix::after {
+  clear: both;
+}
+```
+
+方案四: 使用现代布局替代:
+
+```css
+.container {
+  display: flex;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+```
+
+clear 属性的值:
+
+- `left`: 元素左侧不允许有浮动元素
+- `right`: 元素右侧不允许有浮动元素
+- `both`: 两侧都不允许有浮动元素
+
+浮动布局的历史地位: 在 Flex 和 Grid 出现之前, 浮动是主要的布局手段。现代开发中, 浮动应仅用于其原始目的 — 文字环绕效果, 布局应使用 Flex 或 Grid。
+
+### 45. CSS 中的 grid 和 flex 应该如何选择?
+
+A:
+
+Grid 和 Flex 不是竞争关系, 而是互补的布局系统。选择取决于布局维度和设计意图。
+
+核心区别:
+
+- Flex 是一维布局: 一次只处理一个方向 (行或列)
+- Grid 是二维布局: 同时处理行和列
+
+选择 Flex 的场景:
+
+- 内容驱动的布局: 元素尺寸由内容决定, 需要弹性分配
+- 单行/单列排列: 导航栏、按钮组、标签页、工具栏
+- 对齐需求: 垂直居中、两端对齐、等分布局
+- 组件内部: 卡片内容排列、表单项、列表项
+- 不确定元素数量: 动态添加/删除元素时自动适应
+
+```css
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+```
+
+选择 Grid 的场景:
+
+- 页面级布局: header + sidebar + main + footer 的整体结构
+- 精确的二维控制: 元素需要占据特定的行和列
+- 复杂网格: 图片画廊、仪表盘、数据表格
+- 重叠布局: 元素需要在网格中重叠
+- 固定列数/行数: 设计稿明确定义了网格结构
+
+```css
+.page {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer footer";
+  grid-template-columns: 250px 1fr;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+```
+
+两者配合:
+
+```css
+.page {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 60px 1fr 40px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+```
+
+决策流程:
+
+1. 布局是二维的 (需要同时控制行和列)? 选 Grid
+2. 布局是一维的 (只关心一个方向的排列)? 选 Flex
+3. 元素位置由内容决定? 选 Flex
+4. 元素位置由布局决定? 选 Grid
+5. 需要重叠? 选 Grid
+6. 不确定? 两者都试试, 选代码更简洁的
+
+### 46. CSS 中的 gap 属性在 flex 和 grid 中有什么区别?
+
+A:
+
+gap 属性 (及其子属性 row-gap 和 column-gap) 用于设置网格或弹性容器中子元素之间的间距。它在 Grid 和 Flex 中的行为基本一致, 但历史兼容性和使用场景有所不同。
+
+语法:
+
+```css
+.container {
+  gap: 16px; /* row-gap 和 column-gap 均为 16px */
+  gap: 16px 24px; /* row-gap: 16px, column-gap: 24px */
+  row-gap: 16px;
+  column-gap: 24px;
+}
+```
+
+在 Grid 中:
+
+- Grid 从一开始就支持 gap (最初叫 grid-gap, 后统一为 gap)
+- 控制网格轨道之间的间距
+- 不影响容器边缘与第一个/最后一个子元素的距离
+
+在 Flex 中:
+
+- Flex 的 gap 支持较晚 (Chrome 84+, Firefox 63+, Safari 14.1+)
+- IE 完全不支持 Flex gap
+- 控制 flex item 之间的间距
+- 换行时, row-gap 控制行间距, column-gap 控制列间距
+
+与 margin 的对比:
+
+```css
+/* 传统方案: 用 margin 模拟 gap */
+.flex-container > * + * {
+  margin-left: 16px;
+}
+
+/* 或负 margin 方案 */
+.flex-container {
+  margin: -8px;
+}
+.flex-container > * {
+  margin: 8px;
+}
+
+/* gap 方案: 更简洁, 无边缘多余间距 */
+.flex-container {
+  gap: 16px;
+}
+```
+
+gap 的优势:
+
+- 只在元素之间添加间距, 容器边缘没有多余间距
+- 不需要处理第一个/最后一个子元素的特殊 margin
+- 换行时自动处理行间距和列间距
+- 代码更简洁, 意图更明确
+
+兼容性注意:
+
+- Grid gap: 所有现代浏览器均支持; IE 的旧版 -ms-grid 实现不支持 gap
+- Flex gap: IE 不支持, 旧版 Safari (14.1 之前) 不支持
+- 需要兼容旧浏览器时, 仍需使用 margin 方案
+
 ---
 
 ## 视觉绘制与常见效果
@@ -706,6 +1126,84 @@ A:
 - 字体: 需要跟随用户系统字号设置 (可访问性) 用 rem; 局部组件希望随父级字号缩放的微调场景用 em (如按钮内图标与文字的相对比例)
 - 全屏弹层/首屏高度: `100dvh` 优于 `100vh` (移动端地址栏)
 - 最大宽度限制阅读宽度: `max-width: 70ch` 之类
+
+### 47. 什么是 CSS 的 aspect-ratio 属性?
+
+A:
+
+aspect-ratio 是 CSS 中用于设置元素宽高比的属性, 替代了传统的 padding-top 百分比 hack 方案。
+
+语法:
+
+```css
+.element {
+  aspect-ratio: 16 / 9;
+  aspect-ratio: 1;
+  aspect-ratio: 4 / 3;
+  aspect-ratio: auto;
+  aspect-ratio: auto 16 / 9;
+}
+```
+
+传统方案 (padding hack):
+
+```css
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 9/16 = 56.25% */
+}
+
+.video-wrapper > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+```
+
+aspect-ratio 方案:
+
+```css
+.video-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+```
+
+工作原理:
+
+- 当元素只设置了 width 或 height 之一时, aspect-ratio 自动计算另一个维度
+- 如果同时设置了 width 和 height, aspect-ratio 被忽略
+- 对于替换元素 (img、video), 默认使用固有宽高比
+
+```css
+.square {
+  width: 200px;
+  aspect-ratio: 1;
+}
+
+.banner {
+  height: 300px;
+  aspect-ratio: 21 / 9;
+}
+
+.card-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+```
+
+与 max-width/max-height 配合:
+
+```css
+.element {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 500px;
+}
+```
 
 ---
 
@@ -962,6 +1460,312 @@ A:
 
 结论: 生产环境永远用 `<link>` 加载样式表, 避免 `@import`; 需要异步加载非关键 CSS 时用 `media="print" onload` 或 `rel="preload" as="style"` 技巧。
 
+### 48. 什么是 CSS Modules? 它的原理是什么?
+
+A:
+
+CSS Modules 是一种 CSS 类名局部作用域方案, 通过构建工具在编译时将类名转换为唯一标识符, 避免全局样式冲突。
+
+核心原理 — 编译时转换:
+
+- 构建工具 (Webpack 的 css-loader、Vite 内置支持) 识别 `.module.css` 后缀
+- 将 CSS 文件中的每个类名转换为唯一的哈希字符串
+- 转换规则通常为: `[文件名]_[类名]_[哈希]`, 如 `Button_primary_abc123`
+- 生成一个 JSON 映射对象, 导出原始类名到哈希类名的对应关系
+- JavaScript 通过 import 获取映射对象, 使用映射后的类名
+
+```css
+/* Button.module.css */
+.primary {
+  background: #1890ff;
+  color: white;
+}
+
+.large {
+  padding: 16px 32px;
+  font-size: 18px;
+}
+```
+
+```javascript
+import styles from "./Button.module.css";
+
+function Button({ size }) {
+  return (
+    <button className={`${styles.primary} ${size === "large" ? styles.large : ""}`}>按钮</button>
+  );
+}
+```
+
+编译后的 HTML:
+
+```html
+<button class="Button_primary_abc123 Button_large_def456">按钮</button>
+```
+
+特性:
+
+局部作用域:
+
+- 类名只在当前模块内有效, 不会污染全局
+- 不同文件可以使用相同的类名, 编译后哈希不同, 互不冲突
+
+全局样式:
+
+```css
+:global(.global-class) {
+  color: red;
+}
+
+:global {
+  .another-global {
+    color: blue;
+  }
+}
+```
+
+组合 (composes):
+
+```css
+.base {
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.primary {
+  composes: base;
+  background: #1890ff;
+}
+```
+
+与其他方案的对比:
+
+| 维度       | CSS Modules  | CSS-in-JS    | 原子化 CSS   |
+| ---------- | ------------ | ------------ | ------------ |
+| 作用域     | 编译时哈希   | 运行时生成   | 预定义类名   |
+| 运行时开销 | 无           | 有           | 无           |
+| 动态样式   | 不支持       | 支持         | 有限支持     |
+| 学习成本   | 低           | 中           | 中           |
+| 工具链依赖 | 需要构建工具 | 需要运行时库 | 需要构建工具 |
+
+局限性:
+
+- 类名是静态的, 无法根据 props 动态生成
+- 需要构建工具支持, 无法在纯 HTML 中使用
+- 调试时类名是哈希值, 不够直观 (可通过配置保留原始类名)
+- 无法处理 JavaScript 驱动的动态样式 (如根据状态改变颜色)
+
+### 49. 如何实现 CSS 的按需加载和懒加载?
+
+A:
+
+CSS 按需加载和懒加载是性能优化的重要手段, 目标是减少首屏加载的 CSS 体积, 只在需要时加载对应样式。
+
+代码分割 (Code Splitting):
+
+```javascript
+// Webpack: 动态 import 触发 CSS 分割
+const openModal = async () => {
+  const { Modal } = await import("./Modal");
+};
+
+// React.lazy + Suspense
+const HeavyComponent = React.lazy(() => import("./HeavyComponent"));
+```
+
+CSS 懒加载:
+
+```javascript
+function loadCSS(href) {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.onload = resolve;
+    link.onerror = reject;
+    document.head.appendChild(link);
+  });
+}
+
+button.addEventListener("click", async () => {
+  await loadCSS("/css/editor.css");
+  openEditor();
+});
+```
+
+媒体查询分割:
+
+```html
+<link rel="stylesheet" href="print.css" media="print" />
+<link rel="stylesheet" href="mobile.css" media="(max-width: 768px)" />
+```
+
+注意: media 属性不会阻止 CSS 下载, 浏览器仍会下载所有 CSS, 只是不匹配时不阻塞渲染。真正的按需加载需要 JavaScript 动态插入。
+
+Critical CSS (关键 CSS):
+
+```html
+<style>
+  .header {
+    height: 60px;
+    background: #fff;
+  }
+  .hero {
+    min-height: 80vh;
+  }
+</style>
+
+<link rel="preload" href="full.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="full.css" /></noscript>
+```
+
+工具支持:
+
+- critical: 自动提取首屏关键 CSS
+- critters: Webpack 插件, 内联关键 CSS
+- purgecss: 移除未使用的 CSS
+- uncss: 分析 HTML, 移除未使用的 CSS
+
+Tailwind CSS 的按需生成:
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+};
+```
+
+最佳实践:
+
+- 首屏 CSS 控制在 14KB 以内 (一个 TCP 包)
+- 关键 CSS 内联到 HTML, 非关键 CSS 异步加载
+- 路由级代码分割, 每个页面独立 CSS chunk
+- 使用 PurgeCSS 移除未使用的样式
+- 组件库使用按需引入 (如 babel-plugin-import)
+- 避免 @import, 它会串行加载 CSS
+
+### 50. 什么是 CSS 的 @layer 规则?
+
+A:
+
+@layer (Cascade Layers) 是 CSS 层叠层规则, 允许开发者显式定义样式的优先级层级, 解决第三方库样式覆盖困难、特异性战争等问题。
+
+问题背景:
+
+```css
+/* 第三方库的样式, 特异性很高 */
+.ui-lib .btn.btn-primary {
+  background: blue;
+}
+
+/* 你想覆盖它, 但需要更高的特异性 */
+.my-app .container .btn.btn-primary {
+  background: red;
+}
+```
+
+@layer 解决方案:
+
+```css
+@layer reset, base, components, utilities;
+
+@layer reset {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+@layer base {
+  body {
+    font-family: sans-serif;
+    line-height: 1.5;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  .btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+  }
+  .btn-primary {
+    background: #1890ff;
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  .mt-4 {
+    margin-top: 16px;
+  }
+  .text-center {
+    text-align: center;
+  }
+}
+```
+
+层级规则:
+
+- 后声明的 layer 优先级高于先声明的
+- 未归属任何 layer 的样式优先级最高
+- 同一 layer 内, 按正常的特异性和源码顺序决定
+- layer 的优先级覆盖特异性: utilities 层的 `.mt-4` 可以覆盖 components 层的 `.btn-primary`, 即使后者特异性更高
+
+嵌套 layer:
+
+```css
+@layer framework {
+  @layer layout {
+    .container {
+      width: 100%;
+    }
+  }
+  @layer theme {
+    .container {
+      background: #fff;
+    }
+  }
+}
+
+@layer framework.theme {
+  .container {
+    background: #f5f5f5;
+  }
+}
+```
+
+匿名 layer:
+
+```css
+@layer {
+  .element {
+    color: red;
+  }
+}
+```
+
+与第三方库配合:
+
+```css
+@layer third-party, app;
+
+@layer third-party {
+  @import "normalize.css";
+  @import "ui-library.css";
+}
+
+@layer app {
+  .btn {
+    background: red;
+  }
+}
+```
+
 ---
 
 ## 渲染原理与性能优化
@@ -1112,6 +1916,158 @@ A:
 `contain-intrinsic-size` 提供预估尺寸, 避免未渲染内容高度为 0 导致滚动条位置漂移。
 
 适用场景与定位: 超长列表/长页面 (信息流、文档站) 的低成本优化, 实测可显著降低首屏渲染时间; 与虚拟列表互补 — 虚拟列表解决 DOM 节点数, `content-visibility` 解决渲染成本, 简单场景甚至可替代虚拟列表。注意点: `auto` 下浏览器查找 (Ctrl+F) 与锚点跳转对未渲染区域的行为有细节差异; 预估尺寸不准会有轻微滚动抖动。
+
+### 51. CSS 中的 will-change 属性有什么作用?
+
+A:
+
+will-change 是 CSS 中用于提前告知浏览器元素将发生何种变化的属性, 让浏览器提前做好优化准备, 如创建合成层、分配 GPU 资源。
+
+语法:
+
+```css
+.element {
+  will-change: transform;
+  will-change: opacity;
+  will-change: transform, opacity;
+  will-change: scroll-position;
+  will-change: contents;
+  will-change: auto;
+}
+```
+
+工作原理:
+
+- 浏览器在元素实际变化之前, 根据 will-change 的声明提前分配资源
+- `will-change: transform` 会让浏览器将元素提升为独立的合成层
+- 合成层的 transform 和 opacity 动画由 GPU 直接处理, 跳过 Layout 和 Paint
+- 相当于给浏览器一个"预告", 让它有时间准备, 而非动画开始时才匆忙创建图层
+
+正确使用:
+
+```javascript
+const element = document.querySelector(".animated");
+
+element.addEventListener("mouseenter", () => {
+  element.style.willChange = "transform";
+});
+
+element.addEventListener("animationend", () => {
+  element.style.willChange = "auto";
+});
+```
+
+```css
+.modal-overlay {
+  will-change: opacity;
+}
+
+.drawer {
+  will-change: transform;
+}
+```
+
+注意事项:
+
+- 不要滥用: 每个 will-change 都会创建合成层, 占用 GPU 内存。页面合成层过多会导致内存暴涨, 反而降低性能
+- 不要提前太久: 在动画即将开始时添加, 而非页面加载时就设置
+- 及时清理: 动画结束后移除, 释放资源
+- 不要用于大量元素: 列表中的每个 item 都设置 will-change 是反模式
+- 不要作为性能银弹: will-change 只优化 transform 和 opacity 动画, 对 width、height 等触发布局的属性无效
+
+与 `transform: translateZ(0)` 的对比:
+
+- 两者都能触发合成层提升
+- will-change 是标准推荐方式, 语义更明确
+- translateZ(0) 是 hack 手段, 会实际改变元素的 3D 变换
+- will-change 可以声明更多变化类型 (scroll-position、contents 等)
+
+### 52. CSS 中的 transform 和 position 有什么区别?
+
+A:
+
+transform 和 position 都可以改变元素的视觉位置, 但工作原理、性能影响和使用场景完全不同。
+
+核心区别:
+
+| 维度       | transform                | position                         |
+| ---------- | ------------------------ | -------------------------------- |
+| 影响布局   | 不影响, 元素仍占据原位置 | 影响 (absolute/fixed 脱离文档流) |
+| 渲染阶段   | 合成阶段 (Composite)     | 布局阶段 (Layout)                |
+| 性能       | 高, 可 GPU 加速          | 低, 触发回流                     |
+| 百分比参照 | 元素自身尺寸             | 包含块尺寸                       |
+| 层叠上下文 | 创建                     | absolute/fixed 创建              |
+
+详细对比:
+
+```css
+/* transform: translate */
+.element {
+  transform: translate(100px, 50px);
+}
+
+/* position: relative */
+.element {
+  position: relative;
+  top: 50px;
+  left: 100px;
+}
+
+/* position: absolute */
+.element {
+  position: absolute;
+  top: 50px;
+  left: 100px;
+}
+```
+
+性能差异:
+
+```javascript
+// 差: 每帧都触发回流
+function animateWithPosition(element, x) {
+  element.style.left = x + "px";
+}
+
+// 好: 只触发合成
+function animateWithTransform(element, x) {
+  element.style.transform = `translateX(${x}px)`;
+}
+```
+
+使用场景:
+
+使用 transform:
+
+- 动画和过渡 (位移、缩放、旋转)
+- 不影响其他元素位置的视觉偏移
+- 需要 GPU 加速的高频更新
+- 居中: `transform: translate(-50%, -50%)`
+
+使用 position:
+
+- 需要脱离文档流的定位 (弹窗、下拉菜单、固定导航)
+- 需要影响其他元素布局的位置调整
+- 粘性定位 (sticky)
+- 层叠布局 (z-index 配合)
+
+组合使用:
+
+```css
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  transform: translateY(8px);
+  transition: transform 0.2s;
+}
+```
 
 ---
 
@@ -1293,6 +2249,312 @@ if (saved) document.documentElement.dataset.theme = saved;
 
 防闪烁: 主题判定脚本要内联在 `<head>` 最前同步执行, 否则暗色用户会看到一帧亮色 (FOUC 主题版)。
 
+### 53. CSS 中的 calc()、min()、max()、clamp() 函数如何使用?
+
+A:
+
+这四个数学函数提供了在 CSS 中进行动态计算的能力, 减少了对 JavaScript 和媒体查询的依赖。
+
+calc() (计算):
+
+```css
+.element {
+  width: calc(100% - 40px);
+  height: calc(100vh - 60px);
+  font-size: calc(16px + 1vw);
+  margin: calc(var(--spacing) * 2);
+  padding: calc(10px + 2em);
+}
+
+/* + 和 - 前后必须有空格 */
+width: calc(100% - 40px); /* 正确 */
+width: calc(100%-40px); /* 错误 */
+
+/* 可以嵌套 */
+width: calc(calc(100% - 20px) / 2);
+
+/* 可以与变量配合 */
+width: calc(var(--base-width) + var(--extra-width));
+```
+
+min() (取最小值):
+
+```css
+.element {
+  width: min(90%, 500px);
+  font-size: min(4vw, 24px);
+}
+```
+
+max() (取最大值):
+
+```css
+.element {
+  width: max(300px, 30vw);
+  font-size: max(16px, 1.2vw);
+  padding: max(12px, 1vh);
+}
+```
+
+clamp() (范围约束):
+
+```css
+/* clamp(min, preferred, max) */
+h1 {
+  font-size: clamp(16px, 2.5vw, 24px);
+}
+
+.container {
+  width: clamp(320px, 90%, 1200px);
+}
+
+.section {
+  padding: clamp(16px, 5vw, 64px);
+}
+
+/* clamp 等价于 max(min, min(preferred, max)) */
+font-size: clamp(16px, 2.5vw, 24px);
+/* 等价于 */
+font-size: max(16px, min(2.5vw, 24px));
+```
+
+实际应用场景:
+
+```css
+:root {
+  --space-sm: clamp(8px, 1vw, 12px);
+  --space-md: clamp(16px, 2vw, 24px);
+  --space-lg: clamp(24px, 4vw, 48px);
+  --space-xl: clamp(32px, 6vw, 80px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-md);
+}
+
+.content {
+  width: min(90%, 1200px);
+  margin-inline: auto;
+}
+
+.hero {
+  min-height: calc(100vh - var(--header-height, 60px));
+}
+```
+
+浏览器兼容性:
+
+- calc(): IE9+, 所有现代浏览器
+- min() / max(): IE 不支持, 现代浏览器均支持
+- clamp(): IE 不支持, Chrome 79+, Firefox 75+, Safari 13.1+
+
+### 54. 什么是 CSS 的 @supports 规则?
+
+A:
+
+@supports 是 CSS 的特性查询规则, 用于检测浏览器是否支持某个 CSS 属性或值, 根据支持情况应用不同样式。它是渐进增强的核心工具。
+
+基本语法:
+
+```css
+@supports (property: value) {
+  /* 浏览器支持时应用的样式 */
+}
+
+@supports not (property: value) {
+  /* 浏览器不支持时应用的样式 */
+}
+```
+
+使用示例:
+
+```css
+@supports (display: grid) {
+  .container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@supports not (display: grid) {
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .item {
+    width: 33.333%;
+  }
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .glass {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+  }
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .glass {
+    background: rgba(255, 255, 255, 0.95);
+  }
+}
+```
+
+逻辑运算符:
+
+```css
+@supports (display: grid) and (gap: 10px) {
+  .container {
+    display: grid;
+    gap: 10px;
+  }
+}
+
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass {
+    backdrop-filter: blur(10px);
+  }
+}
+
+@supports not (display: grid) {
+  /* 回退样式 */
+}
+```
+
+JavaScript API:
+
+```javascript
+if (CSS.supports("display", "grid")) {
+  // 支持 grid
+}
+
+if (CSS.supports("backdrop-filter: blur(10px)")) {
+  // 支持 backdrop-filter
+}
+
+if (CSS.supports("(display: grid) and (gap: 10px)")) {
+  // 同时支持
+}
+```
+
+与 Modernizr 的对比:
+
+- @supports 是浏览器原生 API, 无需引入第三方库
+- Modernizr 通过 JavaScript 检测, 可以检测更多特性 (包括 HTML5 特性)
+- @supports 只能检测 CSS 属性, 无法检测 JavaScript API
+- 现代项目中, @supports 已能覆盖大部分 CSS 特性检测需求
+
+### 55. 什么是 CSS 的 scroll-snap?
+
+A:
+
+CSS Scroll Snap 是一种控制滚动容器停止位置的机制, 使滚动在释放后自动吸附到预定义的锚点位置。常用于轮播图、全屏滚动、图片画廊等场景。
+
+核心概念:
+
+- Scroll Snap Container: 设置 scroll-snap-type 的滚动容器
+- Scroll Snap Area: 子元素上设置 scroll-snap-align 定义的吸附区域
+- Snap Position: 滚动停止时, 容器的 snap port 与子元素的 snap area 对齐的位置
+
+容器属性:
+
+```css
+.carousel {
+  scroll-snap-type: x mandatory;
+  /* x | y | both: 吸附方向 */
+  /* mandatory | proximity: 吸附强度 */
+  /* mandatory: 滚动结束必须吸附到最近锚点 */
+  /* proximity: 接近锚点时才吸附, 否则自由滚动 */
+
+  overflow-x: scroll;
+  display: flex;
+}
+
+.fullpage-scroll {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
+}
+```
+
+子元素属性:
+
+```css
+.slide {
+  scroll-snap-align: center;
+  /* start | end | center | none */
+  /* 定义子元素的哪个位置与容器对齐 */
+
+  scroll-snap-stop: always;
+  /* normal | always */
+  /* always: 快速滚动时也不能跳过此元素 */
+
+  flex: 0 0 100%;
+}
+```
+
+完整轮播示例:
+
+```css
+.carousel {
+  display: flex;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel > * {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+/* 可选: 隐藏滚动条 */
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+.carousel {
+  scrollbar-width: none;
+}
+```
+
+全屏滚动示例:
+
+```css
+html {
+  scroll-snap-type: y proximity;
+}
+
+section {
+  min-height: 100vh;
+  scroll-snap-align: start;
+}
+```
+
+配合 JavaScript:
+
+```javascript
+const container = document.querySelector(".carousel");
+
+// 监听吸附位置变化
+container.addEventListener("scrollsnapchange", (e) => {
+  console.log("吸附到:", e.snapTargetInline);
+});
+
+// 编程式滚动到特定位置
+container.scrollTo({ left: 0, behavior: "smooth" });
+```
+
+与第三方轮播库的对比:
+
+- scroll-snap 是原生 CSS, 无需 JavaScript, 性能更好
+- 支持触摸滑动、惯性滚动、键盘导航
+- 但缺乏自动播放、指示器、无限循环等高级功能
+- 简单轮播和全屏滚动优先使用 scroll-snap, 复杂需求使用库
+
 ---
 
 ## 动画与交互
@@ -1317,10 +2579,11 @@ JS 动画:
 Web Animations API (`element.animate()`) 是两者优势的合体: 用 JS 创建动画对象 (可暂停、反向、调速、组合), 但插值与渲染仍走浏览器动画管线, 可进合成线程:
 
 ```js
-el.animate(
-  [{ transform: "translateX(0)" }, { transform: "translateX(200px)" }],
-  { duration: 300, easing: "ease-out", fill: "forwards" },
-);
+el.animate([{ transform: "translateX(0)" }, { transform: "translateX(200px)" }], {
+  duration: 300,
+  easing: "ease-out",
+  fill: "forwards",
+});
 ```
 
 选择建议: 状态过渡/hover/loading 等用 CSS; 需要交互驱动 (拖拽、滚动进度)、复杂时序编排用 rAF 或 WAAPI; 库层面 GSAP 等底层也是 rAF + WAAPI 思路。

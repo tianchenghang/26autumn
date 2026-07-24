@@ -54,8 +54,7 @@
 
   /* Typography: monospace-first stack with CJK fallback */
   --font-mono:
-    "JetBrains Mono", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo,
-    Consolas, monospace;
+    "JetBrains Mono", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Motion curves: decelerate-out and spring-overshoot */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -475,11 +474,7 @@ samp {
 /* --- Reading progress bar (gradient fill + glow) --- */
 
 .progress {
-  background: linear-gradient(
-    90deg,
-    var(--c-accent),
-    var(--c-accent-soft)
-  ) !important;
+  background: linear-gradient(90deg, var(--c-accent), var(--c-accent-soft)) !important;
   box-shadow: 0 0 10px rgba(224, 92, 133, 0.55);
 }
 
@@ -848,8 +843,7 @@ samp {
 .markdown-section td a {
   color: var(--c-accent-strong);
   text-decoration: none;
-  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0%
-    1px;
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0% 1px;
   transition:
     background-size 0.3s var(--ease-out),
     color 0.2s var(--ease-out);

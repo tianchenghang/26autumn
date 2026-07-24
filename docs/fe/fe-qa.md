@@ -92,6 +92,57 @@
   - [Q76. SSR 同构与 Hydration 的原理与常见问题](#q76-ssr-同构与-hydration-的原理与常见问题)
   - [Q77. 微前端的核心问题 JS 沙箱与样式隔离](#q77-微前端的核心问题-js-沙箱与样式隔离)
   - [Q78. 前端错误监控体系与 sourcemap 还原](#q78-前端错误监控体系与-sourcemap-还原)
+- [第十一部分 服务降级 熔断与限流](#第十一部分-服务降级-熔断与限流)
+  - [Q79. 什么是服务降级 它和服务熔断有什么区别](#q79-什么是服务降级-它和服务熔断有什么区别)
+  - [Q80. 熔断器的三种状态是怎么流转的](#q80-熔断器的三种状态是怎么流转的)
+  - [Q81. 常见的限流算法有哪些 各自适用什么场景](#q81-常见的限流算法有哪些-各自适用什么场景)
+  - [Q82. 前端如何实现服务降级](#q82-前端如何实现服务降级)
+  - [Q83. 限流在前端和后端分别怎么做](#q83-限流在前端和后端分别怎么做)
+  - [Q84. 分布式系统中如何做全链路降级](#q84-分布式系统中如何做全链路降级)
+  - [Q85. Sentinel 和 Hystrix 在熔断限流上的对比](#q85-sentinel-和-hystrix-在熔断限流上的对比)
+  - [Q86. 如何设计一个自适应限流算法](#q86-如何设计一个自适应限流算法)
+  - [Q87. 前端监控 SDK 的上报限流怎么做](#q87-前端监控-sdk-的上报限流怎么做)
+  - [Q88. 熔断和降级在 BFF 层如何落地](#q88-熔断和降级在-bff-层如何落地)
+- [第十二部分 手写算法题](#第十二部分-手写算法题)
+  - [题目 1 手写 call apply bind](#题目-1手写-call-apply-bind)
+  - [题目 2 循环闭包输出与修复](#题目-2循环闭包输出与修复)
+  - [题目 3 累加式柯里化](#题目-3累加式柯里化)
+  - [题目 4 防抖与四种节流](#题目-4防抖与四种节流)
+  - [题目 5 装饰器求值顺序](#题目-5装饰器求值顺序)
+  - [题目 6 深拷贝 循环引用](#题目-6深拷贝-循环引用)
+  - [题目 7 寄生组合式继承](#题目-7寄生组合式继承)
+  - [题目 8 手写 Array.prototype.flat](#题目-8手写-arrayprototypeflat)
+  - [题目 9 手写 instanceof](#题目-9手写-instanceof)
+  - [题目 10 让普通对象可迭代](#题目-10让普通对象可迭代)
+  - [题目 11 手写 map reduce 与 Promise 串行链](#题目-11手写-map-reduce-与-promise-串行链)
+  - [题目 12 类字段初始化顺序](#题目-12类字段初始化顺序)
+  - [题目 13 手写 new 操作符](#题目-13手写-new-操作符)
+  - [题目 14 手写 Promise](#题目-14手写-promise)
+  - [题目 15 用 rAF 实现 setTimeout setInterval](#题目-15用-raf-实现-settimeout-setinterval)
+  - [题目 16 手写 requestAnimationFrame polyfill](#题目-16手写-requestanimationframe-polyfill)
+  - [题目 17 JSON 深比较](#题目-17json-深比较)
+  - [题目 18 基于 fn.length 的柯里化](#题目-18基于-fnlength-的柯里化)
+  - [题目 19 手写 JSON.stringify](#题目-19手写-jsonstringify)
+  - [题目 20 Promise 并发池](#题目-20promise-并发池)
+  - [题目 21 对齐语义的节流](#题目-21对齐语义的节流)
+  - [题目 22 Proxy 无限对象](#题目-22proxy-无限对象)
+  - [题目 23 手写 Immer produce](#题目-23手写-immer-produce)
+  - [题目 24 深度不可变对象](#题目-24深度不可变对象)
+  - [题目 25 对象 Diff](#题目-25对象-diff)
+  - [题目 26 深合并 deepMerge](#题目-26深合并-deepmerge)
+  - [题目 27 查询批处理器](#题目-27查询批处理器)
+  - [题目 28 循环生成器](#题目-28循环生成器)
+  - [题目 29 Date.prototype.nextDay](#题目-29dateprototypenextday)
+  - [题目 30 promisify](#题目-30promisify)
+  - [题目 31 手写 Promise.allSettled 找 Bug](#题目-31手写-promiseallsettled-找-bug)
+  - [题目 32 delayAll](#题目-32delayall)
+  - [题目 33 JSON 转矩阵](#题目-33json-转矩阵)
+- [第十三部分 补充深入问答](#第十三部分-补充深入问答)
+  - [Q89. TypeScript 转为 JS 的每一个过程](#q89-typescript-转为-js-的每一个过程)
+  - [Q90. V8 性能优化 隐藏类 内联缓存 逃逸分析](#q90-v8-性能优化-隐藏类-内联缓存-逃逸分析)
+  - [Q91. ES 新特性高频考点](#q91-es-新特性高频考点)
+  - [Q92. 正则引擎与灾难性回溯](#q92-正则引擎与灾难性回溯)
+  - [Q93. fetch 与 XHR 的细节对比](#q93-fetch-与-xhr-的细节对比)
 
 ## 第一部分 JavaScript 语言核心
 
@@ -180,9 +231,7 @@ A: new 调用构造函数时按以下步骤执行：
 function myNew(Fn, ...args) {
   const obj = Object.create(Fn.prototype);
   const ret = Fn.apply(obj, args);
-  return ret !== null && (typeof ret === "object" || typeof ret === "function")
-    ? ret
-    : obj;
+  return ret !== null && (typeof ret === "object" || typeof ret === "function") ? ret : obj;
 }
 ```
 
@@ -201,8 +250,7 @@ A: A instanceof B 的语义是：在 A 的原型链上查找是否存在 B.proto
 
 ```js
 function myInstanceof(obj, Fn) {
-  if (typeof Fn !== "function")
-    throw new TypeError("Right-hand side must be callable");
+  if (typeof Fn !== "function") throw new TypeError("Right-hand side must be callable");
   let proto = Object.getPrototypeOf(obj);
   while (proto !== null) {
     if (proto === Fn.prototype) return true;
@@ -331,9 +379,7 @@ function deepClone(obj, cache = new WeakMap()) {
     obj.forEach((v) => s.add(deepClone(v, cache)));
     return s;
   }
-  const clone = Array.isArray(obj)
-    ? []
-    : Object.create(Object.getPrototypeOf(obj));
+  const clone = Array.isArray(obj) ? [] : Object.create(Object.getPrototypeOf(obj));
   cache.set(obj, clone);
   for (const key of Reflect.ownKeys(obj)) {
     clone[key] = deepClone(obj[key], cache);
@@ -428,10 +474,7 @@ const range = {
   [Symbol.iterator]() {
     let cur = 0;
     return {
-      next: () =>
-        cur < 3
-          ? { value: cur++, done: false }
-          : { value: undefined, done: true },
+      next: () => (cur < 3 ? { value: cur++, done: false } : { value: undefined, done: true }),
     };
   },
 };
@@ -1634,3 +1677,965 @@ A: 采集层需要覆盖的错误类型与手段：
 上报设计：错误按"类型 + message + 堆栈前几帧"计算指纹去重与聚合；采样率与限流防止雪崩（详见监控 SDK 限流实践）；上报用 sendBeacon 或 fetch keepalive 保证页面卸载时不丢；附带 release 版本、用户与环境维度、面包屑（用户最近的操作轨迹）。
 
 sourcemap 还原：生产代码经压缩混淆，堆栈中的 (file.js:1:23456) 需要还原到源码位置。构建时生成 hidden sourcemap（不在产物中暴露 sourceMappingURL），上传到监控平台（如 Sentry 按 release 关联）；服务端用 source-map 库根据行列号反查原始文件、行号与源码片段。要点：sourcemap 绝不部署到公网；版本必须与产物严格对应（release + dist 标识），否则还原错位；对 App 内嵌 H5 还需处理 JSBridge 注入代码导致的行号偏移。
+
+## 第十一部分 服务降级 熔断与限流
+
+### Q79. 什么是服务降级 它和服务熔断有什么区别
+
+A: 服务降级（Degradation）是在系统整体负载过高或下游服务不可用时，主动放弃部分非核心功能，保证核心链路可用的策略。比如电商大促期间关闭评价、推荐等非核心接口，只保留下单、支付链路。
+
+服务熔断（Circuit Breaker）是一种保护机制：当对某个下游服务的调用失败率达到阈值时，自动"断开"对该服务的调用，直接返回错误或 fallback 结果，经过一段时间后尝试"半开"恢复。
+
+核心区别：
+
+- 降级是主动的、全局的策略，通常由运维或业务决策触发，目的是在资源不足时保核心。
+- 熔断是被动的、局部的保护，由错误率自动触发，目的是防止级联故障。
+- 降级的粒度通常是整个功能模块；熔断的粒度通常是对某个具体下游服务的调用。
+
+两者可以配合使用：熔断触发后，对调用方而言就是一次降级（走 fallback 逻辑）。
+
+### Q80. 熔断器的三种状态是怎么流转的
+
+A: 经典熔断器有三个状态：
+
+1. Closed（关闭）：正常状态，请求正常通过。内部维护一个失败计数器，每次调用失败时 +1，成功时清零（或按滑动窗口统计）。
+
+2. Open（打开）：当失败率超过阈值（如 50%）或连续失败次数超过阈值（如 5 次），熔断器切换到 Open 状态。所有请求直接走 fallback，不再发送到下游服务。同时启动一个超时计时器。
+
+3. Half-Open（半开）：超时计时器到期后，熔断器切换到 Half-Open 状态，允许少量探测请求通过（如 1 个）。如果探测请求成功，认为下游恢复，切换到 Closed；如果失败，切回 Open 重新计时。
+
+实际工程中（如 Hystrix、Sentinel）还有一些细节：
+
+- 滑动窗口：用最近 N 秒或最近 N 次请求作为统计窗口，而不是从启动开始累计。
+- 最小请求数：在窗口期内请求数不足时不触发熔断，避免小样本误判。
+- 慢调用熔断：除了错误率，还可以对慢调用比例做熔断（如 P99 超过 3s 的请求占比超过 30%）。
+
+### Q81. 常见的限流算法有哪些 各自适用什么场景
+
+A: 四种主流限流算法：
+
+1. 固定窗口计数器（Fixed Window Counter）：
+   - 原理：每个时间窗口（如 1 秒）维护一个计数器，请求到来时 +1，超过阈值则拒绝。窗口结束时重置。
+   - 优点：实现简单，内存开销小。
+   - 缺点：临界问题——窗口切换瞬间可能承受 2 倍流量（上一个窗口末尾 + 下一个窗口开头）。
+   - 适用：对精度要求不高的粗粒度限流。
+
+2. 滑动窗口计数器（Sliding Window Counter）：
+   - 原理：将时间窗口细分为多个子窗口，统计滑动范围内的请求数。或者用滑动日志（记录每个请求的时间戳）。
+   - 优点：解决了固定窗口的临界问题，流量控制更平滑。
+   - 缺点：子窗口越多内存开销越大；滑动日志方式在请求量大时内存开销高。
+   - 适用：需要精确控制速率的场景。
+
+3. 漏桶（Leaky Bucket）：
+   - 原理：请求进入桶中，以固定速率流出（被处理）。桶满时拒绝新请求。
+   - 优点：输出速率恒定，对下游保护效果好。
+   - 缺点：无法处理突发流量（即使桶有空余，突发请求也只能以固定速率处理）。
+   - 适用：需要严格限制处理速率的场景（如消息队列消费、日志写入）。
+
+4. 令牌桶（Token Bucket）：
+   - 原理：以固定速率向桶中放入令牌，请求需要获取令牌才能被处理。桶满时丢弃多余令牌。桶空时拒绝请求。
+   - 优点：允许一定程度的突发流量（桶中积累的令牌可以一次性被消耗）。
+   - 缺点：突发流量可能瞬时打高下游。
+   - 适用：大多数 API 限流场景（如 Google API、AWS API Gateway 默认用令牌桶）。
+
+令牌桶 vs 漏桶的关键区别：令牌桶允许突发（桶中有令牌时可以快速处理多个请求），漏桶强制匀速（不管桶中有多少请求，都以固定速率处理）。
+
+### Q82. 前端如何实现服务降级
+
+A: 前端降级策略按层次：
+
+1. UI 降级：
+   - 非核心组件延迟加载或隐藏（如评论区、推荐列表）。
+   - 动画降级：prefers-reduced-motion 媒体查询关闭动画，或低端设备关闭复杂动画。
+   - 图片降级：使用低分辨率图片、WebP 格式，或使用 placeholder。
+
+2. 数据降级：
+   - 接口超时或失败时展示缓存数据（stale-while-revalidate）。
+   - 使用本地兜底数据（如默认配置、预置的静态数据）。
+   - 减少请求频率（关闭轮询、延长 refreshInterval）。
+
+3. 功能降级：
+   - 关闭非核心功能开关（feature flag），如实时通知、在线聊天。
+   - 降级复杂的富文本编辑器为 textarea。
+   - 关闭 WebSocket 实时推送，降级为定时 HTTP 轮询。
+
+4. 加载策略降级：
+   - 骨架屏 -> loading spinner -> 纯文本。
+   - 预加载的资源改为按需加载。
+   - 关闭 Service Worker 缓存更新，直接使用缓存。
+
+实现层面通常通过配置中心下发降级开关：
+
+```typescript
+interface DegradeConfig {
+  enableRecommendation: boolean;
+  enableAnimation: boolean;
+  enableRealtime: boolean;
+  imageQuality: "high" | "medium" | "low";
+}
+```
+
+前端在启动时拉取降级配置，根据配置决定加载哪些模块、使用哪种渲染策略。
+
+### Q83. 限流在前端和后端分别怎么做
+
+A: 后端限流：
+
+1. 网关层限流（如 Nginx、Kong、AWS API Gateway）：
+   - Nginx 的 limit_req（漏桶）和 limit_conn（并发连接数限制）。
+   - 在入口层挡住大部分超限请求，保护后端服务。
+
+2. 应用层限流（如 Sentinel、Hystrix、自研）：
+   - 基于令牌桶或滑动窗口。
+   - 可以按接口、用户、IP、租户等多维度限流。
+   - Sentinel 还支持热点参数限流（如某个商品 ID 的请求频率）。
+
+3. 分布式限流：
+   - 使用 Redis + Lua 脚本实现分布式令牌桶（Redisson 提供了开箱即用的实现）。
+   - 或使用 etcd / ZooKeeper 做协调。
+   - 难点：分布式场景下时钟不同步、网络延迟导致的限流精度问题。
+
+前端限流：
+
+1. 请求并发控制：
+   - 限制同时发出的请求数（如最多 6 个并发请求）。
+   - 实现一个请求队列，超出并发上限的请求排队等待。
+
+2. 请求节流/防抖：
+   - 按钮点击防抖（debounce）：避免用户连续点击触发多次请求。
+   - 搜索输入节流（throttle）：限制搜索请求频率。
+
+3. 重试策略：
+   - 指数退避（exponential backoff）：失败后等待 1s, 2s, 4s, 8s...
+   - 添加抖动（jitter）：避免大量请求在同一时刻重试（惊群效应）。
+
+4. 请求合并（batching）：
+   - 短时间内多次触发的请求合并为一次批量请求。
+   - 如 React Query 的 queryClient 自动合并相同 key 的请求。
+
+### Q84. 分布式系统中如何做全链路降级
+
+A: 全链路降级的核心思想：从入口到存储，每一层都有降级预案，在流量洪峰时逐级降级。
+
+1. CDN 层：
+   - 启用静态兜底页面（预渲染的 HTML）。
+   - 延长缓存 TTL，减少回源请求。
+   - 关闭动态内容的 CDN bypass。
+
+2. 网关层：
+   - 限流：按用户/IP/接口限流。
+   - 降级：直接返回预设的兜底响应（如"系统繁忙，请稍后重试"）。
+   - 灰度：按百分比放行请求。
+
+3. 服务层（BFF / 微服务）：
+   - 熔断下游服务调用。
+   - 非核心服务降级（如推荐服务不可用时返回热门列表）。
+   - 降低超时时间（从 3s 降到 500ms），快速失败。
+
+4. 缓存层：
+   - 延长缓存过期时间（热点数据永不过期）。
+   - 缓存穿透时返回空值或默认值。
+   - 开启本地缓存（进程内 LRU），减少 Redis 压力。
+
+5. 数据库层：
+   - 关闭复杂查询（如全文搜索、多表 JOIN）。
+   - 只读操作走从库。
+   - 写入降级：异步写入消息队列，延迟持久化。
+
+6. 前端层：
+   - 上述前端降级策略。
+   - 展示"当前访问人数过多"的友好提示。
+
+关键实践：
+
+- 降级预案要提前准备并演练（如定期做压测和降级演练）。
+- 降级开关要能快速下发（秒级生效），通常通过配置中心（如 Apollo、Nacos）。
+- 降级后要有监控告警，知道哪些服务在降级状态。
+- 恢复时要有灰度策略，避免流量突然全部涌入。
+
+### Q85. Sentinel 和 Hystrix 在熔断限流上的对比
+
+A: Hystrix（Netflix，已停维）：
+
+- 隔离策略：线程池隔离（每个服务调用独立线程池），防止单个服务拖垮整个系统。也有信号量隔离模式。
+- 熔断：基于滑动窗口（最近 N 次请求）的失败率。
+- 限流：有限，主要通过并发线程数限制。
+- 实时指标：滑动窗口（RxJava 实现）。
+- 动态规则：支持多种数据源。
+- 缺点：线程池隔离引入了线程切换开销，高并发下性能损耗明显。
+
+Sentinel（Alibaba）：
+
+- 隔离策略：信号量隔离（轻量级），不使用独立线程池。
+- 熔断：支持慢调用比例、异常比例、异常数三种熔断策略。
+- 限流：功能丰富——QPS 限流、热点参数限流、集群限流、系统自适应保护。
+- 实时指标：滑动窗口（LeapArray 数据结构，基于时间片的环形数组）。
+- 动态规则：支持 Nacos、ZooKeeper、Apollo、文件等多种数据源。
+- 控制台：提供可视化的流量监控和规则管理。
+- 优点：性能更好（信号量隔离无线程切换），功能更丰富。
+
+实际选型：
+
+- 新项目推荐 Sentinel，社区活跃、功能全。
+- 已有 Hystrix 的项目可以考虑迁移到 Resilience4j（Hystrix 的继任者）。
+- Go 生态可以用 go-zero 内置的限流熔断、或自研。
+
+### Q86. 如何设计一个自适应限流算法
+
+A: 自适应限流（Adaptive Rate Limiting）的核心：根据系统实时负载自动调整限流阈值，而不是使用固定的 QPS 上限。
+
+一种常见实现（类似 BBR 拥塞控制算法）：
+
+1. 实时采集系统指标：
+   - CPU 使用率。
+   - 当前在途请求数（in-flight requests）。
+   - 平均 RT（响应时间）。
+   - 最大吞吐量（maxPass，最近窗口内通过的最大 QPS）。
+   - 最小 RT（minRt，最近窗口内的最小平均响应时间）。
+
+2. 计算系统最大承载能力：
+   - maxInFlight = maxPass _ minRt / 1000（Little's Law: L = lambda _ W）。
+   - 即：系统能同时处理的最大在途请求数 = 最大吞吐量 \* 最小响应时间。
+
+3. 决策逻辑：
+   - 当前在途请求数 < maxInFlight \* 安全系数：放行。
+   - 当前在途请求数 >= maxInFlight \* 安全系数：拒绝。
+   - 安全系数通常取 0.8-0.9，留出余量。
+
+4. CPU 使用率兜底：
+   - 当 CPU 使用率超过阈值（如 90%）时，无论上述计算结果如何，直接触发限流。
+
+Sentinel 的系统自适应保护就是这个思路。它的好处是能根据系统实际能力动态调整，而不是依赖人工设定的固定阈值。
+
+### Q87. 前端监控 SDK 的上报限流怎么做
+
+A: 监控 SDK 的上报限流需要平衡两个目标：不丢失关键错误信息，同时不打爆后端。
+
+实现策略：
+
+1. 采样率控制：
+   - 全局采样：配置 sampleRate = 0.1，只有 10% 的错误上报。
+   - 分层采样：不同类型的错误设置不同采样率（JS Error 全量上报，Performance 数据 1% 采样）。
+
+2. 错误去重：
+   - 相同指纹（错误类型 + 堆栈前几帧）的错误在时间窗口内只上报一次。
+   - 使用 LRU 缓存维护已上报错误的指纹。
+
+3. 速率限制：
+   - 每秒最多上报 N 条（如 10 条），超出的进入队列。
+   - 队列满时按优先级丢弃（性能数据优先丢弃，JS Error 保留）。
+
+4. 批量上报：
+   - 错误先进入缓冲区，每 5-10 秒批量发送一次。
+   - 减少请求次数，提高单次请求的传输效率。
+
+5. 后端反馈控制：
+   - 后端返回 429（Too Many Requests）时，SDK 自动降低上报频率。
+   - 后端可以下发动态采样率配置，全局调控流量。
+
+6. 离线缓冲：
+   - 上报失败的数据暂存 localStorage。
+   - 网络恢复后分批刷盘，避免瞬时洪峰。
+
+### Q88. 熔断和降级在 BFF 层如何落地
+
+A: BFF 层作为前后端之间的中间层，是熔断和降级落地的关键位置。
+
+1. 熔断下游 RPC 服务：
+
+```typescript
+class CircuitBreaker {
+  private state: "closed" | "open" | "half-open" = "closed";
+  private failures = 0;
+  private lastFailureTime = 0;
+  private threshold = 5;
+  private timeout = 30000;
+
+  async call<T>(fn: () => Promise<T>, fallback: () => T): Promise<T> {
+    if (this.state === "open") {
+      if (Date.now() - this.lastFailureTime > this.timeout) {
+        this.state = "half-open";
+      } else {
+        return fallback();
+      }
+    }
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (e) {
+      this.onFailure();
+      return fallback();
+    }
+  }
+
+  private onSuccess() {
+    this.failures = 0;
+    this.state = "closed";
+  }
+
+  private onFailure() {
+    this.failures++;
+    this.lastFailureTime = Date.now();
+    if (this.failures >= this.threshold) {
+      this.state = "open";
+    }
+  }
+}
+```
+
+2. 降级策略：
+   - 推荐服务熔断 -> 返回热门列表（兜底数据）。
+   - 用户画像服务熔断 -> 返回默认推荐。
+   - 评论服务熔断 -> 隐藏评论模块（返回空数组，前端不渲染）。
+
+3. 超时控制：
+   - 给每个下游 RPC 调用设置独立超时（核心服务 3s，非核心服务 500ms）。
+   - 使用 Promise.race 实现超时中断。
+
+4. 限流：
+   - 按用户 ID 限流：防止单个用户频繁请求。
+   - 按接口限流：防止某个接口被打爆。
+   - 使用令牌桶或滑动窗口。
+
+5. 监控与告警：
+   - 记录每次熔断触发、降级触发、限流触发的事件。
+   - 上报到监控系统，配置告警规则。
+   - 提供运营面板查看各服务的熔断/降级状态。
+
+## 第十二部分 手写算法题
+
+本部分基于 src/js 目录下 33 个源码文件逐文件编排，每题含源码解读、考点深挖、进阶追问。
+
+| #   | 题目                                | 对应文件             | 核心考点                       |
+| --- | ----------------------------------- | -------------------- | ------------------------------ |
+| 1   | 手写 call / apply / bind            | apply-call-bind.js   | this 绑定、Symbol、new.target  |
+| 2   | 循环闭包输出与修复                  | closure.js           | 闭包、IIFE、let 块级作用域     |
+| 3   | 累加式柯里化                        | curry.js             | 柯里化、参数聚合、空参触发     |
+| 4   | 防抖与四种节流                      | debounce-throttle.js | 定时器、leading/trailing       |
+| 5   | 装饰器求值顺序                      | decorator.ts         | TS 装饰器四类、求值时序        |
+| 6   | 深拷贝（循环引用）                  | deep-clone.js        | WeakMap、类型分支              |
+| 7   | 寄生组合式继承                      | extends.js           | 原型链、静态继承               |
+| 8   | 手写 Array.prototype.flat           | flat.js              | 递归/DFS、稀疏数组             |
+| 9   | 手写 instanceof                     | instanceof.js        | 原型链遍历、Symbol.hasInstance |
+| 10  | 让普通对象可迭代                    | iterator.js          | Symbol.iterator、生成器        |
+| 11  | 手写 map / reduce + 串行 Promise 链 | map-reduce.js        | 稀疏数组、reduce 链式 then     |
+| 12  | 类字段初始化顺序（米哈游题）        | miHoYo.js            | 字段初始化时序、方法重写陷阱   |
+| 13  | 手写 new 操作符                     | new.js               | 构造函数返回值规则             |
+| 14  | 手写 Promise（A+ 规范）             | promise.js           | 状态机、回调队列、链式         |
+| 15  | 用 rAF 实现 setTimeout/setInterval  | timer.js             | 渲染帧、时间戳比对             |
+| 16  | 手写 requestAnimationFrame polyfill | polyfill/index.js    | 60fps 对齐、批量回调、取消     |
+| 17  | JSON 深比较                         | lc/lc2628.ts         | 递归、键序无关比较             |
+| 18  | 基于 fn.length 的柯里化             | lc/lc2632.js         | 函数 length 属性               |
+| 19  | 手写 JSON.stringify                 | lc/lc2633.js         | 递归序列化                     |
+| 20  | Promise 并发池（4 种实现）          | lc/lc2636.js         | 并发控制、迭代器共享           |
+| 21  | 对齐语义的节流                      | lc/lc2676.js         | nextCallTime 调度              |
+| 22  | Proxy 无限对象                      | lc/lc2690.js         | Proxy get 陷阱                 |
+| 23  | 手写 Immer produce                  | lc/lc2691.js         | 写时复制、草稿代理             |
+| 24  | 深度不可变对象                      | lc/lc2692.js         | Proxy set/apply 拦截           |
+| 25  | 对象 Diff                           | lc/lc2700.js         | 递归差分                       |
+| 26  | 深合并 deepMerge                    | lc/lc2755.js         | 键并集递归                     |
+| 27  | 查询批处理器                        | lc/lc2756.ts         | 批量合并、节流窗口             |
+| 28  | 循环生成器                          | lc/lc2757.js         | generator 双向通信、负数取模   |
+| 29  | Date.prototype.nextDay              | lc/lc2758.js         | 日期进位、padStart             |
+| 30  | promisify                           | lc/lc2776.ts         | 回调转 Promise                 |
+| 31  | 手写 Promise.allSettled（找 Bug）   | lc/lc2795.js         | 计数器、缺陷分析               |
+| 32  | delayAll                            | lc/lc2821.js         | 高阶函数包装                   |
+| 33  | JSON 转矩阵                         | lc/lc3675.js         | 路径展开、列对齐               |
+
+### 题目 1｜手写 call / apply / bind
+
+源码解读：用 Symbol() 生成唯一键把函数挂到上下文对象上再调用，从而改变 this；bind2 返回的 Bound 函数通过 new.target 判断是否被 new 调用——若是则改为构造 fn 的实例。
+
+考点深挖：
+
+- 为什么用 Symbol() 而不是固定字符串键？——避免与 ctx 已有属性冲突，且 delete ctx[prop] 后不留痕迹。
+- ctx 为 null/undefined 时原生行为是绑定到全局对象（非严格模式）或保持 undefined（严格模式），如何兼容？传入原始值（如数字）时原生会装箱为包装对象。
+- new.target 是 ES6 元属性（meta property），它让函数感知自己的调用方式；bind2 中利用它区分构造调用与普通调用，这是手写 bind 最容易丢分的一步。
+- 原生 bind 产生的函数没有 prototype，且其 length/name 会被重写（bound xxx）。
+
+参考实现：
+
+```js
+Function.prototype.bind2 = function (ctx, ...args) {
+  const fn = this;
+  return function Bound(...rest) {
+    if (new.target) return new fn(...args, ...rest);
+    const prop = Symbol();
+    ctx[prop] = fn;
+    const ret = ctx[prop](...args, ...rest);
+    delete ctx[prop];
+    return ret;
+  };
+};
+```
+
+进阶追问：bind 链式调用 fn.bind(a).bind(b) 的 this 是什么？（永远是最先绑定的 a）；如何让 Bound 函数继承原函数的 prototype（Bound.prototype = Object.create(fn.prototype)）；软绑定（softBind）是什么场景？
+
+### 题目 2｜循环闭包输出与修复
+
+源码解读：第一个循环中 5 个 setTimeout 回调共享同一个 var i，宏任务执行时循环已结束，输出 6 6 6 6 6；第二个循环用 IIFE 把每轮的 j 捕获进独立函数作用域，输出 1 2 3 4 5。
+
+考点深挖：
+
+- var 声明提升 + 函数作用域 -> 所有回调闭包引用同一词法环境记录（Environment Record）。
+- 四种修复的本质差异：
+  1. IIFE：每轮创建新函数作用域；
+  2. let：ES6 为 for 循环体每次迭代创建新的词法环境（per-iteration binding），这是规范 13.7.4.8 节的特殊处理；
+  3. setTimeout 第三参：setTimeout(cb, t, arg) 会把 arg 作为回调入参传入；
+  4. bind 预设参数：setTimeout(console.log.bind(null, i), ...)。
+- 计时并不精确：宏任务排队 + 最小延迟（浏览器对嵌套 >=5 层的定时器强制 >=4ms）。
+
+### 题目 3｜累加式柯里化
+
+源码解读：curry 内部维护 aggregatedArgs 数组，每次调用把参数推入并返回自身；以空参调用作为求值信号，触发 fn.apply(this, aggregatedArgs)。
+
+考点深挖：
+
+- 两种柯里化范式：固定元数（依赖 fn.length）与可变参数（依赖终止信号或隐式转换）。
+- 隐式转换版本的关键：给返回函数挂载 valueOf，返回聚合结果；注意 === 不会触发转换，只有 == 或数学运算/String() 才会。
+- fn.apply(this, ...) 保留 this，柯里化函数作为方法调用时不丢上下文。
+
+参考实现（隐式转换版）：
+
+```js
+function curry(fn) {
+  const all = [];
+  const curried = (...args) => {
+    all.push(...args);
+    return curried;
+  };
+  curried.valueOf = () => fn(...all);
+  curried.toString = () => String(fn(...all));
+  return curried;
+}
+```
+
+### 题目 4｜防抖与四种节流
+
+源码解读：
+
+- debounce：每次调用清掉旧定时器重排，只有停止触发 delay 后才执行（trailing）。
+- throttle（时间戳版）：比较 Date.now() 与上次执行时间，立即执行（leading），但停止触发后不会补最后一次（无 trailing）。
+- throttle2（定时器版）：timer 存在期间直接丢弃调用（leading，无 trailing 补偿）。
+- throttle3：维护 nextCallTime，用 Math.max(0, nextCallTime - now) 计算延迟，每次调用都会重排定时器，保证最后一次调用一定在节流窗口结束时执行（trailing 语义）。
+
+考点深挖：
+
+- 时间戳版 vs 定时器版的经典缺陷对比：前者边界时刻停止触发会丢尾，后者首次触发有延迟。
+- 高阶 API：cancel（清 timer + 重置状态）、flush（有挂起调用则立即执行并返回结果）。
+- 防抖在输入联想、resize 的场景；节流在 scroll、鼠标轨迹上报的场景。
+
+### 题目 5｜装饰器求值顺序
+
+源码解读：文件演示了 TS 实验性装饰器的四种形态——类装饰器（target 是构造函数）、属性装饰器（target 是原型，无 descriptor）、方法装饰器（多一个 PropertyDescriptor）、参数装饰器（多一个 paramIndex）。
+
+考点深挖：
+
+- 旧版（experimentalDecorators）求值顺序：参数装饰器 -> 方法/访问器/属性装饰器（按声明顺序）-> 静态成员先于实例成员 -> 类装饰器最后。装饰器表达式自上而下求值，调用自下而上（洋葱模型）。
+- 属性装饰器拿不到 PropertyDescriptor（因为实例属性不在原型上），所以无法拦截赋值。
+- TS 5.0 标准装饰器签名完全不同：(value, context)，context 含 kind/name/access/addInitializer，不再有 target/descriptor 三元组。
+- 装饰器叠加 emitDecoratorMetadata 会生成 design:type / design:paramtypes / design:returntype 元数据（reflect-metadata），这是 Angular/NestJS 依赖注入的根基。
+
+### 题目 6｜深拷贝 循环引用
+
+源码解读：deepClone 用 WeakMap 记录"原对象 -> 克隆对象"映射解决循环引用；特判 Date（new Date(obj)）与 RegExp（拷贝 source/flags/lastIndex）；用 for...in + hasOwnProperty 只拷贝自身可枚举属性。
+
+考点深挖：
+
+- 用 WeakMap 而非 Map：键弱引用，拷贝结束后原对象可被 GC，且天然支持对象键。
+- 必须在递归之前 seen.set(obj, clone)，否则循环引用死循环。
+- 源码的盲区：for...in 会遍历原型链（靠 hasOwnProperty 过滤）但漏掉 Symbol 键与不可枚举属性；不处理 Map/Set/Promise/Function/BigInt 包装对象。
+- 对比方案：structuredClone（原生，支持 Map/Set/ArrayBuffer/循环引用，但不支持函数、DOM、原型上的 getter/setter）；JSON.parse(JSON.stringify())（丢 undefined/函数/Symbol/循环引用直接抛错、Date 变字符串）。
+
+### 题目 7｜寄生组合式继承
+
+源码解读：extendsImpl 用 Object.create(Parent.prototype) 创造干净的中间对象作为 Child.prototype（避免 new Parent() 带来的多余实例属性），修正 constructor 指针，并用 Object.setPrototypeOf(Child, Parent) 继承静态成员。
+
+考点深挖：
+
+- 六种继承演进：原型链继承 -> 构造函数继承 -> 组合继承 -> 原型式 -> 寄生式 -> 寄生组合式（只调一次父构造函数、原型链干净）。
+- Object.setPrototypeOf(Child, Parent) 对应 ES6 class extends 中 Child.**proto** === Parent 这一双重原型链。
+- ES6 class 转译后大致就是寄生组合式 + 静态继承 + super 的 [[HomeObject]] 语义。
+
+### 题目 8｜手写 Array.prototype.flat
+
+源码解读：flat2 基于 reduce + concat + 原生 flat(depth-1) 递归降维；flat3 用显式 DFS 收集到结果数组。
+
+考点深挖：
+
+- 原生 flat 对空位的处理：[1, , 2].flat() -> [1, 2]，空位被丢弃。
+- for...of/for 循环会把 hole 读成 undefined，必须用 i in arr 或 hasOwnProperty 判空位。
+- 递归版爆栈深度约 1 万层（V8 默认栈约 1MB）；迭代版用栈 [{arr, depth}] 展开。
+
+参考实现（迭代版）：
+
+```js
+function flat(arr, depth = 1) {
+  const stack = arr.map((item) => [item, depth]);
+  const res = [];
+  while (stack.length) {
+    const [item, d] = stack.pop();
+    if (Array.isArray(item) && d > 0) {
+      stack.push(...item.map((sub) => [sub, d - 1]));
+    } else {
+      res.push(item);
+    }
+  }
+  return res.reverse();
+}
+```
+
+### 题目 9｜手写 instanceof
+
+源码解读：instanceofV2 沿 Object.getPrototypeOf 一路向上找 right.prototype；找到返回 true，到达 null 返回 false。
+
+考点深挖：
+
+- 规范算法（OrdinaryHasInstance）：若 right 有 [Symbol.hasInstance] 方法，调用它；若 right 不可调用抛 TypeError；bound 函数则对目标函数递归 instanceof。
+- 跨 realm（iframe）问题：不同全局环境的 Array 不相等，[] instanceof Array 跨窗口为 false——所以大型库用 Array.isArray。
+- Object.create(null) 的对象 instanceof Object 为 false（原型链无 Object.prototype）。
+
+### 题目 10｜让普通对象可迭代
+
+源码解读：方式一给 obj 挂生成器方法 [Symbol.iterator]，for...of 自动消费 yield 的值；方式二用 Object.defineProperty 定义不可枚举、不可写、不可配置的迭代器属性。
+
+考点深挖：
+
+- 迭代协议三件套：可迭代协议（[Symbol.iterator]() 返回迭代器）、迭代器协议（next() 返回 {value, done}）、生成器是两者的语法糖。
+- for...of 只找 Symbol.iterator，与 for...in（枚举字符串键、含原型链）完全正交。
+- 消费方式盘点：for...of、扩展运算符、解构、Array.from、Promise.all、yield\*、Map/Set 构造器。
+
+### 题目 11｜手写 map reduce 与 Promise 串行链
+
+源码解读：map2 用 new Array(len) 预分配 + i in this 跳过空位；reduce2 处理 initialValue 缺省；末尾 bootstrap 用 reduce((p, t) => p.then(t), Promise.resolve(val)) 把异步任务数组串成顺序链。
+
+考点深挖：
+
+- 原生 map 保留稀疏性：[1, , 2].map(x => x\*2) 结果仍有空位；reduce 版本把空位写成 undefined 实值——这是面试官最爱的坑。
+- reduce 无初始值时，首个存在的元素为累加器，从第二个元素开始迭代；空数组无初始值抛 TypeError。
+- p.then(curTask) 串行原理：每个 then 返回新 Promise，注册时机保证任务按序排队。
+
+### 题目 12｜类字段初始化顺序
+
+源码解读（米哈游面试题）：new Child() 的执行序列：
+
+1. super() 进入 Parent：先初始化 Parent 的实例字段；
+2. 执行 Parent 构造体；
+3. this.run() 调用的是子类原型上的重写方法（动态派发）；
+4. super() 返回后，初始化 Child 自己的实例字段——覆盖第 3 步赋的值；
+5. 执行 Child 构造体。
+
+考点深挖：
+
+- 字段初始化时机（[[Define]] 语义）：基类在构造体开头初始化；派生类在 super() 返回后立即初始化——所以派生类字段必然覆盖父类构造期间对同名属性的写入。
+- 父类构造函数中调用 this.run() 触发动态派发到子类方法，此时子类字段尚未初始化——这是 Java/C# 中都存在的"构造器调用虚方法"反模式。
+- class fields 使用 [[Define]]（定义在实例自身），而构造体内 this.x = ... 是 [[Set]]——同名场景下行为差异（如原型上有 setter 时，field 不触发 setter，赋值会触发）。
+
+### 题目 13｜手写 new 操作符
+
+源码解读：newV2 三步：Object.create(Constructor.prototype) 建实例 -> Constructor.apply(obj, args) 执行构造体 -> 若返回对象则用返回值否则用新建对象。
+
+参考实现：
+
+```js
+function newV2(Ctor, ...args) {
+  const obj = Object.create(Ctor.prototype ?? Object.prototype);
+  const res = Reflect.apply(Ctor, obj, args);
+  return (typeof res === "object" && res !== null) || typeof res === "function" ? res : obj;
+}
+```
+
+考点深挖：
+
+- new 的完整语义（Construct 内部方法）：创建 [[Prototype]] 为 F.prototype 的对象 -> 以 new.target = F 调用 -> 返回值若是 Object（含函数）则取之，否则取新建对象。
+- F.prototype 为 null 时，实例原型回退到 Object.prototype；箭头函数没有 prototype 也没有 [[Construct]]，new 抛 TypeError。
+
+### 题目 14｜手写 Promise
+
+源码解读：PromiseV2 实现状态机（pending/resolved/rejected）+ 双回调队列 + then 返回新 Promise 的链式；处理回调返回值是 Promise 时的"解包"。
+
+考点深挖（对照源码找偏差）：
+
+- 异步执行缺失：规范 2.2.4 要求 onFulfilled/onRejected 必须在执行栈仅含平台代码时调用。
+- thenable 解包不完整：只判断 instanceof PromiseV2，而规范要求对任何含 then 方法的对象递归解包，且 then 的 getter 抛错要 reject、多次调用要忽略（called 标志）。
+- resolve 一个自身必须抛 TypeError: Chaining cycle detected。
+- 微任务调度：浏览器用 queueMicrotask/MutationObserver，Node 用 process.nextTick。
+
+参考骨架（关键片段）：
+
+```js
+const resolvePromise = (p2, x, resolve, reject) => {
+  if (p2 === x) return reject(new TypeError("Chaining cycle"));
+  if (x instanceof MyPromise) return x.then((y) => resolvePromise(p2, y, resolve, reject), reject);
+  if (x !== null && (typeof x === "object" || typeof x === "function")) {
+    let called = false;
+    try {
+      const then = x.then;
+      if (typeof then === "function") {
+        then.call(
+          x,
+          (y) => {
+            if (called) return;
+            called = true;
+            resolvePromise(p2, y, resolve, reject);
+          },
+          (r) => {
+            if (called) return;
+            called = true;
+            reject(r);
+          },
+        );
+      } else resolve(x);
+    } catch (e) {
+      if (!called) reject(e);
+    }
+  } else resolve(x);
+};
+```
+
+### 题目 15｜用 rAF 实现 setTimeout setInterval
+
+源码解读：useSetTimeout 在 rAF 回调里比对 Date.now() - startTime >= timeout，到点执行并 cancelAnimationFrame 自清理；useSetInterval 到点后重置 startTime = currentTime 并循环。
+
+考点深挖：
+
+- rAF 与垂直同步（VSYNC）对齐（通常 60Hz 约 16.7ms），后台标签页 rAF 完全暂停，而 setTimeout 被节流到 >=1s。
+- 源码 setInterval2 的漂移：startTime = currentTime 把回调执行耗时计入下一周期，长期运行会累积漂移；修正方案是 startTime += interval（按计划网格对齐）。
+- 高精度计时为什么用 performance.now() 而非 Date.now()（单调时钟 vs 系统时钟可被校时改动）。
+
+### 题目 16｜手写 requestAnimationFrame polyfill
+
+源码解读：以 frameDuration = 1000/60 为帧长，用"上一次帧回调计划时刻"算 nextCallDelay 对齐帧边界；所有本帧注册的回调先入队 taskQueues，到点后克隆队列统一执行（本帧内新注册的回调进入下一帧）；cancelAnimationFrame 打 cancelled 标记惰性删除。
+
+考点深挖：
+
+- "克隆队列 + 清空原队列"是规范行为：防止回调里递归注册导致同帧无限循环。
+- 首帧延迟计算：latestCallTimestamp 记录的是计划触发时刻而非真实触发时刻，保证连续调用的帧间隔均匀。
+- 真实浏览器 rAF 回调参数是 DOMHighResTimeStamp（该帧的 VSYNC 时刻），polyfill 传 performance.now()。
+
+### 题目 17｜JSON 深比较
+
+源码解读：areDeeplyEqual 分三种情况：非对象用 ===；双数组按索引递归；双对象比较键集合（排序后逐键递归）；一数组一对象直接 false。
+
+考点深挖：
+
+- 键排序使得比较与键的插入顺序无关——这是 JSON 对象键无序语义的正确处理。
+- 通用版循环引用防护：用 WeakMap<o1, o2> 记忆已比对的对象对。
+- 与 React 的 shallowEqual 对比（只比一层 + Object.is）。
+
+### 题目 18｜基于 fn.length 的柯里化
+
+源码解读：与题目 3 的"空参触发"不同，这里用 fn.length（形参个数）作为聚合目标：累计参数达到 argsCnt 即执行。
+
+考点深挖：
+
+- fn.length 统计第一个默认值参数或剩余参数之前的形参数：function f(a, b=1, ...rest){} 的 length 是 1。
+- 源码用 aggregatedArgs.length === argsCnt：严格相等意味着一次传超量参数永不触发——应改为 >= 更健壮。
+
+### 题目 19｜手写 JSON.stringify
+
+源码解读：字符串加双引号；非对象原始值 String(obj)；数组递归 map+join；对象用 Object.entries 拼 "key": value。
+
+考点深挖：
+
+- 原生序列化规则：顶层 undefined/function/Symbol -> 返回 undefined（不是字符串）；Date 走 toJSON（toISOString）；BigInt 抛 TypeError。
+- 循环引用检测：递归栈上维护 Set，进入对象 add、离开 delete。
+- 第二参 replacer（函数/数组白名单）与第三参 space（缩进）的实现方式。
+
+### 题目 20｜Promise 并发池
+
+源码解读：四种实现四种思路——
+
+1. promisePool：先启动前 n 个，每个完成后从 pendingQueue 取下一个（链式接力）；
+2. promisePool2：共享同一个数组迭代器，n 个 worker 各自 for (const [i, task] of iter) 争抢任务——迭代器状态天然互斥（JS 单线程同步段内 next() 原子）；
+3. promisePool3：共享游标 idx++，worker 循环取任务；
+4. promisePool4：维护 workQueue: Set，任务完成即 delete，集合满 n 时 await Promise.race 腾出位置。
+
+参考实现（游标法）：
+
+```js
+async function promisePool(funcs, n) {
+  const res = new Array(funcs.length);
+  let idx = 0;
+  const worker = async () => {
+    while (idx < funcs.length) {
+      const cur = idx++;
+      res[cur] = await funcs[cur]();
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(n, funcs.length) }, worker));
+  return res;
+}
+```
+
+考点深挖：
+
+- 方案 2/3 的精髓：利用单线程同步段的不可分割性——iter.next()/idx++ 在 await 之间不会被其他 worker 抢占，无需锁。
+- 这就是 p-limit / 前端图片批量上传 / 接口并发限制的标准模型。
+
+### 题目 21｜对齐语义的节流
+
+源码解读：维护 nextCallTime，每次调用按 max(0, nextCallTime - now) 延迟执行，执行后把 nextCallTime 推到 now + t；因为每次都 clearTimeout 重排，最后一次调用一定执行（trailing），且执行间隔不小于 t。
+
+考点深挖：
+
+- 首次调用 nextCallTime = 0 -> delay 为 0 立即执行，天然带 leading。
+- 与 debounce 的本质区别：debounce 每次重置完整 delay；本节流以 nextCallTime 为锚，窗口不随新调用无限后移。
+
+### 题目 22｜Proxy 无限对象
+
+源码解读：createInfiniteObject 返回一个 get 陷阱永远返回 () => p 的 Proxy——任意属性访问都得到"返回该属性名字符串"的函数。
+
+参考实现（路径累积）：
+
+```js
+function createInfiniteObject(path = []) {
+  return new Proxy(function () {}, {
+    get: (_, p) => createInfiniteObject([...path, String(p)]),
+    apply: () => path.join("."),
+  });
+}
+```
+
+考点深挖：
+
+- get(target, p, receiver) 中 p 是 string | symbol；注意 Symbol.toPrimitive / Symbol.toStringTag / then 等特殊键会被语言内部访问。
+- Proxy 不可 polyfill（需要引擎级拦截），这是它改写响应式系统设计（Vue3）的原因。
+
+### 题目 23｜手写 Immer produce
+
+源码解读：ImmutableHelper.produce(recipe) 是 Immer 核心机制的精简实现：createDraft 用 Proxy 包装对象，get 时懒创建子草稿、set 时写时复制（首次修改浅拷贝 base，之后写入 copy）；finalize 递归收尾：子草稿有变化则回填到父 copy，整棵子树无修改则返回 state.base 保持引用不变。
+
+考点深挖：
+
+- 结构共享（structural sharing）：引用相等性 = 变化检测信号，这是 React/Redux 纯函数状态更新的基石。
+- 写时复制时机：第一次 set 才浅拷贝 base。
+- 局限性（对照真 Immer）：未处理 Map/Set、数组长度缩短、delete 操作（需 deleteProperty 陷阱）、冻结产物（autoFreeze）。
+
+### 题目 24｜深度不可变对象
+
+源码解读：makeImmutable 返回深层代理：get 拦截把对象值递归 proxify；set 一律抛错；数组的 7 个变更方法（pop/push/shift/unshift/splice/sort/reverse）被替换为带 apply 陷阱的 Proxy，调用即抛错。
+
+考点深挖：
+
+- 三类写入面都要封死：set（对象属性）、set 中数组分支（下标写入）、变更方法（push 等不经过 set 陷阱的对外 API）。
+- Object.freeze 是浅冻结且静默失败（严格模式才抛错）——深冻结需要递归 + freeze，与本题的代理式"只读视图"是两种路线。
+
+### 题目 25｜对象 Diff
+
+源码解读：objDiff 递归对比两个对象共有键：叶子值不等返回 [oldVal, newVal]，数组与对象类型不匹配整体返回 [obj1, obj2]；只在 obj2 中存在的键被忽略。
+
+考点深挖：
+
+- 源码的键处理约定：只比较共有键（新增/删除键被忽略），这与"深比较"语义不同。
+- 这就是 React 状态 diff、JSON Patch（RFC 6902）、协作编辑 OT/CRDT 的入门模型。
+
+### 题目 26｜深合并 deepMerge
+
+源码解读：deepMerge(obj1, obj2)：任一非对象或"一数组一对象"时取 obj2；否则对两对象键的并集递归合并，数组对数组按下标合并。
+
+考点深挖：
+
+- new Set([...keys1, ...keys2]) 求并集保持插入序；key in obj 区分"键不存在"与"键存在值为 undefined"。
+- 与 Object.assign / 展开运算符（浅合并，后者覆盖前者整支替换）的本质差异。
+- 合并结果永远是新对象/新数组（不修改输入），符合不可变更新范式。
+
+### 题目 27｜查询批处理器
+
+源码解读：getValue(key) 把 [resolve, key] 推入队列并触发 consume；consume 在非节流窗口且队列非空时执行 batchQuery——把当前队列整体取出，调用批量接口 queryMultiple(keys)，再按下标把结果分发给各 Promise。
+
+考点深挖：
+
+- "队列快照"技巧：const queries = this.queries; this.queries = []——先换引用再异步处理，期间新进的 key 进入下一轮。
+- 这就是 GraphQL DataLoader 的核心思想（DataLoader 用微任务/帧合并 + 缓存）。
+
+### 题目 28｜循环生成器
+
+源码解读：cycleGenerator(arr, startIndex) 无限循环：yield arr[idx] 的返回值是下次 next(v) 传入的 v，步进 idx = ((idx + v) % len + len) % len——双重取模兼容负数步进。
+
+考点深挖：
+
+- 生成器的双向通信：yield expr 整体是表达式，求值结果是下一次 next(arg) 的实参；第一次 next(arg) 的实参被丢弃（生成器体尚未执行到任何 yield）。
+- 负数取模修正：-1 % 5 === -1（JS 取余保留被除数符号），(x % n + n) % n 归一到 [0, n)。
+- 生成器 + Promise = 协程（co 库 / redux-saga）的原理，async/await 本质就是"Promise 驱动的生成器执行器"。
+
+### 题目 29｜Date.prototype.nextDay
+
+源码解读：nextDay 以当前日期新建 Date，setDate(getDate() + 1) 依赖 Date 的自动进位（1 月 32 日 -> 2 月 1 日），再手工拼 YYYY-MM-DD。
+
+考点深挖：
+
+- setDate 溢出进位是规范行为（MakeDay），比手写"每月天数表 + 闰年"可靠得多。
+- 月份 getMonth() 从 0 起——补零前 +1，经典踩坑点。
+- 跨时区/夏令时切换日，"加一天"与"加 24h"不等价（setDate(+1) 是日历日，+86400000 是物理时长）。
+- 扩展原生原型的争议——生产应封装工具函数或使用 Temporal 提案 API。
+
+### 题目 30｜promisify
+
+源码解读：promisify(fn) 把"回调在前"（fn(callback, ...args)，callback(data, err)）的函数包装为返回 Promise 的版本：err 非空 reject，否则 resolve data。
+
+考点深挖：
+
+- 两种回调约定差异：LC 风格 (data, err) vs Node 风格 error-first (err, data)——分支条件相反。
+- util.promisify 的行为：依赖被转换函数的 this，包装函数内要 fn.call(this, ...)；还支持 fn[util.promisify.custom] 自定义符号。
+- 回调被调用多次的防护（called 标志）——Promise 自身已幂等（settled 后忽略后续调用），天然免疫。
+
+### 题目 31｜手写 Promise.allSettled 找 Bug
+
+源码解读：promiseAllSettled2 是正确范式：计数器 + 每个任务 then/catch 写入对应下标、finally 里计数达到总数即 resolve。而第一版藏了两个 bug：
+
+1. functions.map((fn, i) => { fn[i](); ... })——回调形参 fn 就是函数本身，fn[i] 是 undefined，调用立即抛 TypeError；
+2. map 回调没有 return 那个 Promise，得到的 promises 数组全是 undefined，Promise.all([undefined...]) 立即 resolve。
+
+考点深挖：
+
+- 四类静态方法的语义差异是必考口述：all（快速失败）、allSettled（永不 reject）、race（第一个 settled 者胜出）、any（第一个 fulfilled 胜出，全败抛 AggregateError）。
+- 计数器法 vs Promise.all(map) 法：前者手动 resolve 一次，注意空数组边界。
+
+### 题目 32｜delayAll
+
+源码解读：delayAll(functions, ms) 返回新函数数组：每个新函数调用时先 setTimeout(ms)，再执行原函数并把结果通过 resolve(fn()) 交给外层 Promise——利用了 Promise 对 thenable 的自动解包。
+
+考点深挖：
+
+- resolve(fn()) 的解包语义：fn() 返回 Promise 时，外层 Promise 吸收其状态。
+- 延迟在"调用时"开始而非"创建时"——高阶函数返回的是惰性包装。
+- 若 fn() 同步抛错，发生在 setTimeout 回调内——错误不会进 Promise 链：严谨实现应 try { resolve(fn()) } catch (e) { reject(e) }。
+
+### 题目 33｜JSON 转矩阵
+
+源码解读：jsonToMatrix 把 JSON 对象数组展平成表：DFS 遍历每个对象，叶子值记录到"路径 -> 值"（数组下标也并入路径）；收集全部路径去重、字典序排序作为列头；每个对象一行，缺列补 ""。
+
+考点深挖：
+
+- 字典序排序的坑："a.10" < "a.2"（按字符比较），正确做法是 localeCompare 的 numeric: true 选项。
+- 空对象/空数组没有叶子 -> 该对象贡献零列；整行全 ""。
+- 应用：JSON 数据导出 Excel/CSV、低代码表格列推导、日志结构化展开。
+
+## 第十三部分 补充深入问答
+
+### Q89. TypeScript 转为 JS 的每一个过程
+
+A: TypeScript 编译器（tsc）本质是一个"带类型擦除的转译器"，从源码到 JS 产物经历 6 个阶段：
+
+1. 扫描（Scanner / Lexer）：源码文本 -> Token 流。const x: number = 1 被切分为 const、x、:、number、=、1 等 token，跳过空白与注释（注释会以 trivia 形式挂在 token 上供 emitter 保留）。
+
+2. 解析（Parser）：Token 流 -> AST（抽象语法树）。TS 的 AST 节点带完整的位置信息（pos/end），且语法错误不中断解析（错误恢复机制，为 IDE 服务）。
+
+3. 绑定（Binder）：遍历 AST 建立符号表（Symbol Table）——每个声明生成 Symbol，记录作用域归属（Container -> locals）。此阶段把"同名标识符"关联到同一个 Symbol，为类型检查提供名称解析基础。
+
+4. 类型检查（Checker）：核心阶段——
+   - 类型推断：从初始化表达式、上下文（contextual typing）反推类型；
+   - 类型标注验证：检查赋值兼容性（结构化类型 / duck typing，而非名义类型）；
+   - 控制流分析（CFA）：if (typeof x === 'string') 分支内收窄类型，基于赋值流图（flow graph）；
+   - 泛型实例化、条件类型求值、协变/逆变检查（strictFunctionTypes 下方法参数双变、函数参数逆变）。
+   - 注意：类型错误不阻断编译（除非 noEmitOnError）——因为类型信息只用于检查，不影响转译结果。
+
+5. 转换（Transformer）：AST -> AST 的降级变换，按 target 决定应用哪些 transformer：
+   - 类型擦除：删除所有类型标注、接口、类型别名、as 断言、! 非空断言（纯删除，零运行时成本）；
+   - TS 独有语法展开：enum -> IIFE 生成双向映射对象；namespace -> IIFE 闭包；参数属性（constructor(private x)）-> 构造体内赋值语句；
+   - 装饰器（旧版）：类与方法调用改写为 \_\_decorate([...], target, key, descriptor) 辅助函数调用；emitDecoratorMetadata 额外注入 Reflect.metadata("design:type", ...)；
+   - 语法降级：async/await -> \_\_awaiter + 生成器状态机（target <= ES2017）；class -> 函数 + 原型赋值（<=ES5）；?. / ?? -> 临时变量 + 三元表达式；
+   - 模块转换：ESM import/export -> CJS 的 require/exports.x（module: commonjs 时）。
+
+6. 发射（Emitter）：变换后 AST -> 输出文本，三种产物：
+   - .js：打印 AST（printer），按 removeComments/sourceMap 等选项处理；
+   - .d.ts：从符号表+类型信息生成声明文件（只导出面可见的类型签名）；
+   - .js.map：VLQ 编码的 sourcemap，建立产物位置与源码位置的映射。
+
+补充深挖点：
+
+- tsc vs transpileModule vs swc/esbuild/babel：transpileModule 走"单文件、无类型检查"快速通道（无法处理 const enum 等需跨文件信息的特性）；swc/esbuild 只做扫描/解析/降级/发射（Rust/Go 实现快 10-100 倍），不做类型检查——所以现代工程链路是"esbuild/swc 负责转译 + tsc --noEmit 负责类型检查"。
+- 增量编译：incremental: true 生成 .tsbuildinfo（签名哈希 + 依赖图），二次编译跳过未变化文件。
+- Language Service：同一套编译器 API 驱动 VS Code 的跳转/补全/重构——binder/checker 结果常驻内存，编辑时增量重解析。
+
+### Q90. V8 性能优化 隐藏类 内联缓存 逃逸分析
+
+A: 隐藏类（Hidden Class / Map / Shape）：
+
+- 对象属性按添加顺序形成转换链：{} -> {x} -> {x, y} 每一步生成新 Map，记录属性名 -> 偏移量。
+- 同形状对象共享 Map -> 属性访问编译为固定偏移的机器码。
+- 优化守则：构造函数里按固定顺序初始化全部属性；避免 delete（退化为字典模式 dictionary mode）；避免运行期增删属性/改原型；不同形状的对象别混进同一个数组/多态调用点。
+
+内联缓存（Inline Cache, IC）：
+
+- 属性访问字节码处记录"上次对象的 Map + 命中偏移"。
+- 单态（monomorphic）：总是同 Map -> 直接比较 Map 后按偏移取值，极快。
+- 多态（polymorphic，2-4 种 Map）：小跳转表。
+- 超态（megamorphic）：退化哈希查表——热点代码要避免。
+- TurboFan 基于 IC 反馈做推测优化：假设类型不变直接生成机器码 + 去优化（deopt）检查点（假设失败回退字节码）。
+
+逃逸分析（Escape Analysis）：JIT 证明对象不逃逸出函数（不外传、不存堆）-> 标量替换：对象不分配，字段拆成局部变量（栈上寄存器分配），省掉堆分配与 GC。
+
+其他：
+
+- 函数内联（inlining）：小函数直接展开。
+- 数组 ElementsKind：PACKED*SMI -> PACKED_DOUBLE -> PACKED_ELEMENTS 单向迁移，稀疏数组变 HOLEY*\* 甚至字典——保持数组紧凑、同类型。
+- 数字：31 位内整数走 SMI（指针 tagged）不开箱，超出变 HeapNumber。
+- 字符串：cons string（拼接先存切片树）、sliced string、intern 化。
+
+面试口径：写"JIT 友好"代码 = 形状稳定 + 类型稳定 + 热点函数小而纯。
+
+### Q91. ES 新特性高频考点
+
+A: 尾调用优化（PTC, ES6 规范）：严格模式下 return f(...) 复用当前栈帧——理论上递归阶乘可 O(1) 栈。现实：只有 Safari/JSC 实现，V8 曾实现后移除——面试要会说"规范有、引擎没普及，别依赖"。
+
+BigInt：任意精度整数（123n）；不能与 Number 混算（显式转换）；typeof 1n === 'bigint'；JSON 序列化抛错；BigInt.asIntN(64, x) 固定位宽截断。应用：雪花 ID、时间戳纳秒、区块链数值。
+
+其他常考：
+
+- ?. / ??：?? 只判 null/undefined（0/''/false 有效），与 || 的本质差异；?.() / ?.[] / 可选链短路返回 undefined；a?.b.c 中 a 为 nullish 时整个链短路。
+- 逻辑赋值 ??= / &&= / ||=。
+- Array.prototype.at(-1)、findLast。
+- Object.hasOwn（替代 hasOwnProperty.call）。
+- 顶层 await（ES2022）；类私有字段 #x（真私有，运行时不可访问，与 TS private 的"类型层私有"本质不同）。
+- Array.prototype.group / Object.groupBy；Promise.withResolvers；structuredClone。
+- 正则 d 标志（indices，捕获组起止下标）、命名捕获组、后行断言。
+- 在途提案：Temporal（取代 Date）、Record & Tuple（#{...} 深不可变 + 值相等 ===）、Decorator（已落地 TS 5）、Iterator Helpers（iter.map/filter/take）、Pattern Matching。
+
+### Q92. 正则引擎与灾难性回溯
+
+A: NFA 回溯模型：JS 正则是回溯式 NFA——贪婪量词先尽量多吃，匹配失败按"后进先出"回溯让位。
+
+灾难性回溯（ReDoS）成因：嵌套量词 + 可重叠匹配——/(a+)+$/ 对 "aaaaaaaaaaaaaaaaaaaaX" 的划分方案数是指数级（2^n 种分组），引擎全试一遍才宣告失败。
+
+识别与防御：
+
+- 危险信号：(x+)+、(x|y)_ 内部分支可匹配相同前缀、._._._ 连续贪婪。
+- 防御：改写为原子化结构（a+ 外不再套量词）、限定长度 {1,64}、用 possessive 思路拆匹配、输入长度校验、worker 中执行 + 超时杀掉（JS 正则无超时参数）。
+- 工具：safe-regex、recheck 静态分析。
+
+其他深挖：
+
+- lastIndex 与 g/y 标志：全局正则在 exec/test 间共享 lastIndex（同一个正则对象连续 test 结果交替的坑）。
+- 命名捕获组 (?<year>\d{4}) 与 matchAll（返回迭代器，避免 exec 循环）。
+- Unicode：u 标志下 . 匹配码点（含代理对）、\p{Script=Han} 属性类。
+- v 标志（ES2024）：字符集运算 [\p{ASCII}--[aeiou]]。
+- 性能：编译正则缓存（字面量只编译一次）、避免不必要捕获组（用 (?:...)）。
+
+### Q93. fetch 与 XHR 的细节对比
+
+A: fetch 的坑（高频）：
+
+- HTTP 错误状态不 reject：404/500 照常 resolve，要检查 response.ok 或 status——只有网络故障/CORS/DNS 失败才 reject。
+- 凭证策略：fetch 默认 credentials: 'same-origin'（同源请求带 Cookie，跨源不带），跨源要带 Cookie 需显式 credentials: 'include'。
+- 无原生超时：用 AbortController + setTimeout 自实现。
+- 无上传进度（ReadableStream 只有下载进度；上传进度要用 XHR 或 duplex: 'half' 流式 body）。
+- 响应体只能读一次（bodyUsed，clone() 备份）。
+
+AbortController（现代取消模型）：
+
+```js
+const ctrl = new AbortController();
+fetch(url, { signal: ctrl.signal });
+ctrl.abort(); // fetch reject: AbortError；同时中止 TCP 读取
+```
+
+同一 signal 可传给多个 fetch/addEventListener——统一取消域；AbortSignal.timeout(5000)、AbortSignal.any([...]) 组合信号。
+
+流式能力：response.body.getReader() 逐块读取（SSE 客户端、大文件边下边处理、for await 消费）；request body 传 ReadableStream 需 duplex: 'half'。
+
+XHR 尚存的场景：上传进度事件（xhr.upload.onprogress）、同步请求（async: false，已废弃勿用）、老环境兼容。
+
+深挖：keepalive: true（页面卸载时小数据上报，beacon 的 fetch 版）；redirect: 'manual' 观察重定向；referrerPolicy 控制 Referer 泄漏；cache 选项与 HTTP 缓存的互动；Node 18+ 全局 fetch（undici）与浏览器实现的差异（无 CORS、有连接池配置）。
