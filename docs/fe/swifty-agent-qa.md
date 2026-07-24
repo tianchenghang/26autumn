@@ -6,17 +6,17 @@
 
 ## 目录
 
-- [一、项目架构与整体设计](#一项目架构与整体设计)
-- [二、LLM 工程与 Vercel AI SDK](#二llm-工程与-vercel-ai-sdk)
-- [三、Agent 编排:ReAct 与 Plan-Execute-Replan](#三agent-编排react-与-plan-execute-replan)
-- [四、RAG 与向量检索](#四rag-与向量检索)
-- [五、工具系统与 MCP](#五工具系统与-mcp)
-- [六、流式输出与 SSE](#六流式输出与-sse)
-- [七、前端工程:React 19 / Next.js 16 / Hooks](#七前端工程react-19--nextjs-16--hooks)
-- [八、性能优化、稳定性与容错](#八性能优化稳定性与容错)
-- [九、安全](#九安全)
-- [十、工程化与代码质量](#十工程化与代码质量)
-- [十一、开放性问题与技术权衡](#十一开放性问题与技术权衡)
+- [一、项目架构与整体设计](#一-项目架构与整体设计)
+- [二、LLM 工程与 Vercel AI SDK](#二-llm-工程与-vercel-ai-sdk)
+- [三、Agent 编排:ReAct 与 Plan-Execute-Replan](#三-agent-编排-react-与-plan-execute-replan)
+- [四、RAG 与向量检索](#四-rag-与向量检索)
+- [五、工具系统与 MCP](#五-工具系统与-mcp)
+- [六、流式输出与 SSE](#六-流式输出与-sse)
+- [七、前端工程:React 19 / Next.js 16 / Hooks](#七-前端工程-react-19-next-js-16-hooks)
+- [八、性能优化、稳定性与容错](#八-性能优化-稳定性与容错)
+- [九、安全](#九-安全)
+- [十、工程化与代码质量](#十-工程化与代码质量)
+- [十一、开放性问题与技术权衡](#十一-开放性问题与技术权衡)
 
 ---
 

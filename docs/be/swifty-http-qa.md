@@ -16,7 +16,7 @@
 - [Q12: WebSocket 帧解析与消息重组](#q12-websocket-帧解析与消息重组)
 - [Q13: 并发安全设计](#q13-并发安全设计)
 - [Q14: 优雅关闭 (Graceful Shutdown)](#q14-优雅关闭-graceful-shutdown)
-- [Q15: 与 Gin/Echo 等框架的对比](#q15-与-ginecho-等框架的对比)
+- [Q15: 与 Gin/Echo 等框架的对比](#q15-与-gin-echo-等框架的对比)
 - [Q16: 零依赖设计的取舍](#q16-零依赖设计的取舍)
 - [Q17: 潜在改进方向](#q17-潜在改进方向)
 

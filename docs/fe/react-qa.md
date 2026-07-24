@@ -6,16 +6,16 @@
 
 ## 目录
 
-1. [闭包陷阱（Stale Closure）](#1-闭包陷阱stale-closure)
-2. [Re-render 陷阱与渲染机制](#2-re-render-陷阱与渲染机制)
-3. [React Fiber 架构](#3-react-fiber-架构)
-4. [Virtual DOM 与 Diff 算法](#4-virtual-dom-与-diff-算法)
-5. [React 性能优化体系](#5-react-性能优化体系)
-6. [Hooks 为什么只能在组件顶层调用](#6-hooks-为什么只能在组件顶层调用)
-7. [setState 批量更新机制](#7-setstate-批量更新机制)
-8. [React 并发模式与调度](#8-react-并发模式与调度)
-9. [useEffect 与生命周期映射](#9-useeffect-与生命周期映射)
-10. [React 状态管理设计哲学](#10-react-状态管理设计哲学)
+1. [闭包陷阱（Stale Closure）](#_1-闭包陷阱-stale-closure)
+2. [Re-render 陷阱与渲染机制](#_2-re-render-陷阱与渲染机制)
+3. [React Fiber 架构](#_3-react-fiber-架构)
+4. [Virtual DOM 与 Diff 算法](#_4-virtual-dom-与-diff-算法)
+5. [React 性能优化体系](#_5-react-性能优化体系)
+6. [Hooks 为什么只能在组件顶层调用](#_6-hooks-为什么只能在组件顶层调用)
+7. [setState 批量更新机制](#_7-setstate-批量更新机制)
+8. [React 并发模式与调度](#_8-react-并发模式与调度)
+9. [useEffect 与生命周期映射](#_9-useeffect-与生命周期映射)
+10. [React 状态管理设计哲学](#_10-react-状态管理设计哲学)
 
 ---
 

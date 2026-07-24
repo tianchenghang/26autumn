@@ -60,7 +60,7 @@ export default defineConfig({
     ],
   },
   highlight: {
-    theme: "github-light",
+    theme: "github-dark",
     darkTheme: "github-dark",
     languages: ["go", "typescript", "javascript", "jsx", "tsx", "bash", "json", "yaml", "sql", "css", "html", "lua", "python"],
   },

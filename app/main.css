@@ -1,17 +1,7 @@
 @import "tailwindcss";
-@import "@swifty.js/docs/client.css";
-@source "@swifty.js/docs/theme.js";
 
-/* @import "../node_modules/@swifty.js/docs/dist/client.css";
-@source "../node_modules/@swifty.js/docs/dist/theme.js"; */
-
-/* ============================================================
-   Sakura Terminal — swifty-docs Theme Migration
-   ------------------------------------------------------------
-   Migrated from the docsify "Sakura Terminal" theme.
-   Sakura pink palette, monospace typography, ambient gradient
-   orbs, terminal-style code blocks, and spring-based motion.
-   ============================================================ */
+@source "../node_modules/@swifty.js/docs/dist";
+@import "../node_modules/@swifty.js/docs/dist/client.css";
 
 /* --- Sakura palette as oklch token overrides --- */
 
@@ -84,9 +74,15 @@
 /* --- Monospace-first typography --- */
 
 @theme {
-  --font-sans: "JetBrains Mono", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-display: "JetBrains Mono", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-mono: "JetBrains Mono", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans:
+    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo,
+    "Cascadia Code", monospace;
+  --font-display:
+    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo,
+    "Cascadia Code", monospace;
+  --font-mono:
+    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo,
+    "Cascadia Code", monospace;
 }
 
 /* --- Ambient background: soft gradient orbs + noise texture --- */
@@ -99,9 +95,21 @@ body::before {
   pointer-events: none;
   overflow: hidden;
   background:
-    radial-gradient(circle at 82% 18%, oklch(0.9 0.04 350 / 0.5) 0%, transparent 50%),
-    radial-gradient(circle at 10% 85%, oklch(0.92 0.03 60 / 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 55% 50%, oklch(0.92 0.025 350 / 0.25) 0%, transparent 45%);
+    radial-gradient(
+      circle at 82% 18%,
+      oklch(0.9 0.04 350 / 0.5) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 10% 85%,
+      oklch(0.92 0.03 60 / 0.4) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 55% 50%,
+      oklch(0.92 0.025 350 / 0.25) 0%,
+      transparent 45%
+    );
   animation: sakura-drift 26s var(--sakura-ease-out) infinite alternate;
 }
 
@@ -112,14 +120,25 @@ body::after {
   z-index: -1;
   pointer-events: none;
   opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .dark body::before {
   background:
-    radial-gradient(circle at 82% 18%, oklch(0.35 0.06 350 / 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 10% 85%, oklch(0.3 0.04 300 / 0.25) 0%, transparent 50%),
-    radial-gradient(circle at 55% 50%, oklch(0.32 0.03 350 / 0.15) 0%, transparent 45%);
+    radial-gradient(
+      circle at 82% 18%,
+      oklch(0.35 0.06 350 / 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 10% 85%,
+      oklch(0.3 0.04 300 / 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 55% 50%,
+      oklch(0.32 0.03 350 / 0.15) 0%,
+      transparent 45%
+    );
 }
 
 @keyframes sakura-drift {
@@ -187,7 +206,8 @@ body::after {
 /* --- Prose link animated underline --- */
 
 .prose a {
-  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0% 1px;
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0%
+    1px;
   transition:
     background-size 0.3s var(--sakura-ease-out),
     color 0.2s var(--sakura-ease-out);
