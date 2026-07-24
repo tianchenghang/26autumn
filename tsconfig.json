@@ -5,6 +5,10 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
+    "types": [
+      "node",
+      "vite/client"
+    ],
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -12,8 +16,14 @@
     "isolatedModules": true,
     "noEmit": true,
     "paths": {
-      "@swifty-docs/generated": ["./.swifty-docs/generated/index.js"]
+      "@swifty-docs/generated": [
+        "./.swifty-docs/generated/index.js"
+      ]
     }
   },
-  "include": ["app", "swifty-docs.config.ts", "vite.config.ts"]
+  "include": [
+    "app",
+    "swifty-docs.config.ts",
+    "vite.config.ts"
+  ]
 }

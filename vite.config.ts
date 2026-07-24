@@ -1,21 +1,20 @@
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import { swiftyDocsPlugin } from "@swifty.js/docs/vite";
 import docsConfig from "./swifty-docs.config";
-import { docsGuardPlugin } from "./plugins/docs-guard";
+import { fileURLToPath } from "node:url";
 
 export default defineConfig({
   base: "/26autumn/",
   root: "app",
-  plugins: [
-    swiftyDocsPlugin({ config: docsConfig }),
-    docsGuardPlugin(),
-    tailwindcss(),
-  ],
+  plugins: [swiftyDocsPlugin({ config: docsConfig }), tailwindcss()],
   resolve: {
     alias: {
-      "@swifty-docs/generated": resolve(__dirname, ".swifty-docs/generated"),
+      "@swifty-docs/generated": resolve(
+        dirname(fileURLToPath(new URL(import.meta.url))),
+        ".swifty-docs/generated",
+      ),
     },
   },
 });

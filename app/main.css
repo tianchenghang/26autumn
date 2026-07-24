@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@source "../node_modules/@swifty.js/docs/dist";
+@source "../node_modules/@swifty.js/docs/dist/theme.js";
 @import "../node_modules/@swifty.js/docs/dist/client.css";
 
 /* --- Sakura palette as oklch token overrides --- */
