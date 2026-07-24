@@ -28,7 +28,22 @@
 
 本质区别是打包时机: Webpack 是"先打包再启动"，Vite 是"先启动再按需编译"。
 
-![Vite 与 Webpack dev 模式对比](../assets/vite-vs-webpack-dev.png)
+```
+Webpack dev 模式:
+
+  源码 ──> 全量扫描 ──> 构建依赖图 ──> 转译/打包 ──> bundle ──> 启动服务器
+  |___________________ O(模块数) ___________________|
+  项目越大, 启动越慢
+
+Vite dev 模式:
+
+  启动服务器 (几乎无打包)
+       |
+       v
+  浏览器请求 /src/App.vue ──> 实时转译该模块 ──> 返回 ESM
+  浏览器请求 /src/util.ts ──> 实时转译该模块 ──> 返回 ESM
+  |___________ 按需编译, 冷启动接近 O(1) ___________|
+```
 
 Webpack dev 启动时要扫描所有依赖、构建完整依赖图、全量转译打包成 bundle，项目越大启动越慢，复杂度是 O(模块数)。Vite 利用浏览器原生 ES Module 支持，启动时不做打包，只在浏览器请求某个模块时实时转译该模块返回，冷启动接近 O(1)。
 
@@ -44,7 +59,15 @@ Vite 快的三个关键点:
 
 ### Q2: Webpack 的完整构建流程是怎样的？Loader 和 Plugin 的区别？
 
-![Webpack 构建流程](../assets/webpack-build-flow.png)
+```
+  初始化              编译 (make)              封装 (seal)           产出 (emit)
++-----------+    +------------------+    +------------------+    +----------------+
+| 合并配置   |    | entry 出发       |    | 拆分 Chunk       |    | 渲染最终代码   |
+| 创建       |───>| Loader 链转译    |───>| Tree Shaking     |───>| 注入 runtime   |
+| Compiler   |    | acorn 解析 AST   |    | SplitChunks      |    | 写入文件系统   |
+| 注册 Plugin|    | 递归构建模块图   |    | Scope Hoisting   |    |                |
++-----------+    +------------------+    +------------------+    +----------------+
+```
 
 完整流程:
 
@@ -215,7 +238,20 @@ Vite 对应 `build.sourcemap: true | 'hidden' | 'inline'`，语义一致。
 
 ### Q9: Webpack 和 Vite 的模块联邦有什么本质差异？你给 @module-federation/vite 贡献了什么？
 
-![模块联邦 Host 与 Remote 关系](../assets/module-federation.png)
+```
+  Host (消费方)                          Remote (提供方)
++---------------------+              +---------------------+
+| import('remote/App')|              | remoteEntry.js      |
+|        |            |   运行时     |   |                 |
+|        v            |   加载       |   v                 |
+| MF Runtime 协商     |<────────────>| 暴露 ./App 模块     |
+| shared 版本匹配     |              | shared 声明         |
++---------------------+              +---------------------+
+         |                                    |
+         +──────── shared scope ──────────────+
+              react / react-dom 等共享依赖
+              运行时版本协商, 避免重复加载
+```
 
 本质差异在于 runtime 基座不同:
 

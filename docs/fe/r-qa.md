@@ -1,4 +1,4 @@
-# 面试回答 - 杭天铖
+# 面试 QA
 
 ## 目录
 
@@ -225,7 +225,9 @@ function useVirtualScroll(config: VirtualScrollConfig) {
   const startIndex = Math.floor(scrollTop / config.itemHeight);
   const endIndex = Math.min(
     config.itemCount,
-    startIndex + Math.ceil(config.containerHeight / config.itemHeight) + (config.overscan || 5),
+    startIndex +
+      Math.ceil(config.containerHeight / config.itemHeight) +
+      (config.overscan || 5),
   );
 
   const offsetY = startIndex * config.itemHeight;
@@ -406,12 +408,18 @@ const LoginFormSchema = z
     email: z.string().email(),
     password: z.string().min(8),
   })
-  .refine((data) => data.password !== "12345678", { message: "密码过于简单", path: ["password"] });
+  .refine((data) => data.password !== "12345678", {
+    message: "密码过于简单",
+    path: ["password"],
+  });
 
 // 序列化处理
 const EventSchema = z.object({
   name: z.string(),
-  date: z.preprocess((val) => (typeof val === "string" ? new Date(val) : val), z.date()),
+  date: z.preprocess(
+    (val) => (typeof val === "string" ? new Date(val) : val),
+    z.date(),
+  ),
 });
 ```
 
@@ -1106,7 +1114,11 @@ useEffect(() => {
 
 ```typescript
 function useAsyncWithRace<T>(asyncFn: () => Promise<T>, deps: any[]) {
-  const [state, setState] = useState({ data: null, loading: true, error: null });
+  const [state, setState] = useState({
+    data: null,
+    loading: true,
+    error: null,
+  });
   const requestId = useRef(0);
 
   useEffect(() => {
@@ -1148,7 +1160,11 @@ interface PoolOptions {
 class ConnectionPool {
   private idle: net.Socket[] = [];
   private active = new Set<net.Socket>();
-  private waitQueue: Array<{ resolve: Function; reject: Function; timer: NodeJS.Timeout }> = [];
+  private waitQueue: Array<{
+    resolve: Function;
+    reject: Function;
+    timer: NodeJS.Timeout;
+  }> = [];
 
   async acquire(timeoutMs = 3000): Promise<net.Socket> {
     // 1. 优先复用空闲连接
@@ -1165,7 +1181,10 @@ class ConnectionPool {
     }
     // 3. 达到上限, 排队等待并设置超时
     return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("acquire timeout")), timeoutMs);
+      const timer = setTimeout(
+        () => reject(new Error("acquire timeout")),
+        timeoutMs,
+      );
       this.waitQueue.push({ resolve, reject, timer });
     });
   }
@@ -1639,7 +1658,9 @@ const flags = await getFeatureFlags(userId);
 
 // 路由层灰度 (动态 import)
 const Dashboard = lazy(() =>
-  flags.newDashboard.enabled ? import("./DashboardV2") : import("./DashboardV1"),
+  flags.newDashboard.enabled
+    ? import("./DashboardV2")
+    : import("./DashboardV1"),
 );
 ```
 

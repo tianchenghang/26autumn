@@ -1,3 +1,7 @@
+---
+protected: true
+---
+
 # A2UI
 
 传统方式: 通过 iframe 传输 html/js
@@ -163,7 +167,10 @@ export class A2UIMcpSample extends SignalWatcher(LitElement) {
       <div id="surfaces">
         ${surfaces.map(
           (surface) => html`
-            <a2ui-surface .surface=${surface} @a2uiaction=${this.#handleAction} />
+            <a2ui-surface
+              .surface=${surface}
+              @a2uiaction=${this.#handleAction}
+            />
           `,
         )}
       </div>
@@ -458,7 +465,9 @@ res.end(JSON.stringify(task.status.message.parts));
 // => [{ kind: 'data', data: { createSurface: {...} } }, { kind: 'data', data: { updateComponents: {...} } }, ...]
 
 // Client 提取 data 类型的 payload
-const messages = response.filter((item) => item.kind === "data").map((item) => item.data);
+const messages = response
+  .filter((item) => item.kind === "data")
+  .map((item) => item.data);
 
 // 交给 MessageProcessor 处理
 this.#processor.processMessages(messages);

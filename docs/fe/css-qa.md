@@ -1,4 +1,4 @@
-# CSS 面试 Q/A 大全
+# CSS 面试 Q/A
 
 本文档收录 55 道 CSS 高频面试题, 覆盖选择器、布局、工程化、渲染原理、性能优化、响应式、动画、跨端与现代 CSS 新特性等方向, 解答兼顾原理深度与工程实践, 适合中高级前端面试准备。
 
@@ -1492,7 +1492,11 @@ import styles from "./Button.module.css";
 
 function Button({ size }) {
   return (
-    <button className={`${styles.primary} ${size === "large" ? styles.large : ""}`}>按钮</button>
+    <button
+      className={`${styles.primary} ${size === "large" ? styles.large : ""}`}
+    >
+      按钮
+    </button>
   );
 }
 ```
@@ -1615,7 +1619,12 @@ Critical CSS (关键 CSS):
   }
 </style>
 
-<link rel="preload" href="full.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<link
+  rel="preload"
+  href="full.css"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
 <noscript><link rel="stylesheet" href="full.css" /></noscript>
 ```
 
@@ -2579,11 +2588,14 @@ JS 动画:
 Web Animations API (`element.animate()`) 是两者优势的合体: 用 JS 创建动画对象 (可暂停、反向、调速、组合), 但插值与渲染仍走浏览器动画管线, 可进合成线程:
 
 ```js
-el.animate([{ transform: "translateX(0)" }, { transform: "translateX(200px)" }], {
-  duration: 300,
-  easing: "ease-out",
-  fill: "forwards",
-});
+el.animate(
+  [{ transform: "translateX(0)" }, { transform: "translateX(200px)" }],
+  {
+    duration: 300,
+    easing: "ease-out",
+    fill: "forwards",
+  },
+);
 ```
 
 选择建议: 状态过渡/hover/loading 等用 CSS; 需要交互驱动 (拖拽、滚动进度)、复杂时序编排用 rAF 或 WAAPI; 库层面 GSAP 等底层也是 rAF + WAAPI 思路。

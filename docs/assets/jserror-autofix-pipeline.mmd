@@ -1,7 +1,0 @@
-flowchart TD
-  A[JSError 上报] --> B[错误聚合 / 指纹去重]
-  B --> C["SourceMap 还原 + 上下文收集<br/>源码上下文 / 类型定义 / Git Blame / 相似修复案例"]
-  C --> D[构造 Prompt 调用 LLM 生成修复 patch]
-  D --> E["自动验证<br/>tsc 编译 / 单元测试 / diff 审查规则 / 沙箱复现"]
-  E --> F[生成 CR 人工 Review]
-  F --> G[合并上线 + 灰度监控]

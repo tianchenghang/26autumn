@@ -296,7 +296,11 @@ export default async function Page() {
 "use client";
 import { useState } from "react";
 
-export default function ClientCounter({ initialCount }: { initialCount: number }) {
+export default function ClientCounter({
+  initialCount,
+}: {
+  initialCount: number;
+}) {
   const [count, setCount] = useState(initialCount);
   return <button onClick={() => setCount((c) => c + 1)}>Count: {count}</button>;
 }
@@ -734,7 +738,11 @@ const posts = await fetchPosts();
 const comments = await fetchComments();
 
 // 正确：并行执行，1 次网络往返时间
-const [user, posts, comments] = await Promise.all([fetchUser(), fetchPosts(), fetchComments()]);
+const [user, posts, comments] = await Promise.all([
+  fetchUser(),
+  fetchPosts(),
+  fetchComments(),
+]);
 ```
 
 API Route 中的模式——"早启动，晚 await"：
@@ -747,7 +755,10 @@ export async function GET(request: Request) {
 
   // 需要 session 结果的操作在 await 后启动
   const session = await sessionPromise;
-  const [config, data] = await Promise.all([configPromise, fetchData(session.user.id)]);
+  const [config, data] = await Promise.all([
+    configPromise,
+    fetchData(session.user.id),
+  ]);
 
   return Response.json({ data, config });
 }
@@ -775,7 +786,11 @@ export async function GET(request: Request) {
 const userPromise = fetchUser();
 const profilePromise = userPromise.then((user) => fetchProfile(user.id));
 
-const [user, config, profile] = await Promise.all([userPromise, fetchConfig(), profilePromise]);
+const [user, config, profile] = await Promise.all([
+  userPromise,
+  fetchConfig(),
+  profilePromise,
+]);
 ```
 
 方案二：better-all 库（自动依赖分析）
@@ -1015,9 +1030,12 @@ next/dynamic 基本用法：
 import dynamic from "next/dynamic";
 
 // 禁用 SSR（纯客户端组件，如 Monaco Editor）
-const MonacoEditor = dynamic(() => import("./monaco-editor").then((m) => m.MonacoEditor), {
-  ssr: false,
-});
+const MonacoEditor = dynamic(
+  () => import("./monaco-editor").then((m) => m.MonacoEditor),
+  {
+    ssr: false,
+  },
+);
 
 // 带 loading 状态
 const Dashboard = dynamic(() => import("./Dashboard"), {
@@ -1065,9 +1083,12 @@ const Page = await PAGE_MODULES[pageName]();
 策略一：next/dynamic + ssr: false
 
 ```tsx
-const Analytics = dynamic(() => import("@vercel/analytics/react").then((m) => m.Analytics), {
-  ssr: false,
-});
+const Analytics = dynamic(
+  () => import("@vercel/analytics/react").then((m) => m.Analytics),
+  {
+    ssr: false,
+  },
+);
 ```
 
 策略二：next/script 的 strategy 属性
@@ -1140,7 +1161,10 @@ React DOM 的 preloadModule API：
 ```tsx
 import { preloadModule } from "react-dom";
 
-<a href="/dashboard" onMouseEnter={() => preloadModule("/dashboard.js", { as: "script" })}>
+<a
+  href="/dashboard"
+  onMouseEnter={() => preloadModule("/dashboard.js", { as: "script" })}
+>
   Dashboard
 </a>;
 ```

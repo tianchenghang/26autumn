@@ -1,7 +1,0 @@
-flowchart TD
-  subgraph W["Webpack dev: 先打包再启动"]
-    W1[扫描全部依赖] --> W2[全量编译打包 bundle] --> W3[启动 dev server] --> W4[浏览器加载 bundle]
-  end
-  subgraph V["Vite dev: 先启动再按需编译"]
-    V1[启动 dev server 秒级] --> V2["esbuild 预构建依赖<br/>node_modules/.vite 缓存"] --> V3[浏览器按 ESM 请求模块] --> V4["按需转译单个模块返回<br/>HTTP 304 协商缓存"]
-  end

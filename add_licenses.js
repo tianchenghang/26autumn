@@ -157,10 +157,14 @@ function chunked(items, batchSize) {
  */
 function runAddlicense(addlicenseBinary, repoRoot, files, batchSize) {
   for (const batch of chunked(files, batchSize)) {
-    spawnSync(addlicenseBinary, ["-l", LICENSE_NAME, "-c", COPYRIGHT_HOLDER, ...batch], {
-      cwd: repoRoot,
-      stdio: "inherit",
-    });
+    spawnSync(
+      addlicenseBinary,
+      ["-l", LICENSE_NAME, "-c", COPYRIGHT_HOLDER, ...batch],
+      {
+        cwd: repoRoot,
+        stdio: "inherit",
+      },
+    );
   }
 }
 
@@ -191,7 +195,10 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
   try {
     process.exit(main(process.argv));
   } catch (/** @type {any} */ error) {

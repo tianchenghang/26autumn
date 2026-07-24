@@ -8,7 +8,7 @@
 
 涵盖 React、Next.js、CSS、Vite、JavaScript 等核心前端主题，面向中高级前端工程师。
 
-- [React 高级面试题](fe/react-qa.md)
+- [React 面试题](fe/react-qa.md)
 - [Next.js 面试题](fe/next-qa.md)
 - [前端综合面试题](fe/fe-qa.md)
 - [CSS 面试题](fe/css-qa.md)

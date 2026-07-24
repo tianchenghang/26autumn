@@ -231,7 +231,9 @@ A: new 调用构造函数时按以下步骤执行：
 function myNew(Fn, ...args) {
   const obj = Object.create(Fn.prototype);
   const ret = Fn.apply(obj, args);
-  return ret !== null && (typeof ret === "object" || typeof ret === "function") ? ret : obj;
+  return ret !== null && (typeof ret === "object" || typeof ret === "function")
+    ? ret
+    : obj;
 }
 ```
 
@@ -250,7 +252,8 @@ A: A instanceof B 的语义是：在 A 的原型链上查找是否存在 B.proto
 
 ```js
 function myInstanceof(obj, Fn) {
-  if (typeof Fn !== "function") throw new TypeError("Right-hand side must be callable");
+  if (typeof Fn !== "function")
+    throw new TypeError("Right-hand side must be callable");
   let proto = Object.getPrototypeOf(obj);
   while (proto !== null) {
     if (proto === Fn.prototype) return true;
@@ -379,7 +382,9 @@ function deepClone(obj, cache = new WeakMap()) {
     obj.forEach((v) => s.add(deepClone(v, cache)));
     return s;
   }
-  const clone = Array.isArray(obj) ? [] : Object.create(Object.getPrototypeOf(obj));
+  const clone = Array.isArray(obj)
+    ? []
+    : Object.create(Object.getPrototypeOf(obj));
   cache.set(obj, clone);
   for (const key of Reflect.ownKeys(obj)) {
     clone[key] = deepClone(obj[key], cache);
@@ -474,7 +479,10 @@ const range = {
   [Symbol.iterator]() {
     let cur = 0;
     return {
-      next: () => (cur < 3 ? { value: cur++, done: false } : { value: undefined, done: true }),
+      next: () =>
+        cur < 3
+          ? { value: cur++, done: false }
+          : { value: undefined, done: true },
     };
   },
 };
@@ -2202,7 +2210,7 @@ function flat(arr, depth = 1) {
 
 考点深挖：
 
-- 迭代协议三件套：可迭代协议（[Symbol.iterator]() 返回迭代器）、迭代器协议（next() 返回 {value, done}）、生成器是两者的语法糖。
+- 迭代协议三件套：可迭代协议（[Symbol.iterator](<>) 返回迭代器）、迭代器协议（next() 返回 {value, done}）、生成器是两者的语法糖。
 - for...of 只找 Symbol.iterator，与 for...in（枚举字符串键、含原型链）完全正交。
 - 消费方式盘点：for...of、扩展运算符、解构、Array.from、Promise.all、yield\*、Map/Set 构造器。
 
@@ -2242,7 +2250,9 @@ function flat(arr, depth = 1) {
 function newV2(Ctor, ...args) {
   const obj = Object.create(Ctor.prototype ?? Object.prototype);
   const res = Reflect.apply(Ctor, obj, args);
-  return (typeof res === "object" && res !== null) || typeof res === "function" ? res : obj;
+  return (typeof res === "object" && res !== null) || typeof res === "function"
+    ? res
+    : obj;
 }
 ```
 
@@ -2267,7 +2277,8 @@ function newV2(Ctor, ...args) {
 ```js
 const resolvePromise = (p2, x, resolve, reject) => {
   if (p2 === x) return reject(new TypeError("Chaining cycle"));
-  if (x instanceof MyPromise) return x.then((y) => resolvePromise(p2, y, resolve, reject), reject);
+  if (x instanceof MyPromise)
+    return x.then((y) => resolvePromise(p2, y, resolve, reject), reject);
   if (x !== null && (typeof x === "object" || typeof x === "function")) {
     let called = false;
     try {
@@ -2485,7 +2496,7 @@ function createInfiniteObject(path = []) {
 
 源码解读：promiseAllSettled2 是正确范式：计数器 + 每个任务 then/catch 写入对应下标、finally 里计数达到总数即 resolve。而第一版藏了两个 bug：
 
-1. functions.map((fn, i) => { fn[i](); ... })——回调形参 fn 就是函数本身，fn[i] 是 undefined，调用立即抛 TypeError；
+1. functions.map((fn, i) => { fn[i](<>); ... })——回调形参 fn 就是函数本身，fn[i] 是 undefined，调用立即抛 TypeError；
 2. map 回调没有 return 那个 Promise，得到的 promises 数组全是 undefined，Promise.all([undefined...]) 立即 resolve。
 
 考点深挖：

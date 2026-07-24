@@ -1,3 +1,7 @@
+---
+protected: true
+---
+
 # Swifty CLI — 高级前端工程师面试 Q/A 文档
 
 > 本文档面向高级前端工程师面试场景，围绕 `apps/swifty`（一个运行在终端中的 Coding Agent，类似 Claude Code）的实现细节设计深度问答。

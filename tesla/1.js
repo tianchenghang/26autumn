@@ -15,7 +15,8 @@ function solution(today, limit) {
     const row = $(this);
 
     const styleAttr = row.attr("style") || "";
-    const isMarkedRed = styleAttr.includes("background-color") && styleAttr.includes("red");
+    const isMarkedRed =
+      styleAttr.includes("background-color") && styleAttr.includes("red");
 
     const cells = row.find("td");
     const borrowDateStr = $(cells[1]).text().trim();

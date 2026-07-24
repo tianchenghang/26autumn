@@ -1,3 +1,7 @@
+---
+protected: true
+---
+
 # @swifty.js/sentry 前端监控 SDK 面试 QA
 
 ## 目录
@@ -187,7 +191,9 @@ const cleanupSend = decorateProp(xhrProto, "send", (oldPropVal) => {
   return function (this, body) {
     this.addEventListener("loadend", () => {
       this.__sentry__.statusCode = this.status;
-      this.__sentry__.serverTiming = parseServerTiming(this.getResponseHeader("server-timing"));
+      this.__sentry__.serverTiming = parseServerTiming(
+        this.getResponseHeader("server-timing"),
+      );
       this.__sentry__.elapsedTime = Date.now() - this.__sentry__.timestamp;
       pub(EventType.Xhr, this.__sentry__);
     });
@@ -262,7 +268,9 @@ const cleanup = decorateProp(globalThis, "fetch", (oldFetch) => {
 
 ```typescript
 // 生成错误唯一标识
-const errorId = base64v2(`${EventType.Error}-${message}-${filename}-${line}-${column}`);
+const errorId = base64v2(
+  `${EventType.Error}-${message}-${filename}-${line}-${column}`,
+);
 
 // BoundedSet 判重（容量 1000，LRU 淘汰）
 if (!sentry.codeErrors.has(errorId)) {
@@ -287,7 +295,10 @@ class BatchErrorManager {
 
   flush() {
     // 按 type-name-message 分组
-    const groups = groupBy(this.cacheError, (err) => `${err.type}-${err.name}-${err.message}`);
+    const groups = groupBy(
+      this.cacheError,
+      (err) => `${err.type}-${err.name}-${err.message}`,
+    );
     for (const items of Object.values(groups)) {
       if (items.length >= 5) {
         // 5 次以上聚合为单条 BatchError
@@ -515,8 +526,14 @@ const sample = () => {
 
   // 水平方向 9 个点 + 垂直方向 9 个点 = 18 个采样点
   for (let i = 1; i <= 9; i++) {
-    const rowElem = document.elementFromPoint((innerWidth * i) / 10, innerHeight / 2);
-    const colElem = document.elementFromPoint(innerWidth / 2, (innerHeight * i) / 10);
+    const rowElem = document.elementFromPoint(
+      (innerWidth * i) / 10,
+      innerHeight / 2,
+    );
+    const colElem = document.elementFromPoint(
+      innerWidth / 2,
+      (innerHeight * i) / 10,
+    );
     if (!rowElem || isRoot(rowElem)) emptyPoints++;
     if (!colElem || isRoot(colElem)) emptyPoints++;
   }
@@ -596,7 +613,11 @@ function observeFirstScreenPaint(callback: Callback): void {
       // 3. 父节点在视口内
       // 4. 新增节点在视口内
       // 5. 排除 link/script/style 非可视元素
-      if (isHTMLElement(node) && !excluded.has(node.tagName) && isInViewport(node)) {
+      if (
+        isHTMLElement(node) &&
+        !excluded.has(node.tagName) &&
+        isInViewport(node)
+      ) {
         children.push(node);
       }
     }
@@ -862,7 +883,10 @@ export function enablePlugin(plugin: SentryPlugin): SentryPlugin {
 
 ```typescript
 import { init, enablePlugin } from "@swifty.js/sentry";
-import { PerformancePlugin, ScreenRecordPlugin } from "@swifty.js/sentry/plugins";
+import {
+  PerformancePlugin,
+  ScreenRecordPlugin,
+} from "@swifty.js/sentry/plugins";
 
 init({ dsn: "https://..." });
 enablePlugin(new PerformancePlugin());
@@ -996,7 +1020,9 @@ function isExcludedApi(api: string): boolean {
 // 配置：ignoreErrors: ["ResizeObserver loop", /Script error/]
 function isIgnoredError(message: string): boolean {
   return sentry.options.ignoreErrors.some((pattern) =>
-    typeof pattern === "string" ? message.includes(pattern) : pattern.test(message),
+    typeof pattern === "string"
+      ? message.includes(pattern)
+      : pattern.test(message),
   );
 }
 ```

@@ -1,3 +1,7 @@
+---
+protected: true
+---
+
 # swifty_rpc RPC 框架面试 QA
 
 > 模块路径: `github.com/hangtiancheng/swifty.go/swifty_rpc`

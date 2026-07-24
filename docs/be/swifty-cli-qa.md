@@ -1,3 +1,7 @@
+---
+protected: true
+---
+
 # Swifty CLI — 高级后端工程师面试 QA
 
 > 基于 `github.com/hangtiancheng/swifty.go/swifty_cli` 项目源码分析（Go 1.26，约 2.7 万行非测试代码）

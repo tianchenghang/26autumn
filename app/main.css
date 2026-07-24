@@ -75,14 +75,48 @@
 
 @theme {
   --font-sans:
-    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo,
-    "Cascadia Code", monospace;
+    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo, "Cascadia Code",
+    monospace;
   --font-display:
-    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo,
-    "Cascadia Code", monospace;
+    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo, "Cascadia Code",
+    monospace;
   --font-mono:
-    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo,
-    "Cascadia Code", monospace;
+    "Geist Mono", "Swifty", "Maple Mono", "SF Mono", Menlo, "Cascadia Code",
+    monospace;
+
+  --animate-guard-fade: guard-fade 0.18s ease-out both;
+  --animate-guard-pop: guard-pop 0.22s var(--sakura-ease-spring) both;
+  --animate-guard-shake: guard-shake 0.35s ease-in-out;
+
+  @keyframes guard-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes guard-pop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.96);
+    }
+  }
+  @keyframes guard-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-7px);
+    }
+    40% {
+      transform: translateX(6px);
+    }
+    60% {
+      transform: translateX(-4px);
+    }
+    80% {
+      transform: translateX(3px);
+    }
+  }
 }
 
 /* --- Ambient background: soft gradient orbs + noise texture --- */

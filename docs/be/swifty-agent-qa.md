@@ -1,3 +1,7 @@
+---
+protected: true
+---
+
 # Swifty Agent (OnCall Agent) 高级后端工程师面试 QA
 
 > 项目路径: `github.com/hangtiancheng/swifty.go/swifty_agent`
@@ -458,7 +462,9 @@ if err != nil {
 
 ```json
 {
-  "tool_calls": [{ "function": { "name": "get_current_time", "arguments": "" } }]
+  "tool_calls": [
+    { "function": { "name": "get_current_time", "arguments": "" } }
+  ]
 }
 ```
 

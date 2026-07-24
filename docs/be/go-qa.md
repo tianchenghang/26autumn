@@ -95,7 +95,21 @@ type slice struct {
 }
 ```
 
-![slice 内存布局](../assets/go-slice-layout.png)
+```
+  slice header (24 bytes)              底层数组 (堆上)
++--------+--------+--------+
+| array  | len=3  | cap=5  |         +---+---+---+---+---+
+|   |    |        |        |         | 0 | 1 | 2 |   |   |
++---|----+--------+--------+         +---+---+---+---+---+
+    |                                  ^           ^
+    +----------------------------------+           |
+    指向底层数组起点                   |           |
+                                    array       array+cap
+                                    (len 边界)  (cap 边界)
+
+  s[i] 边界检查基于 len
+  s[i:j] 再切片边界检查基于 cap
+```
 
 要点：
 
@@ -443,7 +457,34 @@ Q：详细讲讲 GMP 模型，为什么需要 P 这一层？
 
 A：
 
-![GMP 调度模型](../assets/go-gmp.png)
+```
+  全局队列 (GRQ)
++---+---+---+---+
+| G | G | G | G |
++---+---+---+---+
+      |
+      | 偷取 (work stealing)
+      v
++---------------------------+     +--------------------------+
+| P0 (GOMAXPROCS 个)        |     | P1                       |
+| +---+---+---+---+         |     | +---+---+---+---+        |
+| | LRQ (本地运行队列 256)  |     | | LRQ           |        |
+| +---+---+---+---+         |     | +---+---+---+---+        |
+| runnext: G                |     | runnext: G               |
+| mcache (本地内存缓存)     |     | mcache                   |
++---------------------------+     +--------------------------+
+      |                                 |
+      | 绑定                            | 绑定
+      v                                 v
++-----------+                     +-----------+
+| M0        |                     | M1        |
+| (OS 线程) |                     | (OS 线程) |
+| 执行 G    |                     | 执行 G    |
++-----------+                     +-----------+
+
+  M 必须持有 P 才能执行 Go 代码
+  M 阻塞时 P 整体交接 (handoff) 给其他 M
+```
 
 - G（goroutine）：`runtime.g`，用户态协程，含栈指针、PC、状态（\_Grunnable/\_Grunning/\_Gwaiting/\_Gsyscall 等）、被阻塞的原因。初始栈 2KB。死亡的 G 会被缓存在空闲链表复用（`gFree`）。
 - M（machine）：`runtime.m`，OS 线程的抽象。M 必须持有 P 才能执行 Go 代码。M 的数量上限默认 10000（可 `debug.SetMaxThreads`），大量 M 通常是 cgo/syscall 阻塞造成的。
@@ -567,7 +608,31 @@ Q：描述 channel 的运行时结构，以及一次 send 的完整路径。
 
 A：`make(chan T, n)` 在堆上分配一个 `runtime.hchan`：
 
-![hchan 结构](../assets/go-channel-hchan.png)
+```
+  hchan 结构
++-----------------------------------------------+
+| qcount=3    dataqsiz=5    elemsize=8          |
+| closed=0    elemtype=*_type                   |
+|                                               |
+| buf (环形缓冲区, 容量=dataqsiz):              |
+| +---+---+---+---+---+                         |
+| | e0| e1| e2|   |   |                         |
+| +---+---+---+---+---+                         |
+|   ^           ^                               |
+|   recvx=0     sendx=3                         |
+|                                               |
+| recvq (等待接收的 sudog 链表):                |
+|   sudog -> sudog -> ...                       |
+|                                               |
+| sendq (等待发送的 sudog 链表):                |
+|   sudog -> sudog -> ...                       |
+|                                               |
+| lock (互斥锁, 保护以上所有字段)               |
++-----------------------------------------------+
+
+  有缓冲: buf 未满则直接写入, buf 非空则直接读取
+  无缓冲: sendq/recvq 配对, 直接拷贝 (避免二次内存操作)
+```
 
 ```go
 type hchan struct {
@@ -766,7 +831,35 @@ Q：cancel 是怎么传播的？为什么取消只影响子树？
 
 A：
 
-![context 取消传播树](../assets/go-context-tree.png)
+```
+  Background / TODO (根)
+        |
+        v
+  WithCancel (reqCtx)          cancel() 向下传播
+        |                    ==================>
+   +----+----+
+   |         |
+   v         v
+WithTimeout  WithCancel
+ (dbCtx)    (rpcCtx)
+   |              |
+   v         +----+----+
+WithCancel   |         |
+ (queryCtx)  v         v
+        WithCancel  WithCancel
+
+  cancel(reqCtx) 执行:
+  1. 加锁, 设置 err
+  2. close(done) -- 唤醒所有 <-reqCtx.Done()
+  3. 递归 cancel 所有 children:
+     dbCtx, rpcCtx, queryCtx, ...
+  4. 从父节点 children 中摘除自己
+
+  性质:
+  - 取消只向下传播, 父节点与兄弟子树不受影响
+  - 每个请求的 ctx 树独立, 取消一个请求不影响其他
+  - cancel 函数必须调用 (defer cancel()), 否则内存泄漏
+```
 
 构造 `WithCancel(parent)` 时，新节点要向上挂接：沿父链找到最近的 cancelCtx，把自己注册进其 `children` 集合；若父链上没有可取消节点，则启动一个 goroutine 监听 `parent.Done()`（第三方自定义 Context 的兼容路径）。
 
