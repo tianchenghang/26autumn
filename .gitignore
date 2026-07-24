@@ -3,6 +3,7 @@
 logs/
 
 .astro/
+.swifty-docs/
 
 # npm/yarn/pnpm 调试日志
 npm-debug.log*

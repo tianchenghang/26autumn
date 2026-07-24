@@ -1,6 +1,6 @@
 # Golang 分布式系统与数据结构面试 QA：分布式锁、Raft、分布式事务、协程池、跳表、LSM Tree、布隆过滤器、前缀树、一致性哈希
 
-> 面向后端 Golang 岗位的分布式系统与数据结构深度问答。上篇覆盖 Redis / etcd 两种分布式锁实现范式、Redis 锁的数据不一致隐患与改进（看门狗、Redlock、Fencing Token）、Raft 共识协议与 etcd 工程实践、分布式事务原理（2PC / 本地消息表 / Kafka 事务消息 / TCC）、以及 Go 协程池的完整实现。下篇覆盖跳表与并发跳表、LSM Tree、布隆过滤器、前缀树与 Radix Tree、一致性哈希等高级数据结构。所有代码均为可编译的 Go 风格实现，重点在原理与工程取舍。
+> 面向后端 Golang 岗位的分布式系统与数据结构深度问答。覆盖 Redis / etcd 两种分布式锁实现范式、Redis 锁的数据不一致隐患与改进（看门狗、Redlock、Fencing Token）、Raft 共识协议与 etcd 工程实践、分布式事务原理（2PC / 本地消息表 / Kafka 事务消息 / TCC）、以及 Go 协程池的完整实现。下篇覆盖跳表与并发跳表、LSM Tree、布隆过滤器、前缀树与 Radix Tree、一致性哈希等高级数据结构。所有代码均为可编译的 Go 风格实现，重点在原理与工程取舍。
 
 ## 目录
 
