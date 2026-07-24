@@ -2155,7 +2155,7 @@ function curry(fn) {
 考点深挖：
 
 - 六种继承演进：原型链继承 -> 构造函数继承 -> 组合继承 -> 原型式 -> 寄生式 -> 寄生组合式（只调一次父构造函数、原型链干净）。
-- Object.setPrototypeOf(Child, Parent) 对应 ES6 class extends 中 Child.**proto** === Parent 这一双重原型链。
+- Object.setPrototypeOf(Child, Parent) 对应 ES6 class extends 中 Child.proto === Parent 这一双重原型链。
 - ES6 class 转译后大致就是寄生组合式 + 静态继承 + super 的 [[HomeObject]] 语义。
 
 ### 题目 8｜手写 Array.prototype.flat
